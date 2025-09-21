@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Test Extension",
+  "version": "1.0",
+  "description": "Minimal test extension for YouTube OAuth",
+  "permissions": ["identity", "tabs", "scripting", "storage"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "YouTube Test"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.youtube.com/*"],
+      "js": ["content.js"]
+    }
+  ],
+  "host_permissions": [
+    "https://accounts.google.com/*",
+    "https://www.googleapis.com/*",
+    "https://www.youtube.com/*"
+  ],
+  "oauth2": {
+    "client_id": "763119874945-ad7le2f2eldhslfppaflmuspedj1o4hi.apps.googleusercontent.com",
+    "scopes": ["https://www.googleapis.com/auth/youtube.readonly"]
+  }
+}
