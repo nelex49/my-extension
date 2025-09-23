@@ -45,7 +45,7 @@ function showSubfolderSubscriptions(folderName, subfolderName) {
   `;
 
   modal.innerHTML = `
-    <div style="background: white; border-radius: 12px; padding: 0; max-width: 600px; width: 95%; max-height: 80vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+    <div id="subfolder-panel" style="background: white; border-radius: 12px; padding: 0; max-width: 600px; width: 400px; max-height: 80vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.3); transition: width 0.3s ease;">
       <!-- Header -->
       <div id="modal-header" style="background: ${
         subfolderInfo?.color || "#6c757d"
@@ -81,26 +81,31 @@ function showSubfolderSubscriptions(folderName, subfolderName) {
               <div class="subscription-item" data-channel-id="${
                 sub.snippet?.resourceId?.channelId || ""
               }" style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 12px; margin-bottom: 8px; transition: all 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">
-                <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="display: flex; align-items: flex-start; gap: 12px;">
                   <img src="${
                     sub.snippet?.thumbnails?.default?.url || ""
                   }" alt="Channel Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
                   <div style="flex: 1; min-width: 0;">
-                    <div class="channel-name" style="font-weight: 600; font-size: 14px; color: #333; cursor: pointer; margin-bottom: 2px;" title="Click to visit channel">${
+                    <div class="channel-name" style="font-weight: 600; font-size: 14px; color: #333; cursor: pointer; margin-bottom: 8px;" title="Click to visit channel">${
                       sub.snippet?.title || "Unknown Channel"
                     }</div>
-
-                  </div>
-                  <div class="channel-description" style="font-size: 12px; color: #666; line-height: 1.4; display: none; margin-bottom: 8px;">
-                    ${sub.snippet?.description || "No description available"}
-                  </div>
-                  <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
-                    <button class="toggle-description" style="background: #e3f2fd; color: #1976d2; border: 1px solid #bbdefb; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 500; transition: all 0.2s;" onmouseover="this.style.background='#bbdefb'" onmouseout="this.style.background='#e3f2fd'">
-                      Show Description
-                    </button>
-                    <button class="remove-from-subfolder" style="background: #ffebee; color: #d32f2f; border: 1px solid #ffcdd2; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 500; transition: all 0.2s;" onmouseover="this.style.background='#ffcdd2'" onmouseout="this.style.background='#ffebee'" title="Remove from this folder only (keeps subscription)">
-                      🗑️ Remove
-                    </button>
+                    <div class="channel-description" style="font-size: 11px; color: #666; line-height: 1.4; display: none; margin-top: 8px; padding: 10px; background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 6px; white-space: normal; word-wrap: break-word; max-height: 80px; overflow-y: auto; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); text-align: justify; hyphens: auto;">
+                      ${(sub.snippet?.description || "No description available")
+                        .replace(/\n/g, "<br>")
+                        .replace(/\s+/g, " ")
+                        .trim()}
+                    </div>
+                    <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+                      <button class="visit-channel" style="background: #1976d2; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 500; transition: all 0.2s; white-space: nowrap; flex: 1;" onmouseover="this.style.background='#1565c0'" onmouseout="this.style.background='#1976d2'" title="Visit this channel on YouTube">
+                        ▶️ Visit
+                      </button>
+                      <button class="toggle-description" style="background: #e3f2fd; color: #1976d2; border: 1px solid #bbdefb; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 500; transition: all 0.2s; white-space: nowrap; flex: 1;" onmouseover="this.style.background='#bbdefb'" onmouseout="this.style.background='#e3f2fd'">
+                        📝 Description
+                      </button>
+                      <button class="remove-from-subfolder" style="background: #ffebee; color: #d32f2f; border: 1px solid #ffcdd2; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 500; transition: all 0.2s; white-space: nowrap; flex: 1;" onmouseover="this.style.background='#ffcdd2'" onmouseout="this.style.background='#ffebee'" title="Remove from this folder only (keeps subscription)">
+                        🗑️ Remove
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -207,6 +212,15 @@ function showSubfolderSubscriptions(folderName, subfolderName) {
       }
     }
 
+    // Visit channel button click
+    if (e.target.classList.contains("visit-channel")) {
+      const subscriptionItem = e.target.closest(".subscription-item");
+      const channelId = subscriptionItem.dataset.channelId;
+      if (channelId) {
+        window.open(`https://www.youtube.com/channel/${channelId}`, "_blank");
+      }
+    }
+
     // Toggle description functionality
     if (e.target.classList.contains("toggle-description")) {
       const subscriptionItem = e.target.closest(".subscription-item");
@@ -220,7 +234,7 @@ function showSubfolderSubscriptions(folderName, subfolderName) {
         button.textContent = "Hide Description";
       } else {
         description.style.display = "none";
-        button.textContent = "Show Description";
+        button.textContent = "📝 Description";
       }
     }
 
@@ -293,19 +307,19 @@ function showAllSubscriptions() {
   `;
 
   modal.innerHTML = `
-    <div id="subscription-manager-panel" style="background: white; border-radius: 12px; padding: 0; max-width: 800px; width: 95%; max-height: 80vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.3); position: relative;">
+    <div id="subscription-manager-panel" style="background: white; border-radius: 12px; padding: 0; max-width: 380px; width: 95%; max-height: 80vh; box-shadow: 0 8px 32px rgba(0,0,0,0.3); position: relative; display: flex; flex-direction: column;">
       <!-- Header -->
       <div id="panel-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 20px; border-radius: 12px 12px 0 0; position: relative;">
-        <h2 style="margin: 0; font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
+        <button id="close-all-modal" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; border-radius: 50%; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; color: white; transition: all 0.2s; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">✕</button>
+        <h2 style="margin: 0; font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px; padding-right: 50px;">
           <span style="background: rgba(255,255,255,0.2); border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">📺</span>
           <span>Organize Subscriptions (${userSubscriptions.length})</span>
         </h2>
         <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 14px;">Move your subscriptions to organized folders</p>
-        <button id="close-all-modal" style="background: rgba(255,255,255,0.2); border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 16px; color: white; transition: all 0.2s; backdrop-filter: blur(10px);" onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">✕</button>
       </div>
       
       <!-- Content Area -->
-      <div style="padding: 20px; max-height: 400px; overflow-y: auto; position: relative;">
+      <div style="padding: 15px; flex: 1; overflow-y: auto; position: relative;">
         <!-- Sticky instruction text -->
         <div style="position: sticky; top: 0; background: white; padding: 15px 0; margin-bottom: 10px; border-bottom: 1px solid #f0f0f0; z-index: 10;">
           <p style="color: #666; font-size: 14px; margin: 0; font-weight: 500;">Organize your subscriptions by moving them to folders!</p>
@@ -320,44 +334,44 @@ function showAllSubscriptions() {
             const locationColor = isOrganized ? "#2e7d32" : "#666";
 
             return `
-        <div class="subscription-item" data-channel-id="${channelId}" style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 12px; margin-bottom: 8px; display: flex; align-items: center; gap: 12px; transition: all 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">
+        <div class="subscription-item" data-channel-id="${channelId}" style="background: #f8f9fa; border: 1px solid #e9ecef; border-radius: 8px; padding: 10px; margin-bottom: 6px; display: flex; align-items: flex-start; gap: 10px; transition: all 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'">
           <img src="${
             sub.snippet?.thumbnails?.default?.url || ""
           }" alt="Channel Avatar" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex-shrink: 0;">
           <div style="flex: 1; min-width: 0;">
-            <div class="channel-name" style="font-weight: 600; font-size: 14px; color: #333; cursor: pointer; margin-bottom: 2px;" title="Click to visit channel">${
+            <div class="channel-name" style="font-weight: 600; font-size: 14px; color: #333; cursor: pointer; margin-bottom: 8px;" title="Click to visit channel">${
               sub.snippet?.title || "Unknown Channel"
             }</div>
-            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
+            <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 8px;">
               <span class="folder-location" style="background: ${locationBg}; color: ${locationColor}; padding: 4px 8px; border-radius: 12px; font-size: 11px; font-weight: 500; white-space: nowrap; max-width: 200px; overflow: hidden; text-overflow: ellipsis; display: inline-block;">
                 📁 ${location}
               </span>
             </div>
-          </div>
-          <div style="display: flex; align-items: center; gap: 8px; flex-shrink: 0;">
-            <select class="folder-select" style="padding: 8px 10px; border: 1px solid #ddd; border-radius: 6px; background: white; font-size: 11px; min-width: 160px; max-width: 160px; font-weight: 500;">
-              <option value="">📂 Move to folder...</option>
-              ${
-                Object.keys(folderData).length > 0
-                  ? Object.entries(folderData)
-                      .map(([folderName, folderInfo]) => {
-                        let options = "";
-                        if (folderInfo.subfolders) {
-                          Object.keys(folderInfo.subfolders).forEach(
-                            (subfolderName) => {
-                              options += `<option value="subfolder:${folderName}:${subfolderName}">📂 ${folderName} > ${subfolderName}</option>`;
-                            }
-                          );
-                        }
-                        return options;
-                      })
-                      .join("")
-                  : '<option value="" disabled>No folders available - Create folders first</option>'
-              }
-            </select>
-            <button class="remove-subscription" style="background: #ffebee; color: #d32f2f; border: 1px solid #ffcdd2; padding: 8px 10px; border-radius: 6px; font-size: 11px; cursor: pointer; font-weight: 500; transition: all 0.2s; white-space: nowrap; min-width: 80px; position: relative;" onmouseover="this.style.background='#ffcdd2'" onmouseout="this.style.background='#ffebee'" title="Remove from current folder only (keeps subscription)">
-              🗑️ Remove
-            </button>
+            <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
+              <select class="folder-select" style="padding: 6px 8px; border: 1px solid #ddd; border-radius: 4px; background: white; font-size: 11px; min-width: 140px; max-width: 140px; font-weight: 500;">
+                <option value="">📂 Move to folder...</option>
+                ${
+                  Object.keys(folderData).length > 0
+                    ? Object.entries(folderData)
+                        .map(([folderName, folderInfo]) => {
+                          let options = "";
+                          if (folderInfo.subfolders) {
+                            Object.keys(folderInfo.subfolders).forEach(
+                              (subfolderName) => {
+                                options += `<option value="subfolder:${folderName}:${subfolderName}">📂 ${folderName} > ${subfolderName}</option>`;
+                              }
+                            );
+                          }
+                          return options;
+                        })
+                        .join("")
+                    : '<option value="" disabled>No folders available - Create folders first</option>'
+                }
+              </select>
+              <button class="remove-subscription" style="background: #ffebee; color: #d32f2f; border: 1px solid #ffcdd2; padding: 6px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 500; transition: all 0.2s; white-space: nowrap; min-width: 70px; position: relative;" onmouseover="this.style.background='#ffcdd2'" onmouseout="this.style.background='#ffebee'" title="Remove from current folder only (keeps subscription)">
+                🗑️ Remove
+              </button>
+            </div>
           </div>
         </div>
         `;
@@ -373,9 +387,82 @@ function showAllSubscriptions() {
   // Show modal immediately with loading state
   modal.style.display = "flex";
 
-  // Make panel draggable
+  // Make panel draggable with custom implementation
   const panel = modal.querySelector("#subscription-manager-panel");
-  makePanelDraggable(panel, "#panel-header");
+  const header = modal.querySelector("#panel-header");
+
+  setTimeout(() => {
+    if (header && panel) {
+      // Custom dragging implementation for organize subscriptions panel
+      let isDragging = false;
+      let startX, startY, initialX, initialY;
+
+      // Initialize position
+      const rect = panel.getBoundingClientRect();
+      initialX = rect.left;
+      initialY = rect.top;
+
+      // Set cursor
+      header.style.cursor = "move";
+
+      // Mouse down
+      header.addEventListener("mousedown", (e) => {
+        if (e.target.tagName === "BUTTON") return;
+
+        isDragging = true;
+        startX = e.clientX;
+        startY = e.clientY;
+        header.style.cursor = "grabbing";
+
+        // Change panel to absolute positioning for dragging
+        panel.style.position = "absolute";
+        panel.style.left = `${initialX}px`;
+        panel.style.top = `${initialY}px`;
+        panel.style.transform = "none";
+
+        e.preventDefault();
+      });
+
+      // Mouse move
+      const handleMouseMove = (e) => {
+        if (isDragging) {
+          e.preventDefault();
+          const deltaX = e.clientX - startX;
+          const deltaY = e.clientY - startY;
+
+          const newX = initialX + deltaX;
+          const newY = initialY + deltaY;
+
+          panel.style.left = `${newX}px`;
+          panel.style.top = `${newY}px`;
+        }
+      };
+
+      // Mouse up
+      const handleMouseUp = () => {
+        if (isDragging) {
+          isDragging = false;
+          header.style.cursor = "move";
+
+          // Update initial position
+          const rect = panel.getBoundingClientRect();
+          initialX = rect.left;
+          initialY = rect.top;
+        }
+      };
+
+      // Add event listeners
+      document.addEventListener("mousemove", handleMouseMove);
+      document.addEventListener("mouseup", handleMouseUp);
+
+      logStatus("Organize subscriptions panel made draggable", "info");
+    } else {
+      logStatus(
+        "Could not find organize subscriptions header or panel for dragging",
+        "warn"
+      );
+    }
+  }, 10);
 
   // Add close handler
   const closeBtn = modal.querySelector("#close-all-modal");
