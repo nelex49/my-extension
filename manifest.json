@@ -14,7 +14,21 @@
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*"],
-      "js": ["content.js"]
+      "js": [
+        "src/utils/constants.js",
+        "src/utils/validation.js",
+        "src/utils/helpers.js",
+        "src/services/StorageService.js",
+        "src/services/YouTubeAPI.js",
+        "src/services/AuthService.js",
+        "src/components/ModalManager.js",
+        "src/components/SubscriptionManager.js",
+        "src/components/FolderModals.js",
+        "src/components/SidebarButton.js",
+        "src/components/FolderDropdown.js",
+        "src/core/App.js",
+        "src/main.js"
+      ]
     }
   ],
   "host_permissions": [
