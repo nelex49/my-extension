@@ -23,6 +23,7 @@
         "src/services/AuthService.js",
         "src/components/ModalManager.js",
         "src/components/SubscriptionManager.js",
+        "src/components/SubscriptionDisplay.js",
         "src/components/FolderModals.js",
         "src/components/SidebarButton.js",
         "src/components/FolderDropdown.js",

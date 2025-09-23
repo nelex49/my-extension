@@ -8,9 +8,7 @@ function safeSaveFolderData(data) {
     chrome.storage.local.set(
       { [CONFIG.STORAGE_KEYS.FOLDER_DATA]: data },
       () => {
-        if (CONFIG.DEBUG) {
-          console.log("Folder data saved successfully");
-        }
+        // Folder data saved successfully
       }
     );
   } catch (error) {
@@ -39,9 +37,6 @@ function safeLoadFolderData() {
 function saveUserSubscriptions(subscriptions) {
   return new Promise((resolve, reject) => {
     chrome.storage.local.set({ userSubscriptions: subscriptions }, () => {
-      if (CONFIG.DEBUG) {
-        console.log("User subscriptions saved successfully");
-      }
       resolve();
     });
   });
@@ -62,9 +57,6 @@ function loadUserSubscriptions() {
 function saveAccessToken(token) {
   return new Promise((resolve, reject) => {
     chrome.storage.local.set({ accessToken: token }, () => {
-      if (CONFIG.DEBUG) {
-        console.log("Access token saved successfully");
-      }
       resolve();
     });
   });
@@ -85,4 +77,3 @@ window.saveUserSubscriptions = saveUserSubscriptions;
 window.loadUserSubscriptions = loadUserSubscriptions;
 window.saveAccessToken = saveAccessToken;
 window.loadAccessToken = loadAccessToken;
-

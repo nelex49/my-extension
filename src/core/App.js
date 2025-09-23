@@ -125,7 +125,7 @@ if (document.querySelector("#secondary")) {
   try {
     initialize();
   } catch (error) {
-    console.error("❌ Error during initialization:", error);
+    handleError(error, "App Initialization");
   }
 } else {
   // Wait for sidebar to appear
@@ -134,7 +134,7 @@ if (document.querySelector("#secondary")) {
       try {
         initialize();
       } catch (error) {
-        console.error("❌ Error during retry initialization:", error);
+        handleError(error, "App Retry Initialization");
       }
     }
   }, 2000);

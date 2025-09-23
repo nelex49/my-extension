@@ -331,8 +331,9 @@ function showUnifiedFolderManager(folderName = null, mode = "create") {
     if (isEditMode) {
       // Check limit before showing modal
       if (Object.keys(folderInfo.subfolders || {}).length >= 2) {
-        alert(
-          "Maximum of 2 subfolders per parent folder reached. Upgrade to Premium for unlimited subfolders!"
+        showUserNotification(
+          "Maximum of 2 subfolders per parent folder reached. Upgrade to Premium for unlimited subfolders!",
+          "warn"
         );
         return;
       }
@@ -342,7 +343,7 @@ function showUnifiedFolderManager(folderName = null, mode = "create") {
       // In create mode, we need to create the folder first, then add subfolders
       const newFolderName = nameInput.value.trim();
       if (!newFolderName) {
-        alert("Please enter a folder name first");
+        showUserNotification("Please enter a folder name first", "warn");
         return;
       }
 
@@ -366,7 +367,7 @@ function showUnifiedFolderManager(folderName = null, mode = "create") {
   modal.querySelector("#save-unified").addEventListener("click", () => {
     const newFolderName = nameInput.value.trim();
     if (!newFolderName) {
-      alert("Please enter a folder name");
+      showUserNotification("Please enter a folder name", "warn");
       return;
     }
 
@@ -379,14 +380,7 @@ function showUnifiedFolderManager(folderName = null, mode = "create") {
           selectedTextColor
         );
       } else {
-        console.log(
-          "🔄 Updating parent folder properties with textColor:",
-          selectedTextColor
-        );
         updateFolderProperties(folderName, selectedColor, selectedTextColor);
-        console.log(
-          "🔄 Starting complete dropdown recreation for parent folder text color update"
-        );
 
         // Remove existing dropdown completely
         if (folderDropdown) {
@@ -401,16 +395,13 @@ function showUnifiedFolderManager(folderName = null, mode = "create") {
         setTimeout(() => {
           if (folderDropdown) {
             folderDropdown.style.display = "block";
-            console.log(
-              "✅ New dropdown created and shown with updated parent folder data"
-            );
           } else {
           }
         }, 50);
       }
     } else {
       if (folderData[newFolderName] && !folderData[newFolderName].subfolders) {
-        alert("A folder with this name already exists");
+        showUserNotification("A folder with this name already exists", "error");
         return;
       }
 
@@ -828,7 +819,7 @@ function showCreateSubfolderModal(parentFolderName, subfolderName = null) {
   modal.querySelector("#create-subfolder").addEventListener("click", () => {
     const newSubfolderName = nameInput.value.trim();
     if (!newSubfolderName) {
-      alert("Please enter a subfolder name");
+      showUserNotification("Please enter a subfolder name", "warn");
       return;
     }
 
@@ -879,17 +870,6 @@ function showCreateSubfolderModal(parentFolderName, subfolderName = null) {
   });
 }
 
-// Placeholder for inline subfolder creator
-function showInlineSubfolderCreator(
-  modal,
-  tempSubfolders,
-  parentColor,
-  updateCallback
-) {
-  showUserNotification("Inline subfolder creator - coming soon!", "info");
-}
-
 // Make them globally available
 window.showUnifiedFolderManager = showUnifiedFolderManager;
 window.showCreateSubfolderModal = showCreateSubfolderModal;
-window.showInlineSubfolderCreator = showInlineSubfolderCreator;

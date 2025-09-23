@@ -16,9 +16,6 @@ function createFolder(
     subfolders: {},
     expanded: false,
   };
-  console.log(
-    `✅ Created folder: ${folderName} with icon ${icon} and color ${color}`
-  );
 
   // Save to Chrome storage
   chrome.storage.local.set({ folderData: folderData }, () => {});
@@ -258,7 +255,7 @@ function deleteSubfolder(folderName, subfolderName) {
 // Helper functions needed for the unified folder manager
 function updateFolderName(oldName, newName, color, textColor) {
   if (folderData[newName]) {
-    alert("A folder with this name already exists");
+    showUserNotification("A folder with this name already exists", "error");
     return;
   }
 
@@ -282,12 +279,6 @@ function updateFolderProperties(folderName, color, textColor) {
   if (folderData[folderName]) {
     folderData[folderName].color = color;
     folderData[folderName].textColor = textColor;
-    console.log(
-      "✅ Updated folderData for",
-      folderName,
-      ":",
-      folderData[folderName]
-    );
 
     // Save to storage
     chrome.storage.local.set({ folderData: folderData }, () => {});
@@ -321,8 +312,9 @@ function createSubfolder(
     folderData[parentFolderName].subfolders || {}
   ).length;
   if (currentSubfolderCount >= 2) {
-    alert(
-      "Maximum of 2 subfolders per parent folder reached. Upgrade to Premium for unlimited subfolders!"
+    showUserNotification(
+      "Maximum of 2 subfolders per parent folder reached. Upgrade to Premium for unlimited subfolders!",
+      "warn"
     );
     return;
   }

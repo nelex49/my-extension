@@ -544,27 +544,6 @@ function showFolderManagementPanel(folderName) {
   });
 }
 
-// Helper function to find where a subscription is currently located
-function findSubscriptionLocation(channelId) {
-  for (const [folderName, folderInfo] of Object.entries(folderData)) {
-    if (folderInfo.subfolders) {
-      for (const [subfolderName, subfolderInfo] of Object.entries(
-        folderInfo.subfolders
-      )) {
-        if (subfolderInfo.subscriptions) {
-          const found = subfolderInfo.subscriptions.find(
-            (sub) => sub.snippet?.resourceId?.channelId === channelId
-          );
-          if (found) {
-            return `${folderName} > ${subfolderName}`;
-          }
-        }
-      }
-    }
-  }
-  return "Not organized";
-}
-
 // Helper function to lighten colors for subfolders
 function lightenColor(color, percent) {
   const num = parseInt(color.replace("#", ""), 16);
@@ -585,6 +564,7 @@ function lightenColor(color, percent) {
   );
 }
 
+// Moved to SubscriptionDisplay.js
 function showSubfolderSubscriptions(folderName, subfolderName) {
   const folderInfo = folderData[folderName];
   const subfolderInfo = folderInfo?.subfolders?.[subfolderName];
@@ -822,19 +802,6 @@ function showAllSubscriptions() {
   if (userSubscriptions.length === 0) {
     chrome.storage.local.get(["userSubscriptions"], (result) => {
       if (result.userSubscriptions && result.userSubscriptions.length > 0) {
-        // Check if this is test data and clear it
-        const firstSub = result.userSubscriptions[0];
-        if (
-          firstSub.snippet?.title === "Test Channel 1" ||
-          firstSub.snippet?.resourceId?.channelId === "UC123"
-        ) {
-          // Clear test data from storage
-          chrome.storage.local.remove(["userSubscriptions"], () => {
-            showLoginPrompt();
-          });
-          return;
-        }
-
         userSubscriptions = result.userSubscriptions;
         // Recursively call this function now that we have data
         showAllSubscriptions();
@@ -1134,8 +1101,9 @@ function showFolderContextMenu(event, folderName, type, subfolderName = null) {
     } else if (action === "add-subfolder") {
       // Check limit before showing modal
       if (Object.keys(folderData[folderName]?.subfolders || {}).length >= 2) {
-        alert(
-          "Maximum of 2 subfolders per parent folder reached. Upgrade to Premium for unlimited subfolders!"
+        showUserNotification(
+          "Maximum of 2 subfolders per parent folder reached. Upgrade to Premium for unlimited subfolders!",
+          "warn"
         );
         return;
       }

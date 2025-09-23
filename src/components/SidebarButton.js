@@ -3,11 +3,8 @@
 // SidebarButton component for YouTube Subscription Manager
 
 function createSidebarButton() {
-  console.log("Creating sidebar button...");
-
   // Set flag immediately to prevent duplicate calls
   if (sidebarButtonCreated) {
-    console.log("Sidebar button creation already in progress");
     return (
       document.querySelector("#yt-manage-guide-entry") ||
       document.querySelector("#yt-manage-link")
@@ -19,7 +16,6 @@ function createSidebarButton() {
     document.querySelector("#yt-manage-guide-entry") ||
     document.querySelector("#yt-manage-link")
   ) {
-    console.log("Sidebar button already exists in DOM");
     sidebarButtonCreated = true;
     return (
       document.querySelector("#yt-manage-guide-entry") ||
@@ -172,4 +168,3 @@ function createSidebarButton() {
 
 // Make it globally available
 window.createSidebarButton = createSidebarButton;
-

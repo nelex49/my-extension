@@ -83,12 +83,17 @@ async function safeApiCall(apiFunction, errorMessage, context = "API Call") {
 }
 
 function logStatus(message, type = "info") {
+  // Production logging - only log errors in production
   if (type === "error") {
     console.error(`[YT Extension] ${message}`);
-  } else if (type === "warn") {
-    console.warn(`[YT Extension] ${message}`);
-  } else {
-    console.log(`[YT Extension] ${message}`);
+  }
+  // Debug logging can be enabled by setting CONFIG.DEBUG = true
+  if (CONFIG.DEBUG) {
+    if (type === "warn") {
+      console.warn(`[YT Extension] ${message}`);
+    } else {
+      console.log(`[YT Extension] ${message}`);
+    }
   }
 }
 

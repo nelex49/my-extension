@@ -10,7 +10,7 @@ async function unsubscribeFromChannel(channelId, subscriptionItem, modal) {
     );
 
     if (!subscription || !subscription.id) {
-      alert("Error: Could not find subscription ID");
+      showUserNotification("Error: Could not find subscription ID", "error");
       return;
     }
 
@@ -20,7 +20,7 @@ async function unsubscribeFromChannel(channelId, subscriptionItem, modal) {
     });
 
     if (!result.accessToken) {
-      alert("Error: Not logged in to YouTube");
+      showUserNotification("Error: Not logged in to YouTube", "error");
       return;
     }
 
@@ -61,12 +61,13 @@ async function unsubscribeFromChannel(channelId, subscriptionItem, modal) {
       }
     } else {
       const errorText = await response.text();
-      console.error("Unsubscribe failed:", response.status, errorText);
-      alert(`Failed to unsubscribe: ${response.status}`);
+      showUserNotification(
+        `Failed to unsubscribe: ${response.status}`,
+        "error"
+      );
     }
   } catch (error) {
-    console.error("Error unsubscribing:", error);
-    alert("Error unsubscribing from channel");
+    showUserNotification("Error unsubscribing from channel", "error");
   }
 }
 
@@ -76,15 +77,11 @@ async function loadUserData(token) {
     chrome.storage.local.get(["userSubscriptions"], (result) => {
       if (result.userSubscriptions && result.userSubscriptions.length > 0) {
         userSubscriptions = result.userSubscriptions;
-        console.log(
-          `✅ Logged in! Found ${userSubscriptions.length} subscriptions.`
-        );
-      } else {
-        console.log("❌ No subscriptions found. Please try logging in again.");
+        // Subscriptions loaded successfully
       }
     });
   } catch (error) {
-    console.error("Error loading data:", error);
+    showUserNotification("Error loading subscription data", "error");
   }
 }
 
