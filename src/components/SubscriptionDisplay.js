@@ -25,10 +25,30 @@ function findSubscriptionLocation(channelId) {
 
 // Show subfolder subscriptions
 function showSubfolderSubscriptions(folderName, subfolderName) {
-  const folderInfo = folderData[folderName];
-  const subfolderInfo = folderInfo?.subfolders?.[subfolderName];
-  const subscriptions = subfolderInfo ? subfolderInfo.subscriptions : [];
+  // Reload the latest data from storage to ensure accuracy
+  chrome.storage.local.get(["folderData"], (result) => {
+    const currentFolderData = result.folderData || {};
+    const folderInfo = currentFolderData[folderName];
+    const subfolderInfo = folderInfo?.subfolders?.[subfolderName];
+    const subscriptions = subfolderInfo ? subfolderInfo.subscriptions : [];
 
+    createSubfolderModal(
+      folderName,
+      subfolderName,
+      folderInfo,
+      subfolderInfo,
+      subscriptions
+    );
+  });
+}
+
+function createSubfolderModal(
+  folderName,
+  subfolderName,
+  folderInfo,
+  subfolderInfo,
+  subscriptions
+) {
   // Create a modal to show subfolder contents
   const modal = document.createElement("div");
   modal.style.cssText = `
@@ -57,7 +77,7 @@ function showSubfolderSubscriptions(folderName, subfolderName) {
           <span style="background: rgba(255,255,255,0.2); border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">${
             subfolderInfo?.icon || "📂"
           }</span>
-          <span>${subfolderName} (${subscriptions.length})</span>
+          <span>${subfolderName} (${subscriptions.length} subs)</span>
         </h2>
         <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 14px;">Subscriptions in this subfolder</p>
       </div>
@@ -96,13 +116,13 @@ function showSubfolderSubscriptions(folderName, subfolderName) {
                         .trim()}
                     </div>
                     <div style="display: flex; align-items: center; gap: 6px; flex-wrap: wrap;">
-                      <button class="visit-channel" style="background: #1976d2; color: white; border: none; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 500; transition: all 0.2s; white-space: nowrap; flex: 1;" onmouseover="this.style.background='#1565c0'" onmouseout="this.style.background='#1976d2'" title="Visit this channel on YouTube">
+                      <button class="visit-channel" style="background: #f0f8ff; color: #5a7ba7; border: 1px solid #d1e7ff; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 500; transition: all 0.2s; white-space: nowrap; flex: 1;" onmouseover="this.style.background='#e6f3ff'" onmouseout="this.style.background='#f0f8ff'" title="Visit this channel on YouTube">
                         ▶️ Visit
                       </button>
-                      <button class="toggle-description" style="background: #e3f2fd; color: #1976d2; border: 1px solid #bbdefb; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 500; transition: all 0.2s; white-space: nowrap; flex: 1;" onmouseover="this.style.background='#bbdefb'" onmouseout="this.style.background='#e3f2fd'">
+                      <button class="toggle-description" style="background: #f8f9fa; color: #6c757d; border: 1px solid #e9ecef; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 500; transition: all 0.2s; white-space: nowrap; flex: 1;" onmouseover="this.style.background='#e9ecef'; this.style.border='1px solid #dee2e6'" onmouseout="this.style.background='#f8f9fa'; this.style.border='1px solid #e9ecef'">
                         📝 Description
                       </button>
-                      <button class="remove-from-subfolder" style="background: #ffebee; color: #d32f2f; border: 1px solid #ffcdd2; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 500; transition: all 0.2s; white-space: nowrap; flex: 1;" onmouseover="this.style.background='#ffcdd2'" onmouseout="this.style.background='#ffebee'" title="Remove from this folder only (keeps subscription)">
+                      <button class="remove-from-subfolder" style="background: #fff0f5; color: #a75b7b; border: 1px solid #ffd7e6; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; font-weight: 500; transition: all 0.2s; white-space: nowrap; flex: 1;" onmouseover="this.style.background='#ffe6f0'" onmouseout="this.style.background='#fff0f5'" title="Remove from this folder only (keeps subscription)">
                         🗑️ Remove
                       </button>
                     </div>
@@ -114,6 +134,20 @@ function showSubfolderSubscriptions(folderName, subfolderName) {
                 .join("")
         }
       </div>
+      
+      <!-- Footer with add link (only show if there are subscriptions) -->
+      ${
+        subscriptions.length > 0
+          ? `
+      <div style="padding: 16px 20px; border-top: 1px solid #e9ecef; background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%); border-radius: 0 0 12px 12px; text-align: center;">
+        <button id="organize-this-folder" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 6px; padding: 8px 16px; font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 2px 6px rgba(102, 126, 234, 0.2); display: inline-flex; align-items: center; gap: 6px;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 3px 10px rgba(102, 126, 234, 0.3)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 6px rgba(102, 126, 234, 0.2)'" title="Add new subscriptions to this folder">
+          <span style="font-size: 12px; filter: brightness(0) invert(1);">➕</span>
+          <span>Add to this folder</span>
+        </button>
+      </div>
+      `
+          : ""
+      }
       </div>
     </div>
   `;
@@ -254,6 +288,15 @@ function showSubfolderSubscriptions(folderName, subfolderName) {
 
     // Add subscriptions button
     if (e.target.id === "add-subscriptions-to-folder") {
+      modal.remove();
+      showAllSubscriptions();
+    }
+
+    // Organize this folder button
+    if (
+      e.target.id === "organize-this-folder" ||
+      e.target.closest("#organize-this-folder")
+    ) {
       modal.remove();
       showAllSubscriptions();
     }
@@ -500,8 +543,12 @@ function showAllSubscriptions() {
         // Save updated data
         safeSaveFolderData(folderData);
 
-        // Refresh folder dropdown to update counters
-        refreshFolderDropdown();
+        // Refresh the dropdown to show updated counters
+        setTimeout(() => {
+          if (typeof window.refreshFolderDropdown === "function") {
+            window.refreshFolderDropdown();
+          }
+        }, 100);
 
         // Refresh the modal to show updated locations
         setTimeout(() => {
@@ -535,11 +582,8 @@ function showAllSubscriptions() {
         }
         // Reset selection
         e.target.value = "";
-        // Refresh the modal to show updated folder locations after a longer delay
-        setTimeout(() => {
-          modal.remove();
-          showAllSubscriptions();
-        }, 500);
+        // Don't refresh the modal immediately - let the counter update work
+        // The counter should update automatically via the addToSubfolder function
       }
     }
   });

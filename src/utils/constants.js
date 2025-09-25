@@ -103,7 +103,7 @@ const CONFIG = {
   OAUTH_CLIENT_ID:
     "763119874945-ad7le2f2eldhslfppaflmuspedj1o4hi.apps.googleusercontent.com",
   API_BASE_URL: "https://www.googleapis.com/youtube/v3",
-  DEBUG: true, // Set to false for production
+  DEBUG: false, // Set to false for production
   VERSION: "1.0.0",
   MAX_FOLDER_NAME_LENGTH: 50,
   MAX_SUBFOLDER_NAME_LENGTH: 30,
@@ -118,4 +118,3 @@ const CONFIG = {
 // Make them globally available
 window.CSS_CONSTANTS = CSS_CONSTANTS;
 window.CONFIG = CONFIG;
-

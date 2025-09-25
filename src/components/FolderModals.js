@@ -22,7 +22,7 @@ function showUnifiedFolderManager(folderName = null, mode = "create") {
   `;
 
   modal.innerHTML = `
-    <div style="background: white; border-radius: 12px; padding: 0; max-width: 650px; width: 95%; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
+    <div style="background: white; border-radius: 12px; padding: 0; max-width: 480px; width: 95%; max-height: 85vh; overflow-y: auto; box-shadow: 0 8px 32px rgba(0,0,0,0.3);">
       <!-- Header -->
       <div class="unified-header" style="background: ${
         isEditMode
@@ -32,6 +32,16 @@ function showUnifiedFolderManager(folderName = null, mode = "create") {
     isEditMode ? folderInfo?.textColor || "#ffffff" : "white"
   }; padding: 20px; border-radius: 12px 12px 0 0; position: relative;">
         <button id="close-unified-manager" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; border-radius: 50%; width: 30px; height: 30px; color: white; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;">✕</button>
+        ${
+          isEditMode && Object.keys(folderInfo.subfolders || {}).length >= 2
+            ? `
+        <button id="limit-reached-indicator" style="position: absolute; top: 15px; right: 55px; background: rgba(255,255,255,0.2); border: none; border-radius: 6px; padding: 6px 12px; color: white; cursor: default; font-size: 12px; display: flex; align-items: center; gap: 4px;" title="Maximum subfolders reached">
+          <span>⚠️</span>
+          <span>Limit Reached</span>
+        </button>
+        `
+            : ""
+        }
         <h2 style="margin: 0; font-size: 20px; font-weight: 600;">
           ${
             isEditMode
@@ -42,23 +52,26 @@ function showUnifiedFolderManager(folderName = null, mode = "create") {
         <p style="margin: 5px 0 0 0; opacity: 0.9; font-size: 14px;">
           ${
             isEditMode
-              ? "Modify your folder settings and manage subfolders"
+              ? "Modify your folder settings"
               : "Set up your new folder with custom name, icon, and color"
           }
         </p>
       </div>
 
       <!-- Content -->
-      <div style="padding: 15px;">
-        <!-- Folder Settings -->
-        <div style="margin-bottom: 20px;">
+      <div style="padding: 15px; display: flex; justify-content: center;">
+        <div style="display: flex; flex-direction: column; align-items: center; width: 100%; max-width: 400px;">
+          <!-- Folder Settings -->
+          <div style="margin-bottom: 20px; width: 100%;">
           <h3 style="margin: 0 0 15px 0; color: #333; font-size: 16px; display: flex; align-items: center; gap: 8px;">
             <span>📁</span>
             <span>Folder Settings</span>
           </h3>
           
-          <!-- Folder Name -->
-          <div style="margin-bottom: 15px;">
+          <!-- Folder Name and Text Colors Row -->
+          <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-start;">
+            <!-- Folder Name (40% width) -->
+            <div style="flex: 0 0 40%; min-width: 180px;">
               <label style="display: block; margin-bottom: 5px; font-weight: 500; color: #555;">Folder Name:</label>
               <input type="text" id="unified-folder-name" value="${
                 isEditMode ? folderName : ""
@@ -68,38 +81,13 @@ function showUnifiedFolderManager(folderName = null, mode = "create") {
                 <span id="unified-char-count">${
                   isEditMode ? folderName.length : 0
                 }</span>/20 characters
-            </div>
-          </div>
-
-          <!-- Color Selection Row -->
-          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 15px;">
-            <div>
-              <label style="display: block; margin-bottom: 6px; font-weight: 500; color: #555;">Background Color:</label>
-          <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px;">
-            ${[
-              "#ff6b6b",
-              "#4ecdc4",
-              "#9b59b6",
-              "#e74c3c",
-              "#f39c12",
-              "#27ae60",
-              "#3498db",
-              "#34495e",
-            ]
-              .map(
-                (color) => `
-              <button class="unified-color-option" data-color="${color}" style="padding: 10px; border: 2px solid ${
-                  isEditMode && color === folderInfo.color ? "#007bff" : "#ddd"
-                }; border-radius: 4px; background: ${color}; cursor: pointer; transition: all 0.2s;"></button>
-            `
-              )
-              .join("")}
-          </div>
+              </div>
             </div>
             
-            <div>
+            <!-- Text Colors (exact width) -->
+            <div style="flex: 0 0 auto;">
               <label style="display: block; margin-bottom: 6px; font-weight: 500; color: #555;">Text Color:</label>
-              <div style="display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px;">
+              <div style="display: grid; grid-template-columns: repeat(6, 32px); gap: 4px; width: fit-content;"> <!-- Updated spacing -->
                 ${[
                   { name: "White", color: "#ffffff" },
                   { name: "Black", color: "#000000" },
@@ -118,7 +106,7 @@ function showUnifiedFolderManager(folderName = null, mode = "create") {
                     (textColor) => `
                   <button class="unified-text-color-option" data-color="${
                     textColor.color
-                  }" style="padding: 6px; border: 2px solid ${
+                  }" style="padding: 8px; border: 2px solid ${
                       textColor.color ===
                       (isEditMode
                         ? folderInfo.textColor || "#ffffff"
@@ -132,7 +120,7 @@ function showUnifiedFolderManager(folderName = null, mode = "create") {
                       textColor.color === "#f5f5f5"
                         ? "#333"
                         : "#fff"
-                    }; font-weight: 500; font-size: 11px;" title="${
+                    }; font-weight: 500; font-size: 10px; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center;" title="${
                       textColor.name
                     }">Aa</button>
                 `
@@ -142,54 +130,141 @@ function showUnifiedFolderManager(folderName = null, mode = "create") {
             </div>
           </div>
 
-          <!-- Preview -->
-          <div style="margin-bottom: 15px;">
-            <div style="background: #f8f9fa; border-radius: 6px; padding: 10px; border: 1px solid #dee2e6;">
-              <h4 style="margin: 0 0 8px 0; color: #495057; font-size: 12px;">Preview:</h4>
-              <div id="folder-preview" style="background: ${
-                isEditMode ? folderInfo.color : "#007bff"
-              }; color: ${
+          <!-- Preview and Background Colors Row -->
+          <div style="display: flex; gap: 15px; margin-bottom: 15px; align-items: flex-start;">
+            <!-- Preview (40% width) -->
+            <div style="flex: 0 0 40%; min-width: 180px;">
+              <div style="background: #f8f9fa; border-radius: 6px; padding: 10px; border: 1px solid #dee2e6; margin-top: 18px;">
+                <h4 style="margin: 0 0 8px 0; color: #495057; font-size: 12px;">Preview:</h4>
+                <div id="folder-preview" style="background: ${
+                  isEditMode ? folderInfo.color : "#007bff"
+                }; color: ${
     isEditMode ? folderInfo.textColor || "#ffffff" : "#ffffff"
   }; border-radius: 4px; padding: 6px 10px; display: flex; align-items: center; gap: 6px; font-size: 13px;">
-                <span id="preview-expand-icon" style="background: rgba(255,255,255,0.2); border-radius: 50%; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px;">▶</span>
-                <span id="preview-name">${
-                  isEditMode ? folderName : "New Folder"
-                }</span>
+                  <span id="preview-expand-icon" style="background: rgba(255,255,255,0.2); border-radius: 50%; width: 18px; height: 18px; display: inline-flex; align-items: center; justify-content: center; font-size: 10px;">▶</span>
+                  <span id="preview-name">${
+                    isEditMode ? folderName : "New Folder"
+                  }</span>
+                </div>
               </div>
             </div>
+            
+            <!-- Background Colors (60% width, 2 rows) -->
+            <div style="flex: 0 0 60%; min-width: 200px; padding-right: 0px;">
+              <label style="display: block; margin-bottom: 6px; font-weight: 500; color: #555;">Background Color:</label>
+              <div style="display: grid; grid-template-columns: repeat(6, 32px); gap: 4px; margin-bottom: 8px;"> <!-- Updated spacing -->
+                ${[
+                  "#ff6b6b",
+                  "#4ecdc4",
+                  "#9b59b6",
+                  "#e74c3c",
+                  "#f39c12",
+                  "#27ae60",
+                  "#3498db",
+                  "#34495e",
+                  "#e67e22",
+                  "#1abc9c",
+                  "#f1c40f",
+                  "#e91e63",
+                ]
+                  .map(
+                    (color) => `
+                  <button class="unified-color-option" data-color="${color}" style="padding: 10px; border: 2px solid ${
+                      isEditMode && color === folderInfo.color
+                        ? "#007bff"
+                        : "#ddd"
+                    }; border-radius: 4px; background: ${color}; cursor: pointer; transition: all 0.2s; width: 32px; height: 32px; padding: 0;"></button>
+                `
+                  )
+                  .join("")}
+              </div>
+              <button style="background: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; padding: 6px 12px; cursor: pointer; font-size: 12px; color: #666; transition: all 0.2s;" onmouseover="this.style.background='#e9ecef'" onmouseout="this.style.background='#f8f9fa'" title="Custom Color Picker (Coming Soon)">
+                🎨 Custom Color
+              </button>
+            </div>
           </div>
-        </div>
 
-        <!-- Subfolders Management -->
-        <div style="margin-bottom: 15px;">
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
-            <h3 style="margin: 0; color: #333; font-size: 15px; display: flex; align-items: center; gap: 6px;">
-            <span>📂</span>
-            <span>Subfolders ${
-              isEditMode
-                ? `(${Object.keys(folderInfo.subfolders || {}).length}/2)`
-                : "(Optional)"
-            }</span>
-          </h3>
-            <button id="add-subfolder-btn" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; border-radius: 6px; padding: 6px 12px; cursor: pointer; font-size: 12px; font-weight: 500; box-shadow: 0 2px 4px rgba(40, 167, 69, 0.3); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(40, 167, 69, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(40, 167, 69, 0.3)'">+ Add Subfolder</button>
-          </div>
-          <p style="margin: 0; color: #666; font-size: 12px; font-style: italic;">
-            Subfolders will be visible in the main folder dropdown when you click on the parent folder.
-          </p>
         </div>
 
         <!-- Action Buttons -->
-        <div style="display: flex; gap: 10px; justify-content: flex-end; padding-top: 15px; border-top: 1px solid #dee2e6;">
+        <div style="display: flex; gap: 10px; justify-content: center; margin-top: -15px; padding-top: 10px; border-top: 1px solid #dee2e6;">
           <button id="cancel-unified" style="padding: 8px 16px; border: 1px solid #ddd; border-radius: 6px; background: white; cursor: pointer; font-size: 13px; transition: all 0.2s;" onmouseover="this.style.background='#f8f9fa'" onmouseout="this.style.background='white'">Cancel</button>
-          <button id="save-unified" style="padding: 8px 16px; border: none; border-radius: 6px; background: linear-gradient(135deg, #007bff, #0056b3); color: white; cursor: pointer; font-size: 13px; font-weight: 500; box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3); transition: all 0.2s;" onmouseover="this.style.transform='translateY(-1px)'; this.style.boxShadow='0 4px 8px rgba(0, 123, 255, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 2px 4px rgba(0, 123, 255, 0.3)'">
+          <button id="save-unified" style="padding: 8px 16px; border: none; border-radius: 6px; background: linear-gradient(135deg, #007bff, #0056b3); color: white; cursor: pointer; font-size: 13px; font-weight: 500; box-shadow: 0 2px 4px rgba(0, 123, 255, 0.3); transition: all 0.2s;" onmouseover="this.style.background='linear-gradient(135deg, #0056b3, #004085)'; this.style.boxShadow='0 3px 6px rgba(0, 91, 179, 0.4)'" onmouseout="this.style.background='linear-gradient(135deg, #007bff, #0056b3)'; this.style.boxShadow='0 2px 4px rgba(0, 123, 255, 0.3)'">
             ${isEditMode ? "Save Changes" : "Create Folder"}
           </button>
+        </div>
         </div>
       </div>
     </div>
   `;
 
   document.body.appendChild(modal);
+
+  // Add proper event listeners
+  const saveBtn = modal.querySelector("#save-unified");
+  const cancelBtn = modal.querySelector("#cancel-unified");
+  const closeBtn = modal.querySelector("#close-unified-manager");
+
+  if (saveBtn) {
+    saveBtn.addEventListener("click", () => {
+      const newFolderName = nameInput.value.trim();
+      if (!newFolderName) {
+        showUserNotification("Please enter a folder name", "warn");
+        return;
+      }
+
+      if (isEditMode) {
+        if (newFolderName !== folderName) {
+          updateFolderName(
+            folderName,
+            newFolderName,
+            selectedColor,
+            selectedTextColor
+          );
+        } else {
+          updateFolderProperties(folderName, selectedColor, selectedTextColor);
+
+          // Remove existing dropdown completely
+          if (folderDropdown) {
+            folderDropdown.remove();
+            folderDropdown = null;
+          }
+
+          // Create new dropdown with updated data
+          createFolderDropdown();
+        }
+      } else {
+        // Create new folder
+        const newFolder = {
+          name: newFolderName,
+          color: selectedColor,
+          textColor: selectedTextColor,
+          subfolders: {},
+        };
+
+        // Add to folderData
+        folderData[newFolderName] = newFolder;
+
+        // Save to Chrome storage
+        chrome.storage.local.set({ folderData: folderData }, () => {});
+
+        refreshFolderDropdown();
+      }
+      modal.remove();
+    });
+  }
+
+  if (cancelBtn) {
+    cancelBtn.addEventListener("click", () => {
+      modal.remove();
+    });
+  }
+
+  if (closeBtn) {
+    closeBtn.addEventListener("click", () => {
+      modal.remove();
+    });
+  }
 
   // Make panel draggable
   setTimeout(() => {
@@ -324,7 +399,10 @@ function showUnifiedFolderManager(folderName = null, mode = "create") {
   if (isEditMode && Object.keys(folderInfo.subfolders || {}).length >= 2) {
     addSubfolderBtn.style.background = "#6c757d";
     addSubfolderBtn.style.cursor = "not-allowed";
-    addSubfolderBtn.textContent = "Limit Reached";
+    addSubfolderBtn.innerHTML =
+      '<span style="font-size: 14px;">⚠️</span><span>Limit Reached</span>';
+    addSubfolderBtn.onmouseover = null;
+    addSubfolderBtn.onmouseout = null;
   }
 
   addSubfolderBtn.addEventListener("click", () => {

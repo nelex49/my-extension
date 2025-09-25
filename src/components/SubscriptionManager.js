@@ -8,7 +8,23 @@ function createFolder(
   color = "#1976d2",
   textColor = "#ffffff"
 ) {
-  folderData[folderName] = {
+  const currentFolderData = window.folderData || {};
+  const isPremium = window.isPremium || false;
+  const folderLimit = window.folderLimit || 3;
+  const folderCount = Object.keys(currentFolderData).length;
+
+  // Check folder limit for free users
+  if (!isPremium && folderCount >= folderLimit) {
+    if (typeof showUserNotification === "function") {
+      showUserNotification(
+        `Maximum of ${folderLimit} folders reached. Upgrade to Premium for unlimited folders!`,
+        "warn"
+      );
+    }
+    return false;
+  }
+
+  currentFolderData[folderName] = {
     subscriptions: [],
     icon: icon,
     color: color,
@@ -17,15 +33,17 @@ function createFolder(
     expanded: false,
   };
 
+  // Update global variable
+  window.folderData = currentFolderData;
+
   // Save to Chrome storage
-  chrome.storage.local.set({ folderData: folderData }, () => {});
+  chrome.storage.local.set({ folderData: currentFolderData }, () => {});
 
   // Button text stays simple
 
-  // Refresh the dropdown
+  // Refresh the dropdown when creating new folders (this is necessary)
   if (folderDropdown) {
     createFolderDropdown(); // Recreate to show new folder
-  } else {
   }
 }
 
@@ -51,11 +69,13 @@ function removeSubscriptionFromAllFolders(channelId) {
   let removed = false;
 
   // Remove from all subfolders only (parent folders don't hold subscriptions directly)
-  Object.keys(folderData).forEach((folderName) => {
-    if (folderData[folderName].subfolders) {
-      Object.keys(folderData[folderName].subfolders).forEach(
+  const currentFolderData = window.folderData || {};
+  Object.keys(currentFolderData).forEach((folderName) => {
+    if (currentFolderData[folderName].subfolders) {
+      Object.keys(currentFolderData[folderName].subfolders).forEach(
         (subfolderName) => {
-          const subfolder = folderData[folderName].subfolders[subfolderName];
+          const subfolder =
+            currentFolderData[folderName].subfolders[subfolderName];
           if (subfolder && subfolder.subscriptions) {
             const index = subfolder.subscriptions.findIndex(
               (sub) => sub.snippet?.resourceId?.channelId === channelId
@@ -76,7 +96,17 @@ function removeSubscriptionFromAllFolders(channelId) {
 
   if (removed) {
     // Save updated data
-    chrome.storage.local.set({ folderData: folderData });
+    safeSaveFolderData(currentFolderData);
+
+    // Update the global variable to keep it in sync
+    window.folderData = currentFolderData;
+
+    // Refresh the dropdown to show updated counters
+    setTimeout(() => {
+      if (typeof window.refreshFolderDropdown === "function") {
+        window.refreshFolderDropdown();
+      }
+    }, 100);
   }
 
   return removed;
@@ -105,9 +135,15 @@ function removeFromSubfolder(channelId, folderName, subfolderName) {
     // Save to storage
     safeSaveFolderData(folderData);
 
-    // Update folder counts and refresh UI
-    updateFolderCounts();
-    refreshFolderDropdown();
+    // Update the global variable to keep it in sync
+    window.folderData = folderData;
+
+    // Refresh the dropdown to show updated counters
+    setTimeout(() => {
+      if (typeof window.refreshFolderDropdown === "function") {
+        window.refreshFolderDropdown();
+      }
+    }, 100);
   }
 }
 
@@ -128,9 +164,15 @@ function addToSubfolder(channelId, folderName, subfolderName) {
     // Save to storage
     safeSaveFolderData(folderData);
 
-    // Update folder counts and refresh UI
-    updateFolderCounts();
-    refreshFolderDropdown();
+    // Update the global variable to keep it in sync
+    window.folderData = folderData;
+
+    // Refresh the dropdown to show updated counters
+    setTimeout(() => {
+      if (typeof window.refreshFolderDropdown === "function") {
+        window.refreshFolderDropdown();
+      }
+    }, 100);
   }
 }
 
@@ -180,55 +222,22 @@ function showLoginPrompt() {
   });
 }
 
-function updateFolderCounts() {
-  if (folderDropdown) {
-    // Update parent folder counts
-    const parentCounts = folderDropdown.querySelectorAll(
-      ".parent-folder .count"
-    );
-    parentCounts.forEach((count) => {
-      const folderItem = count.closest(".folder-item");
-      const folderName = folderItem.dataset.folder;
-      if (folderData[folderName]) {
-        const totalSubs =
-          folderData[folderName].subscriptions.length +
-          Object.values(folderData[folderName].subfolders || {}).reduce(
-            (sum, sub) => sum + sub.subscriptions.length,
-            0
-          );
-        count.textContent = `(${totalSubs})`;
-      }
-    });
-
-    // Update subfolder counts
-    const subfolderCounts =
-      folderDropdown.querySelectorAll(".subfolder .count");
-    subfolderCounts.forEach((count) => {
-      const folderItem = count.closest(".folder-item");
-      const folderName = folderItem.dataset.folder;
-      const subfolderName = folderItem.dataset.subfolder;
-      if (folderData[folderName]?.subfolders?.[subfolderName]) {
-        const subCount =
-          folderData[folderName].subfolders[subfolderName].subscriptions.length;
-        count.textContent = `(${subCount})`;
-      }
-    });
-  }
-}
-
-// Additional functions needed for the management panel
-
 function deleteParentFolder(folderName) {
   if (
     confirm(
       `Are you sure you want to delete the folder "${folderName}" and all its subfolders?`
     )
   ) {
-    delete folderData[folderName];
+    const currentFolderData = window.folderData || {};
+    delete currentFolderData[folderName];
+
+    // Update global variable
+    window.folderData = currentFolderData;
 
     // Save updated data to storage
-    chrome.storage.local.set({ folderData: folderData }, () => {});
+    chrome.storage.local.set({ folderData: currentFolderData }, () => {});
 
+    // Refresh dropdown only when deleting folders (this is necessary)
     refreshFolderDropdown();
   }
 }
@@ -243,9 +252,25 @@ function deleteSubfolder(folderName, subfolderName) {
       delete folderData[folderName].subfolders[subfolderName];
 
       // Save updated data to storage
-      chrome.storage.local.set({ folderData: folderData }, () => {});
+      safeSaveFolderData(folderData);
 
-      refreshFolderDropdown();
+      // Update the global variable to keep it in sync
+      window.folderData = folderData;
+
+      // Refresh the dropdown to show updated counters
+      setTimeout(() => {
+        if (typeof window.refreshFolderDropdown === "function") {
+          window.refreshFolderDropdown();
+        }
+      }, 100);
+
+      // Show success message
+      if (typeof showUserNotification === "function") {
+        showUserNotification(
+          `Subfolder "${subfolderName}" deleted successfully`,
+          "success"
+        );
+      }
     }
   }
 }
@@ -272,6 +297,7 @@ function updateFolderName(oldName, newName, color, textColor) {
   // Save to storage
   chrome.storage.local.set({ folderData: folderData }, () => {});
 
+  // Refresh dropdown when renaming folders (this is necessary)
   refreshFolderDropdown();
 }
 
@@ -296,7 +322,8 @@ function updateFolderProperties(folderName, color, textColor) {
       });
     }
 
-    refreshFolderDropdown();
+    // Update folder counter without refreshing dropdown
+    updateFolderCounterInDropdown(folderName);
   }
 }
 
@@ -330,7 +357,18 @@ function createSubfolder(
     textColor: textColor,
   };
 
-  refreshFolderDropdown();
+  // Save to storage
+  safeSaveFolderData(folderData);
+
+  // Update the global variable to keep it in sync
+  window.folderData = folderData;
+
+  // Refresh the dropdown to show the new subfolder
+  setTimeout(() => {
+    if (typeof window.refreshFolderDropdown === "function") {
+      window.refreshFolderDropdown();
+    }
+  }, 100);
 }
 
 // Helper functions for color manipulation
@@ -395,10 +433,8 @@ window.removeFromFolder = removeFromFolder;
 window.removeFromSubfolder = removeFromSubfolder;
 window.addToSubfolder = addToSubfolder;
 window.showLoginPrompt = showLoginPrompt;
-window.updateFolderCounts = updateFolderCounts;
 window.deleteParentFolder = deleteParentFolder;
 window.deleteSubfolder = deleteSubfolder;
-// showEditSubfolderModal removed - now using showCreateSubfolderModal from FolderModals.js
 window.updateFolderName = updateFolderName;
 window.updateFolderProperties = updateFolderProperties;
 window.createSubfolder = createSubfolder;

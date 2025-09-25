@@ -57,15 +57,14 @@ function initialize() {
 
             if (!sidebarButton) {
               logStatus("Failed to create button", "error");
+            } else {
+              logStatus("Button created successfully", "info");
             }
           }, 1000);
 
-          if (folderPanel) {
-            logStatus("Panel created successfully", "info");
-            handleLoginState(accessToken);
-          } else {
-            logStatus("Failed to create panel", "error");
-          }
+          // No panel needed - just create the sidebar button
+          logStatus("Sidebar button creation attempted", "info");
+          handleLoginState(accessToken);
         } else {
           // User not logged in, no button should be shown
           logStatus(
@@ -130,7 +129,7 @@ if (document.querySelector("#secondary")) {
 } else {
   // Wait for sidebar to appear
   setTimeout(() => {
-    if (document.querySelector("#secondary") && !folderPanel) {
+    if (document.querySelector("#secondary")) {
       try {
         initialize();
       } catch (error) {
@@ -141,7 +140,7 @@ if (document.querySelector("#secondary")) {
 }
 
 // Make them globally available
-window.folderPanel = folderPanel;
+window.folderPanel = null;
 window.isLoggedIn = isLoggedIn;
 window.sidebarButtonCreated = sidebarButtonCreated;
 window.folderDropdown = folderDropdown;

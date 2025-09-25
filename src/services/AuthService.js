@@ -8,20 +8,7 @@ function handleLoginState(token) {
   if (isLoggedIn) {
     loadUserData(token);
 
-    // User logged in - create sidebar button if it doesn't exist
-    const existingButton = document.querySelector("#yt-manage-guide-entry");
-    if (!existingButton) {
-      // Reset the button creation flag to allow creation
-      sidebarButtonCreated = false;
-
-      // Delay button creation to give YouTube time to load
-      setTimeout(() => {
-        let sidebarButton = createSidebarButton();
-        if (sidebarButton) {
-          // Sidebar button created successfully
-        }
-      }, 1000);
-    }
+    // User logged in - button creation is handled by App.js
   } else {
     // User logged out - remove the panel and sidebar button
     if (folderPanel && folderPanel.parentNode) {
@@ -41,7 +28,7 @@ function handleLoginState(token) {
     }
 
     // Reset the button creation flag
-    sidebarButtonCreated = false;
+    window.sidebarButtonCreated = false;
 
     // Removed cleanup for unused button types
   }

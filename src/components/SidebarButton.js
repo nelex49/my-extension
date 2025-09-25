@@ -3,37 +3,36 @@
 // SidebarButton component for YouTube Subscription Manager
 
 function createSidebarButton() {
-  // Set flag immediately to prevent duplicate calls
-  if (sidebarButtonCreated) {
-    return (
-      document.querySelector("#yt-manage-guide-entry") ||
-      document.querySelector("#yt-manage-link")
-    );
+  // Check if button already exists to prevent duplicates
+  const existingButton = document.querySelector("#yt-manage-guide-entry");
+  if (existingButton) {
+    return existingButton;
   }
 
-  // Check if button already exists to prevent duplicates
-  if (
-    document.querySelector("#yt-manage-guide-entry") ||
-    document.querySelector("#yt-manage-link")
-  ) {
-    sidebarButtonCreated = true;
-    return (
-      document.querySelector("#yt-manage-guide-entry") ||
-      document.querySelector("#yt-manage-link")
-    );
+  // Set flag immediately to prevent duplicate calls
+  if (window.sidebarButtonCreated) {
+    return null;
   }
 
   // Mark as creating to prevent duplicate calls
-  sidebarButtonCreated = true;
+  window.sidebarButtonCreated = true;
 
   // Wait a bit for YouTube to fully load
   setTimeout(() => {
-    // Look for the Home navigation item
-    const homeLink = document.querySelector('a[href*="/feed/"]');
+    // Try multiple selectors to find YouTube sidebar elements
+    let homeLink =
+      document.querySelector('a[href*="/feed/"]') ||
+      document.querySelector('a[href*="/"]') ||
+      document.querySelector("#guide-button") ||
+      document.querySelector("ytd-guide-entry-renderer a");
 
     if (homeLink) {
-      // Find the parent guide entry renderer
-      let guideEntry = homeLink.closest("ytd-guide-entry-renderer");
+      // Try multiple ways to find the container
+      let guideEntry =
+        homeLink.closest("ytd-guide-entry-renderer") ||
+        homeLink.closest("#guide") ||
+        homeLink.closest("#secondary") ||
+        homeLink.parentElement;
 
       if (guideEntry) {
         // Find the parent container
@@ -84,65 +83,26 @@ function createSidebarButton() {
               font-weight: 500 !important;
               font-size: 14px !important;
               white-space: nowrap !important;
-              overflow: hidden !important;
-              text-overflow: ellipsis !important;
-              max-width: 250px !important;
             `;
           }
         }
 
-        // Add hover effect for blue background button
+        // Add hover effect
         if (link) {
           link.addEventListener("mouseenter", () => {
-            link.style.backgroundColor = "#1565c0 !important"; // Darker blue on hover
-            link.style.transform = "scale(1.02)";
-            link.style.transition = "all 0.2s ease";
+            link.style.backgroundColor = "#1565c0";
           });
-
           link.addEventListener("mouseleave", () => {
-            link.style.backgroundColor = "#1976d2 !important"; // Back to original blue
-            link.style.transform = "scale(1)";
+            link.style.backgroundColor = "#1976d2";
           });
         }
-
-        // Insert after the home button
-        container.insertBefore(newGuideEntry, guideEntry.nextSibling);
-
-        // Inject CSS to override YouTube's styles
-        const style = document.createElement("style");
-        style.textContent = `
-          #yt-manage-guide-entry #yt-manage-link {
-            background-color: #1976d2 !important;
-            color: white !important;
-            display: flex !important;
-            align-items: center !important;
-            padding: 10px 24px !important;
-            text-decoration: none !important;
-            border-radius: 10px !important;
-            margin: 2px 0 !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-          }
-          #yt-manage-guide-entry #yt-manage-link .title {
-            color: white !important;
-            font-weight: 500 !important;
-            font-size: 14px !important;
-          }
-          #yt-manage-guide-entry #yt-manage-link svg {
-            fill: white !important;
-            width: 24px !important;
-            height: 24px !important;
-          }
-        `;
-        document.head.appendChild(style);
-
-        // Button created successfully
 
         // Add click handler
         const manageLink = newGuideEntry.querySelector("#yt-manage-link");
         if (manageLink) {
           manageLink.addEventListener("click", (e) => {
             e.preventDefault();
+            e.stopPropagation();
 
             // Temporary visual feedback
             manageLink.style.backgroundColor = "#ff9800";
@@ -150,20 +110,22 @@ function createSidebarButton() {
               manageLink.style.backgroundColor = "#1976d2";
             }, 200);
 
-            toggleFolderDropdown();
+            // Call the dropdown function
+            if (typeof window.toggleFolderDropdown === "function") {
+              window.toggleFolderDropdown();
+            }
           });
-        } else {
         }
+
+        // Actually insert the button into the DOM
+        container.insertBefore(newGuideEntry, guideEntry.nextSibling);
 
         return newGuideEntry;
       }
-    } else {
     }
 
     return null;
   }, 2000);
-
-  return null;
 }
 
 // Make it globally available
