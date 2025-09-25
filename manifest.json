@@ -16,7 +16,6 @@
       "matches": ["https://www.youtube.com/*"],
       "js": [
         "src/utils/constants.js",
-        "src/utils/validation.js",
         "src/utils/helpers.js",
         "src/services/StorageService.js",
         "src/services/YouTubeAPI.js",

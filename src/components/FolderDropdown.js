@@ -2,6 +2,120 @@
 
 // FolderDropdown component for YouTube Subscription Manager
 
+// Show context menu for folder management
+function showFolderContextMenu(event, folderName, type, subfolderName = null) {
+  // Remove any existing context menu
+  const existingMenu = document.querySelector("#folder-context-menu");
+  if (existingMenu) {
+    existingMenu.remove();
+  }
+
+  const menu = document.createElement("div");
+  menu.id = "folder-context-menu";
+  menu.style.cssText = `
+    position: fixed;
+    top: ${event.clientY}px;
+    left: ${event.clientX}px;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 10001;
+    min-width: 150px;
+    padding: 4px 0;
+  `;
+
+  const isParent = type === "parent";
+  const displayName = isParent
+    ? folderName
+    : `${folderName} > ${subfolderName}`;
+
+  const currentFolderData = window.folderData || {};
+
+  menu.innerHTML = `
+    <div style="padding: 8px 12px; border-bottom: 1px solid #eee; font-size: 12px; color: #666; font-weight: 500;">
+      ${displayName}
+    </div>
+    ${
+      isParent
+        ? `
+      <div class="context-menu-item" data-action="add-subfolder" style="padding: 8px 12px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px;">
+        <span>➕</span>
+        <span>Add Subfolder ${
+          Object.keys(currentFolderData[folderName]?.subfolders || {}).length >=
+          2
+            ? "(Limit Reached)"
+            : `(${
+                Object.keys(currentFolderData[folderName]?.subfolders || {})
+                  .length
+              }/2)`
+        }</span>
+      </div>
+    `
+        : ""
+    }
+    <div class="context-menu-item" data-action="delete" style="padding: 8px 12px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; color: #dc3545;">
+      <span>🗑️</span>
+      <span>Delete ${isParent ? "Folder" : "Subfolder"}</span>
+    </div>
+  `;
+
+  // Add hover effects
+  const style = document.createElement("style");
+  style.textContent = `
+    .context-menu-item:hover {
+      background-color: #f8f9fa !important;
+    }
+  `;
+  document.head.appendChild(style);
+
+  document.body.appendChild(menu);
+
+  // Add click handlers
+  menu.addEventListener("click", (e) => {
+    const action = e.target.closest(".context-menu-item")?.dataset.action;
+    if (action === "delete") {
+      if (isParent) {
+        if (typeof window.deleteParentFolder === "function") {
+          window.deleteParentFolder(folderName);
+        }
+      } else {
+        if (typeof window.deleteSubfolder === "function") {
+          window.deleteSubfolder(folderName, subfolderName);
+        }
+      }
+    } else if (action === "add-subfolder") {
+      // Check limit before showing modal
+      if (
+        Object.keys(currentFolderData[folderName]?.subfolders || {}).length >= 2
+      ) {
+        if (typeof window.showUserNotification === "function") {
+          window.showUserNotification(
+            "Maximum of 2 subfolders per parent folder reached. Upgrade to Premium for unlimited subfolders!",
+            "warn"
+          );
+        }
+        return;
+      }
+      if (typeof window.showCreateSubfolderModal === "function") {
+        window.showCreateSubfolderModal(folderName);
+      }
+    }
+    menu.remove();
+    style.remove();
+  });
+
+  // Close menu when clicking outside
+  const closeMenu = (e) => {
+    if (!menu.contains(e.target)) {
+      menu.remove();
+      style.remove();
+      document.removeEventListener("click", closeMenu);
+    }
+  };
+  setTimeout(() => document.addEventListener("click", closeMenu), 100);
+}
+
 function toggleFolderDropdown() {
   if (folderDropdown && folderDropdown.parentNode) {
     // Toggle existing dropdown
@@ -288,8 +402,8 @@ function createFolderDropdown() {
     // Right-click on parent folder to show context menu
     item.addEventListener("contextmenu", (e) => {
       e.preventDefault();
-      if (typeof showFolderContextMenu === "function") {
-        showFolderContextMenu(e, folderName, "parent");
+      if (typeof window.showFolderContextMenu === "function") {
+        window.showFolderContextMenu(e, folderName, "parent");
       }
     });
   });
@@ -318,8 +432,8 @@ function createFolderDropdown() {
     // Right-click on subfolder to show context menu
     item.addEventListener("contextmenu", (e) => {
       e.preventDefault();
-      if (typeof showFolderContextMenu === "function") {
-        showFolderContextMenu(e, folderName, "subfolder", subfolderName);
+      if (typeof window.showFolderContextMenu === "function") {
+        window.showFolderContextMenu(e, folderName, "subfolder", subfolderName);
       }
     });
   });
@@ -560,12 +674,16 @@ function showFolderManagementPanel(folderName) {
 
   panel.querySelector("#add-subfolder").addEventListener("click", () => {
     panel.remove();
-    showCreateSubfolderModal(folderName);
+    if (typeof window.showCreateSubfolderModal === "function") {
+      window.showCreateSubfolderModal(folderName);
+    }
   });
 
   panel.querySelector("#delete-folder").addEventListener("click", () => {
     panel.remove();
-    deleteParentFolder(folderName);
+    if (typeof window.deleteParentFolder === "function") {
+      window.deleteParentFolder(folderName);
+    }
   });
 
   // Subfolder event listeners
@@ -630,108 +748,6 @@ function lightenColor(color, percent) {
 // Functions moved to SubscriptionDisplay.js
 
 // Show context menu for folder management
-function showFolderContextMenu(event, folderName, type, subfolderName = null) {
-  // Remove any existing context menu
-  const existingMenu = document.querySelector("#folder-context-menu");
-  if (existingMenu) {
-    existingMenu.remove();
-  }
-
-  const menu = document.createElement("div");
-  menu.id = "folder-context-menu";
-  menu.style.cssText = `
-    position: fixed;
-    top: ${event.clientY}px;
-    left: ${event.clientX}px;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    z-index: 10001;
-    min-width: 150px;
-    padding: 4px 0;
-  `;
-
-  const isParent = type === "parent";
-  const displayName = isParent
-    ? folderName
-    : `${folderName} > ${subfolderName}`;
-
-  menu.innerHTML = `
-    <div style="padding: 8px 12px; border-bottom: 1px solid #eee; font-size: 12px; color: #666; font-weight: 500;">
-      ${displayName}
-    </div>
-    ${
-      isParent
-        ? `
-      <div class="context-menu-item" data-action="add-subfolder" style="padding: 8px 12px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px;">
-        <span>➕</span>
-        <span>Add Subfolder ${
-          Object.keys(currentFolderData[folderName]?.subfolders || {}).length >=
-          2
-            ? "(Limit Reached)"
-            : `(${
-                Object.keys(currentFolderData[folderName]?.subfolders || {})
-                  .length
-              }/2)`
-        }</span>
-      </div>
-    `
-        : ""
-    }
-    <div class="context-menu-item" data-action="delete" style="padding: 8px 12px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; color: #dc3545;">
-      <span>🗑️</span>
-      <span>Delete ${isParent ? "Folder" : "Subfolder"}</span>
-    </div>
-  `;
-
-  // Add hover effects
-  const style = document.createElement("style");
-  style.textContent = `
-    .context-menu-item:hover {
-      background-color: #f8f9fa !important;
-    }
-  `;
-  document.head.appendChild(style);
-
-  document.body.appendChild(menu);
-
-  // Add click handlers
-  menu.addEventListener("click", (e) => {
-    const action = e.target.closest(".context-menu-item")?.dataset.action;
-    if (action === "delete") {
-      if (isParent) {
-        deleteParentFolder(folderName);
-      } else {
-        deleteSubfolder(folderName, subfolderName);
-      }
-    } else if (action === "add-subfolder") {
-      // Check limit before showing modal
-      if (
-        Object.keys(currentFolderData[folderName]?.subfolders || {}).length >= 2
-      ) {
-        showUserNotification(
-          "Maximum of 2 subfolders per parent folder reached. Upgrade to Premium for unlimited subfolders!",
-          "warn"
-        );
-        return;
-      }
-      showCreateSubfolderModal(folderName);
-    }
-    menu.remove();
-    style.remove();
-  });
-
-  // Close menu when clicking outside
-  const closeMenu = (e) => {
-    if (!menu.contains(e.target)) {
-      menu.remove();
-      style.remove();
-      document.removeEventListener("click", closeMenu);
-    }
-  };
-  setTimeout(() => document.addEventListener("click", closeMenu), 100);
-}
 
 // Make them globally available
 window.toggleFolderDropdown = toggleFolderDropdown;

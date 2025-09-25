@@ -105,9 +105,6 @@ const CONFIG = {
   API_BASE_URL: "https://www.googleapis.com/youtube/v3",
   DEBUG: false, // Set to false for production
   VERSION: "1.0.0",
-  MAX_FOLDER_NAME_LENGTH: 50,
-  MAX_SUBFOLDER_NAME_LENGTH: 30,
-  MAX_SUBSCRIPTIONS_PER_SUBFOLDER: 15,
   STORAGE_KEYS: {
     FOLDER_DATA: "folderData",
     ACCESS_TOKEN: "accessToken",

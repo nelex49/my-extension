@@ -47,24 +47,6 @@ function createFolder(
   }
 }
 
-// Delete a folder
-function deleteFolder(folderName) {
-  if (
-    confirm(
-      `Are you sure you want to delete the "${folderName}" folder? This will remove all subscriptions from this folder.`
-    )
-  ) {
-    delete folderData[folderName];
-
-    // Refresh the dropdown
-    if (folderDropdown) {
-      createFolderDropdown(); // Recreate to show updated folders
-    }
-  }
-}
-
-// showCreateFolderModal function removed - now using showUnifiedFolderManager from FolderModals.js
-
 function removeSubscriptionFromAllFolders(channelId) {
   let removed = false;
 
@@ -113,16 +95,6 @@ function removeSubscriptionFromAllFolders(channelId) {
 }
 
 // Additional functions needed for subscription management
-function removeFromFolder(channelId, folderName) {
-  if (folderData[folderName]) {
-    folderData[folderName].subscriptions = folderData[
-      folderName
-    ].subscriptions.filter(
-      (sub) => sub.snippet?.resourceId?.channelId !== channelId
-    );
-    updateFolderCounts();
-  }
-}
 
 function removeFromSubfolder(channelId, folderName, subfolderName) {
   if (folderData[folderName]?.subfolders?.[subfolderName]) {
@@ -275,8 +247,6 @@ function deleteSubfolder(folderName, subfolderName) {
   }
 }
 
-// showEditSubfolderModal function removed - now using showCreateSubfolderModal from FolderModals.js
-
 // Helper functions needed for the unified folder manager
 function updateFolderName(oldName, newName, color, textColor) {
   if (folderData[newName]) {
@@ -427,9 +397,7 @@ function generateRandomColor() {
 
 // Make them globally available
 window.createFolder = createFolder;
-window.deleteFolder = deleteFolder;
 window.removeSubscriptionFromAllFolders = removeSubscriptionFromAllFolders;
-window.removeFromFolder = removeFromFolder;
 window.removeFromSubfolder = removeFromSubfolder;
 window.addToSubfolder = addToSubfolder;
 window.showLoginPrompt = showLoginPrompt;

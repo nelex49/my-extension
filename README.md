@@ -14,8 +14,7 @@ This extension has been refactored from a monolithic 4,000+ line file into a cle
 src/
 ├── utils/                    # Utility functions
 │   ├── constants.js         # CSS constants and configuration
-│   ├── helpers.js           # DOM utilities and error handling
-│   └── validation.js        # Input validation functions
+│   └── helpers.js           # DOM utilities and error handling
 ├── services/                # Data and API services
 │   ├── StorageService.js    # Chrome storage operations
 │   ├── YouTubeAPI.js        # YouTube API calls
@@ -24,6 +23,8 @@ src/
 │   ├── SidebarButton.js     # MANAGE YT SUBS button
 │   ├── FolderDropdown.js    # Folder dropdown menu
 │   ├── SubscriptionManager.js # Folder management logic
+│   ├── SubscriptionDisplay.js # Subscription display and management
+│   ├── FolderModals.js      # Folder creation and editing modals
 │   └── ModalManager.js      # Modal utilities
 ├── core/                    # Core application logic
 │   └── App.js              # Main app state and initialization
@@ -33,9 +34,9 @@ src/
 ### 📊 Modularization Results
 
 - **Original:** 4,082 lines (monolithic)
-- **Modular:** 1,475 lines across 12 files
-- **Reduction:** 64% complexity reduction
-- **Largest file:** 302 lines (vs 4,082 original)
+- **Modular:** 3,582 lines across 13 files
+- **Reduction:** 12% complexity reduction
+- **Largest file:** 745 lines (vs 4,082 original)
 
 ### 🔧 How It Works
 
@@ -85,4 +86,3 @@ The modular structure makes it easy to:
 - Fix bugs by focusing on specific components
 - Test functionality by testing individual modules
 - Maintain code by keeping related functions together
-

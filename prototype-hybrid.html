@@ -1,0 +1,797 @@
+<!-- @format -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>YouTube Subscription Manager - Hybrid Prototype</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: #f5f5f5;
+        padding: 20px;
+      }
+
+      .container {
+        max-width: 1200px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #007bff, #0056b3);
+        color: white;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .header h1 {
+        font-size: 20px;
+        font-weight: 600;
+      }
+
+      .header .version {
+        background: rgba(255, 255, 255, 0.2);
+        padding: 3px 10px;
+        border-radius: 15px;
+        font-size: 11px;
+      }
+
+      .main-content {
+        display: flex;
+        min-height: 500px;
+      }
+
+      .left-panel {
+        width: 280px;
+        background: #f8f9fa;
+        border-right: 1px solid #e0e0e0;
+        padding: 15px;
+      }
+
+      .right-panel {
+        flex: 1;
+        padding: 15px;
+      }
+
+      .top-controls {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+        align-items: center;
+      }
+
+      .sort-options {
+        display: flex;
+        gap: 5px;
+      }
+
+      .sort-btn {
+        padding: 6px 10px;
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 11px;
+        transition: all 0.2s;
+      }
+
+      .sort-btn.active {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+      }
+
+      .sort-btn:hover {
+        background: #f8f9fa;
+      }
+
+      .sort-btn.active:hover {
+        background: #0056b3;
+      }
+
+      .quick-links {
+        display: flex;
+        gap: 8px;
+        margin-left: auto;
+      }
+
+      .quick-link {
+        padding: 6px 10px;
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-size: 11px;
+        font-weight: 500;
+      }
+
+      .quick-link:hover {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+      }
+
+      .section {
+        margin-bottom: 20px;
+      }
+
+      .section h3 {
+        color: #333;
+        margin-bottom: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .dropdown-group {
+        margin-bottom: 12px;
+      }
+
+      .dropdown-group label {
+        display: block;
+        margin-bottom: 4px;
+        font-weight: 500;
+        color: #555;
+        font-size: 12px;
+      }
+
+      .dropdown {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        background: white;
+        font-size: 12px;
+        cursor: pointer;
+        transition: border-color 0.2s;
+      }
+
+      .dropdown:hover {
+        border-color: #007bff;
+      }
+
+      .dropdown:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+      }
+
+      .search-box {
+        width: 100%;
+        padding: 8px 10px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        font-size: 12px;
+        background: white;
+      }
+
+      .search-box:focus {
+        outline: none;
+        border-color: #007bff;
+        box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.2);
+      }
+
+      .stats {
+        display: flex;
+        gap: 15px;
+        margin-bottom: 15px;
+      }
+
+      .stat-item {
+        background: #f8f9fa;
+        padding: 10px;
+        border-radius: 6px;
+        text-align: center;
+        flex: 1;
+      }
+
+      .stat-number {
+        font-size: 18px;
+        font-weight: bold;
+        color: #007bff;
+      }
+
+      .stat-label {
+        font-size: 10px;
+        color: #666;
+        margin-top: 2px;
+      }
+
+      .subscriptions-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
+        margin-top: 15px;
+      }
+
+      .subscription-card {
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 10px;
+        transition: all 0.2s;
+        cursor: pointer;
+        position: relative;
+      }
+
+      .subscription-card:hover {
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transform: translateY(-1px);
+      }
+
+      .subscription-card.moved {
+        opacity: 0.5;
+        background: #e8f5e8;
+        border-color: #28a745;
+      }
+
+      .subscription-header {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 8px;
+      }
+
+      .channel-avatar {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 12px;
+      }
+
+      .channel-info h4 {
+        font-size: 12px;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1px;
+      }
+
+      .channel-info p {
+        font-size: 10px;
+        color: #666;
+      }
+
+      .subscription-actions {
+        display: flex;
+        gap: 5px;
+        margin-top: 8px;
+      }
+
+      .action-btn {
+        padding: 4px 8px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        background: white;
+        cursor: pointer;
+        font-size: 10px;
+        transition: all 0.2s;
+        flex: 1;
+      }
+
+      .action-btn:hover {
+        background: #f8f9fa;
+      }
+
+      .action-btn.primary {
+        background: #007bff;
+        color: white;
+        border-color: #007bff;
+      }
+
+      .action-btn.primary:hover {
+        background: #0056b3;
+      }
+
+      .unorganized-section {
+        background: #fff3cd;
+        border: 1px solid #ffeaa7;
+        border-radius: 6px;
+        padding: 15px;
+        margin-top: 15px;
+      }
+
+      .unorganized-section h3 {
+        color: #856404;
+        margin-bottom: 10px;
+        font-size: 14px;
+      }
+
+      .unorganized-list {
+        max-height: 150px;
+        overflow-y: auto;
+      }
+
+      .unorganized-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px;
+        background: white;
+        border-radius: 3px;
+        margin-bottom: 6px;
+        font-size: 11px;
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+
+      .unorganized-item:hover {
+        background: #f8f9fa;
+      }
+
+      .unorganized-item .avatar {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: #6c757d;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 9px;
+        font-weight: bold;
+      }
+
+      .move-indicator {
+        position: absolute;
+        top: 5px;
+        right: 5px;
+        background: #28a745;
+        color: white;
+        border-radius: 50%;
+        width: 16px;
+        height: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 10px;
+        opacity: 0;
+        transition: opacity 0.3s;
+      }
+
+      .subscription-card.moved .move-indicator {
+        opacity: 1;
+      }
+
+      .auto-move-notice {
+        background: #d4edda;
+        border: 1px solid #c3e6cb;
+        color: #155724;
+        padding: 8px;
+        border-radius: 4px;
+        font-size: 11px;
+        margin-bottom: 10px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>📺 YouTube Subscription Manager</h1>
+        <div class="version">Hybrid Prototype v2.0</div>
+      </div>
+
+      <div class="main-content">
+        <div class="left-panel">
+          <div class="top-controls">
+            <div class="sort-options">
+              <button class="sort-btn active" onclick="sortBy('name')">
+                A-Z
+              </button>
+              <button class="sort-btn" onclick="sortBy('date')">Date</button>
+              <button class="sort-btn" onclick="sortBy('subscribers')">
+                Subs
+              </button>
+            </div>
+            <div class="quick-links">
+              <div class="quick-link" onclick="createFolder()">New Folder</div>
+              <div class="quick-link" onclick="bulkOrganize()">Bulk</div>
+              <div class="quick-link" onclick="exportList()">Export</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>📁 Move to Folder</h3>
+            <div class="auto-move-notice">
+              Select folder + subfolder to auto-move
+            </div>
+
+            <div class="dropdown-group">
+              <label>Parent Folder:</label>
+              <select class="dropdown" id="parentFolder">
+                <option value="">Choose folder...</option>
+                <option value="gaming">🎮 Gaming</option>
+                <option value="tech">💻 Technology</option>
+                <option value="music">🎵 Music</option>
+                <option value="education">📚 Education</option>
+                <option value="entertainment">🎬 Entertainment</option>
+              </select>
+            </div>
+
+            <div class="dropdown-group">
+              <label>Subfolder:</label>
+              <select class="dropdown" id="subFolder">
+                <option value="">Choose subfolder...</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>🔍 Search</h3>
+            <input
+              type="text"
+              class="search-box"
+              placeholder="Search subscriptions..."
+              id="searchBox"
+            />
+          </div>
+        </div>
+
+        <div class="right-panel">
+          <div class="stats">
+            <div class="stat-item">
+              <div class="stat-number">247</div>
+              <div class="stat-label">Total</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">12</div>
+              <div class="stat-label">Organized</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">235</div>
+              <div class="stat-label">Unorganized</div>
+            </div>
+          </div>
+
+          <div class="section">
+            <h3>📺 Your Subscriptions</h3>
+            <div class="subscriptions-grid" id="subscriptionsGrid">
+              <div class="subscription-card" data-channel="tech">
+                <div class="move-indicator">✓</div>
+                <div class="subscription-header">
+                  <div class="channel-avatar">T</div>
+                  <div class="channel-info">
+                    <h4>TechCrunch</h4>
+                    <p>Technology News</p>
+                  </div>
+                </div>
+                <div class="subscription-actions">
+                  <button class="action-btn" onclick="viewChannel(this)">
+                    View
+                  </button>
+                  <button class="action-btn" onclick="unsubscribe(this)">
+                    Unsub
+                  </button>
+                </div>
+              </div>
+
+              <div class="subscription-card" data-channel="gaming">
+                <div class="move-indicator">✓</div>
+                <div class="subscription-header">
+                  <div class="channel-avatar">G</div>
+                  <div class="channel-info">
+                    <h4>GameSpot</h4>
+                    <p>Gaming Reviews</p>
+                  </div>
+                </div>
+                <div class="subscription-actions">
+                  <button class="action-btn" onclick="viewChannel(this)">
+                    View
+                  </button>
+                  <button class="action-btn" onclick="unsubscribe(this)">
+                    Unsub
+                  </button>
+                </div>
+              </div>
+
+              <div class="subscription-card" data-channel="music">
+                <div class="move-indicator">✓</div>
+                <div class="subscription-header">
+                  <div class="channel-avatar">M</div>
+                  <div class="channel-info">
+                    <h4>Music Channel</h4>
+                    <p>Latest Music</p>
+                  </div>
+                </div>
+                <div class="subscription-actions">
+                  <button class="action-btn" onclick="viewChannel(this)">
+                    View
+                  </button>
+                  <button class="action-btn" onclick="unsubscribe(this)">
+                    Unsub
+                  </button>
+                </div>
+              </div>
+
+              <div class="subscription-card" data-channel="education">
+                <div class="move-indicator">✓</div>
+                <div class="subscription-header">
+                  <div class="channel-avatar">E</div>
+                  <div class="channel-info">
+                    <h4>Educational Content</h4>
+                    <p>Learning Videos</p>
+                  </div>
+                </div>
+                <div class="subscription-actions">
+                  <button class="action-btn" onclick="viewChannel(this)">
+                    View
+                  </button>
+                  <button class="action-btn" onclick="unsubscribe(this)">
+                    Unsub
+                  </button>
+                </div>
+              </div>
+
+              <div class="subscription-card" data-channel="entertainment">
+                <div class="move-indicator">✓</div>
+                <div class="subscription-header">
+                  <div class="channel-avatar">E</div>
+                  <div class="channel-info">
+                    <h4>Entertainment Hub</h4>
+                    <p>Fun Videos</p>
+                  </div>
+                </div>
+                <div class="subscription-actions">
+                  <button class="action-btn" onclick="viewChannel(this)">
+                    View
+                  </button>
+                  <button class="action-btn" onclick="unsubscribe(this)">
+                    Unsub
+                  </button>
+                </div>
+              </div>
+
+              <div class="subscription-card" data-channel="tech">
+                <div class="move-indicator">✓</div>
+                <div class="subscription-header">
+                  <div class="channel-avatar">V</div>
+                  <div class="channel-info">
+                    <h4>Verge</h4>
+                    <p>Tech Reviews</p>
+                  </div>
+                </div>
+                <div class="subscription-actions">
+                  <button class="action-btn" onclick="viewChannel(this)">
+                    View
+                  </button>
+                  <button class="action-btn" onclick="unsubscribe(this)">
+                    Unsub
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="unorganized-section">
+            <h3>📋 Unorganized Subscriptions</h3>
+            <div class="unorganized-list">
+              <div class="unorganized-item" onclick="selectForMove(this)">
+                <div class="avatar">C</div>
+                <span>Cooking Channel</span>
+              </div>
+              <div class="unorganized-item" onclick="selectForMove(this)">
+                <div class="avatar">F</div>
+                <span>Fitness Channel</span>
+              </div>
+              <div class="unorganized-item" onclick="selectForMove(this)">
+                <div class="avatar">T</div>
+                <span>Travel Vlogs</span>
+              </div>
+              <div class="unorganized-item" onclick="selectForMove(this)">
+                <div class="avatar">A</div>
+                <span>Art Tutorials</span>
+              </div>
+              <div class="unorganized-item" onclick="selectForMove(this)">
+                <div class="avatar">S</div>
+                <span>Science Channel</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      let selectedChannel = null;
+
+      // Interactive functionality
+      function viewChannel(button) {
+        const card = button.closest(".subscription-card");
+        const channelName = card.querySelector("h4").textContent;
+        alert(`Opening "${channelName}" channel...`);
+      }
+
+      function unsubscribe(button) {
+        const card = button.closest(".subscription-card");
+        const channelName = card.querySelector("h4").textContent;
+        if (confirm(`Unsubscribe from "${channelName}"?`)) {
+          card.style.opacity = "0.3";
+          card.style.pointerEvents = "none";
+        }
+      }
+
+      function createFolder() {
+        const folderName = prompt("Enter folder name:");
+        if (folderName) {
+          alert(`Creating folder: "${folderName}"`);
+        }
+      }
+
+      function bulkOrganize() {
+        alert("Starting bulk organization...");
+      }
+
+      function exportList() {
+        alert("Exporting subscription list...");
+      }
+
+      function sortBy(type) {
+        // Remove active class from all buttons
+        document
+          .querySelectorAll(".sort-btn")
+          .forEach((btn) => btn.classList.remove("active"));
+        // Add active class to clicked button
+        event.target.classList.add("active");
+
+        alert(`Sorting by ${type}...`);
+      }
+
+      function selectForMove(item) {
+        // Remove previous selection
+        document.querySelectorAll(".unorganized-item").forEach((el) => {
+          el.style.background = "white";
+        });
+
+        // Select this item
+        item.style.background = "#e3f2fd";
+        selectedChannel = item.querySelector("span").textContent;
+
+        // Check if both folder and subfolder are selected
+        const parentFolder = document.getElementById("parentFolder").value;
+        const subFolder = document.getElementById("subFolder").value;
+
+        if (parentFolder && subFolder) {
+          moveChannel(selectedChannel, parentFolder, subFolder);
+        }
+      }
+
+      function moveChannel(channelName, parentFolder, subFolder) {
+        alert(`Moving "${channelName}" to ${parentFolder} > ${subFolder}`);
+
+        // Find and move the channel
+        const unorganizedItems = document.querySelectorAll(".unorganized-item");
+        unorganizedItems.forEach((item) => {
+          if (item.querySelector("span").textContent === channelName) {
+            item.style.opacity = "0.3";
+            item.style.pointerEvents = "none";
+            item.style.background = "#e8f5e8";
+          }
+        });
+
+        // Reset selection
+        selectedChannel = null;
+        document.getElementById("parentFolder").value = "";
+        document.getElementById("subFolder").value = "";
+        document.getElementById("subFolder").innerHTML =
+          '<option value="">Choose subfolder...</option>';
+      }
+
+      // Search functionality
+      document
+        .getElementById("searchBox")
+        .addEventListener("input", function (e) {
+          const searchTerm = e.target.value.toLowerCase();
+          const cards = document.querySelectorAll(".subscription-card");
+          const unorganizedItems =
+            document.querySelectorAll(".unorganized-item");
+
+          cards.forEach((card) => {
+            const channelName = card
+              .querySelector("h4")
+              .textContent.toLowerCase();
+            if (channelName.includes(searchTerm)) {
+              card.style.display = "block";
+            } else {
+              card.style.display = "none";
+            }
+          });
+
+          unorganizedItems.forEach((item) => {
+            const channelName = item
+              .querySelector("span")
+              .textContent.toLowerCase();
+            if (channelName.includes(searchTerm)) {
+              item.style.display = "flex";
+            } else {
+              item.style.display = "none";
+            }
+          });
+        });
+
+      // Auto-move functionality when both folder and subfolder are selected
+      document
+        .getElementById("subFolder")
+        .addEventListener("change", function (e) {
+          const parentFolder = document.getElementById("parentFolder").value;
+          const subFolder = e.target.value;
+
+          if (parentFolder && subFolder && selectedChannel) {
+            moveChannel(selectedChannel, parentFolder, subFolder);
+          }
+        });
+
+      // Folder selection updates
+      document
+        .getElementById("parentFolder")
+        .addEventListener("change", function (e) {
+          const subFolderSelect = document.getElementById("subFolder");
+          const parentFolder = e.target.value;
+
+          // Clear subfolder options
+          subFolderSelect.innerHTML =
+            '<option value="">Choose subfolder...</option>';
+
+          // Add subfolder options based on parent folder
+          if (parentFolder === "gaming") {
+            subFolderSelect.innerHTML +=
+              '<option value="fps">FPS Games</option>';
+            subFolderSelect.innerHTML +=
+              '<option value="rpg">RPG Games</option>';
+            subFolderSelect.innerHTML +=
+              '<option value="mobile">Mobile Games</option>';
+          } else if (parentFolder === "tech") {
+            subFolderSelect.innerHTML +=
+              '<option value="reviews">Tech Reviews</option>';
+            subFolderSelect.innerHTML +=
+              '<option value="news">Tech News</option>';
+            subFolderSelect.innerHTML +=
+              '<option value="tutorials">Tutorials</option>';
+          } else if (parentFolder === "music") {
+            subFolderSelect.innerHTML +=
+              '<option value="pop">Pop Music</option>';
+            subFolderSelect.innerHTML +=
+              '<option value="rock">Rock Music</option>';
+            subFolderSelect.innerHTML +=
+              '<option value="electronic">Electronic</option>';
+          } else if (parentFolder === "education") {
+            subFolderSelect.innerHTML +=
+              '<option value="programming">Programming</option>';
+            subFolderSelect.innerHTML +=
+              '<option value="science">Science</option>';
+            subFolderSelect.innerHTML +=
+              '<option value="history">History</option>';
+          } else if (parentFolder === "entertainment") {
+            subFolderSelect.innerHTML +=
+              '<option value="comedy">Comedy</option>';
+            subFolderSelect.innerHTML +=
+              '<option value="movies">Movies</option>';
+            subFolderSelect.innerHTML += '<option value="tv">TV Shows</option>';
+          }
+        });
+    </script>
+  </body>
+</html>

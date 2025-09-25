@@ -4,7 +4,6 @@
 
 function safeSaveFolderData(data) {
   try {
-    validateFolderData(data);
     chrome.storage.local.set(
       { [CONFIG.STORAGE_KEYS.FOLDER_DATA]: data },
       () => {
@@ -21,7 +20,6 @@ function safeLoadFolderData() {
     chrome.storage.local.get([CONFIG.STORAGE_KEYS.FOLDER_DATA], (result) => {
       try {
         if (result[CONFIG.STORAGE_KEYS.FOLDER_DATA]) {
-          validateFolderData(result[CONFIG.STORAGE_KEYS.FOLDER_DATA]);
           resolve(result[CONFIG.STORAGE_KEYS.FOLDER_DATA]);
         } else {
           resolve({});
