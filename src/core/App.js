@@ -66,14 +66,19 @@ function initialize() {
           logStatus("Sidebar button creation attempted", "info");
           handleLoginState(accessToken);
         } else {
-          // User not logged in, no button should be shown
-          logStatus(
-            "User not logged in, no sidebar button will be shown",
-            "info"
-          );
+          // User not logged in, show login prompt instead of button
+          logStatus("User not logged in, showing login prompt", "info");
 
-          // No panel needed when not logged in
-          // No sidebar button needed when not logged in
+          // Delay login prompt creation to give YouTube time to load
+          setTimeout(() => {
+            let loginPrompt = createLoginPrompt();
+
+            if (!loginPrompt) {
+              logStatus("Failed to create login prompt", "error");
+            } else {
+              logStatus("Login prompt created successfully", "info");
+            }
+          }, 1000);
         }
       });
     })
@@ -90,7 +95,22 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
 
     const newToken = changes.accessToken.newValue;
     if (newToken) {
-      // User logged in, button will be created by main initialization
+      // User logged in - remove login prompt and create regular button
+      const existingButton = document.querySelector("#yt-manage-guide-entry");
+      if (existingButton && existingButton.parentNode) {
+        existingButton.parentNode.removeChild(existingButton);
+      }
+
+      // Reset the button creation flag
+      window.sidebarButtonCreated = false;
+
+      // Create the regular sidebar button
+      setTimeout(() => {
+        let sidebarButton = createSidebarButton();
+        if (sidebarButton) {
+          logStatus("Button created after login", "info");
+        }
+      }, 200);
     }
 
     handleLoginState(newToken);

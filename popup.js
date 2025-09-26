@@ -43,6 +43,11 @@ if (loginBtn) {
 
         // Store token in Chrome storage
         chrome.storage.local.set({ accessToken });
+
+        // Auto-dismiss popup after 2 seconds
+        setTimeout(() => {
+          window.close();
+        }, 2000);
       });
     });
   });
@@ -66,5 +71,10 @@ logoutBtn.addEventListener("click", () => {
 
     // Clear token from storage to notify content script
     chrome.storage.local.remove("accessToken");
+
+    // Auto-dismiss popup after 2 seconds
+    setTimeout(() => {
+      window.close();
+    }, 2000);
   });
 });

@@ -2,6 +2,15 @@
 
 // Background script for YouTube Subscription Manager
 
+// Listen for messages from content script
+chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === "openPopup") {
+    // Open the extension popup
+    chrome.action.openPopup();
+    sendResponse({ success: true });
+  }
+});
+
 // Listen for storage changes to re-inject when token changes
 chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace === "local" && changes.accessToken) {

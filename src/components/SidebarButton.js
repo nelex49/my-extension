@@ -117,8 +117,17 @@ function createSidebarButton() {
           });
         }
 
+        // Add fade-in animation
+        newGuideEntry.style.opacity = "0";
+        newGuideEntry.style.transition = "opacity 0.3s ease-in";
+
         // Actually insert the button into the DOM
         container.insertBefore(newGuideEntry, guideEntry.nextSibling);
+
+        // Trigger fade-in after insertion
+        setTimeout(() => {
+          newGuideEntry.style.opacity = "1";
+        }, 10);
 
         return newGuideEntry;
       }
@@ -128,5 +137,139 @@ function createSidebarButton() {
   }, 2000);
 }
 
+function createLoginPrompt() {
+  logStatus("createLoginPrompt called", "info");
+
+  // Check if button already exists to prevent duplicates
+  const existingButton = document.querySelector("#yt-manage-guide-entry");
+  if (existingButton) {
+    logStatus("Login prompt already exists, returning existing", "info");
+    return existingButton;
+  }
+
+  // Set flag immediately to prevent duplicate calls
+  if (window.sidebarButtonCreated) {
+    logStatus("Button creation flag is true, skipping login prompt", "warn");
+    return null;
+  }
+
+  // Mark as creating to prevent duplicate calls
+  window.sidebarButtonCreated = true;
+
+  // Wait a bit for YouTube to fully load
+  setTimeout(() => {
+    // Try multiple selectors to find YouTube sidebar elements
+    let homeLink =
+      document.querySelector('a[href*="/feed/"]') ||
+      document.querySelector('a[href*="/"]') ||
+      document.querySelector("#guide-button") ||
+      document.querySelector("ytd-guide-entry-renderer a");
+
+    if (homeLink) {
+      // Try multiple ways to find the container
+      let guideEntry =
+        homeLink.closest("ytd-guide-entry-renderer") ||
+        homeLink.closest("#guide") ||
+        homeLink.closest("#secondary") ||
+        homeLink.parentElement;
+
+      if (guideEntry) {
+        // Find the parent container
+        let container = guideEntry.parentElement;
+
+        // Create our login prompt as a proper guide entry
+        const newGuideEntry = document.createElement(
+          "ytd-guide-entry-renderer"
+        );
+        newGuideEntry.id = "yt-manage-guide-entry";
+
+        // Create orange background button with white text and lock icon
+        newGuideEntry.innerHTML = `
+          <a id="yt-manage-link" href="#" class="yt-simple-endpoint style-scope ytd-guide-entry-renderer" aria-label="Login Required">
+            <div style="margin-right: 12px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+              <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" style="pointer-events: none; display: block; width: 20px; height: 20px; fill: white;">
+                <g>
+                  <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"></path>
+                </g>
+              </svg>
+            </div>
+            <span class="title style-scope ytd-guide-entry-renderer">LOGIN REQUIRED</span>
+          </a>
+        `;
+
+        // Apply aggressive styling after creation
+        const link = newGuideEntry.querySelector("#yt-manage-link");
+        if (link) {
+          // Force all the styles
+          link.style.cssText = `
+            background-color: #ff9800 !important;
+            color: white !important;
+            display: flex !important;
+            align-items: center !important;
+            padding: 10px 16px !important;
+            text-decoration: none !important;
+            border-radius: 10px !important;
+            margin: 2px 0 !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
+          `;
+
+          // Force text color and ensure it fits
+          const title = link.querySelector(".title");
+          if (title) {
+            title.style.cssText = `
+              color: white !important;
+              font-weight: 500 !important;
+              font-size: 14px !important;
+              white-space: nowrap !important;
+            `;
+          }
+        }
+
+        // Add hover effect
+        if (link) {
+          link.addEventListener("mouseenter", () => {
+            link.style.backgroundColor = "#f57c00";
+          });
+          link.addEventListener("mouseleave", () => {
+            link.style.backgroundColor = "#ff9800";
+          });
+        }
+
+        // Add click handler
+        const manageLink = newGuideEntry.querySelector("#yt-manage-link");
+        if (manageLink) {
+          manageLink.addEventListener("click", (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Just open extension popup for login - don't fade out yet
+            chrome.runtime.sendMessage({ action: "openPopup" });
+          });
+        }
+
+        // Add fade-in animation
+        newGuideEntry.style.opacity = "0";
+        newGuideEntry.style.transition = "opacity 0.3s ease-in";
+
+        // Actually insert the button into the DOM
+        container.insertBefore(newGuideEntry, guideEntry.nextSibling);
+
+        // Trigger fade-in after insertion
+        setTimeout(() => {
+          newGuideEntry.style.opacity = "1";
+        }, 10);
+
+        logStatus("Login prompt created successfully", "info");
+        return newGuideEntry;
+      }
+    }
+
+    logStatus("Failed to find YouTube sidebar for login prompt", "error");
+    return null;
+  }, 500);
+}
+
 // Make it globally available
 window.createSidebarButton = createSidebarButton;
+window.createLoginPrompt = createLoginPrompt;

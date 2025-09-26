@@ -1,0 +1,259 @@
+<!-- @format -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Popup Design Comparison</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+
+      .comparison-container {
+        display: flex;
+        gap: 40px;
+        justify-content: center;
+        align-items: flex-start;
+      }
+
+      .popup-section {
+        text-align: center;
+      }
+
+      .popup-section h2 {
+        margin-bottom: 20px;
+        color: #333;
+      }
+
+      /* CURRENT POPUP STYLES */
+      .current-popup {
+        background: white;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 10px;
+        width: 250px;
+        font-family: sans-serif;
+      }
+
+      .current-popup h2 {
+        margin: 0 0 10px 0;
+        font-size: 16px;
+      }
+
+      .current-popup button {
+        padding: 8px;
+        background: #cc0000;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        margin-bottom: 8px;
+        width: 100%;
+      }
+
+      .current-popup button:hover {
+        background: #ff0000;
+      }
+
+      .current-popup #logout {
+        display: none;
+      }
+
+      .current-popup #status {
+        font-size: 13px;
+        white-space: pre-wrap;
+      }
+
+      /* IMPROVED POPUP STYLES */
+      .improved-popup {
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        width: 320px;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .improved-header {
+        background: linear-gradient(135deg, #1976d2, #1565c0);
+        color: white;
+        padding: 20px;
+        text-align: center;
+        position: relative;
+      }
+
+      .improved-header::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+        opacity: 0.3;
+      }
+
+      .improved-header-content {
+        position: relative;
+        z-index: 1;
+      }
+
+      .improved-logo {
+        font-size: 32px;
+        margin-bottom: 8px;
+      }
+
+      .improved-title {
+        font-size: 18px;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .improved-subtitle {
+        font-size: 12px;
+        opacity: 0.9;
+        margin: 4px 0 0 0;
+      }
+
+      .improved-content {
+        padding: 24px;
+      }
+
+      .improved-status-card {
+        background: #f8f9fa;
+        border-radius: 12px;
+        padding: 16px;
+        margin-bottom: 20px;
+        border-left: 4px solid #ffc107;
+      }
+
+      .improved-status-icon {
+        font-size: 24px;
+        margin-right: 12px;
+      }
+
+      .improved-status-text {
+        font-size: 14px;
+        color: #333;
+        font-weight: 500;
+      }
+
+      .improved-button {
+        width: 100%;
+        padding: 12px 16px;
+        border: none;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-bottom: 0;
+      }
+
+      .improved-button-primary {
+        background: linear-gradient(135deg, #1976d2, #1565c0);
+        color: white;
+        box-shadow: 0 4px 12px rgba(25, 118, 210, 0.3);
+      }
+
+      .improved-button-primary:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(25, 118, 210, 0.4);
+      }
+
+      .improved-button-danger {
+        background: linear-gradient(135deg, #dc3545, #c82333);
+        color: white;
+        box-shadow: 0 4px 12px rgba(220, 53, 69, 0.3);
+      }
+
+      .improved-button-danger:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 6px 16px rgba(220, 53, 69, 0.4);
+      }
+
+      .improved-footer {
+        padding: 16px 24px;
+        background: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+        text-align: center;
+      }
+
+      .improved-footer-text {
+        font-size: 11px;
+        color: #6c757d;
+        margin: 0;
+      }
+
+      .status-row {
+        display: flex;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="comparison-container">
+      <!-- CURRENT POPUP -->
+      <div class="popup-section">
+        <h2>Current Popup (Plain)</h2>
+        <div class="current-popup">
+          <h2>YT Folder Extension</h2>
+          <button id="login">Sign in with Google</button>
+          <button id="logout">Logout</button>
+          <pre id="status">Not logged in.</pre>
+        </div>
+      </div>
+
+      <!-- IMPROVED POPUP -->
+      <div class="popup-section">
+        <h2>Improved Popup (Beautiful)</h2>
+        <div class="improved-popup">
+          <div class="improved-header">
+            <div class="improved-header-content">
+              <div class="improved-logo">📺</div>
+              <h1 class="improved-title">YouTube Manager</h1>
+              <p class="improved-subtitle">Subscription Organizer</p>
+            </div>
+          </div>
+
+          <div class="improved-content">
+            <div class="improved-status-card">
+              <div class="status-row">
+                <span class="improved-status-icon">🔐</span>
+                <span class="improved-status-text"
+                  >Please log in to continue</span
+                >
+              </div>
+            </div>
+
+            <button class="improved-button improved-button-primary">
+              <span>🔑</span>
+              <span>Sign in with Google</span>
+            </button>
+          </div>
+
+          <div class="improved-footer">
+            <p class="improved-footer-text">Secure authentication required</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 40px; color: #666">
+      <p>
+        <strong>Note:</strong> The improved popup would have the exact same
+        functionality as the current one, just with a much better design.
+      </p>
+      <p>Should I implement the improved design?</p>
+    </div>
+  </body>
+</html>
