@@ -459,23 +459,7 @@ function showUnifiedFolderManager(folderName = null, mode = "create") {
         );
       } else {
         updateFolderProperties(folderName, selectedColor, selectedTextColor);
-
-        // Remove existing dropdown completely
-        if (folderDropdown) {
-          folderDropdown.remove();
-          folderDropdown = null;
-        }
-
-        // Create new dropdown with updated data
-        createFolderDropdown();
-
-        // Show the new dropdown
-        setTimeout(() => {
-          if (folderDropdown) {
-            folderDropdown.style.display = "block";
-          } else {
-          }
-        }, 50);
+        // updateFolderProperties now handles the dropdown refresh
       }
     } else {
       if (folderData[newFolderName] && !folderData[newFolderName].subfolders) {

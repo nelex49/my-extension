@@ -292,8 +292,10 @@ function updateFolderProperties(folderName, color, textColor) {
       });
     }
 
-    // Update folder counter without refreshing dropdown
-    updateFolderCounterInDropdown(folderName);
+    // Refresh dropdown to show updated colors
+    if (typeof window.refreshFolderDropdown === "function") {
+      window.refreshFolderDropdown();
+    }
   }
 }
 
