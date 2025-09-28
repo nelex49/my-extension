@@ -19,24 +19,16 @@ function createSidebarButton() {
 
   // Wait a bit for YouTube to fully load
   setTimeout(() => {
-    // Try multiple selectors to find YouTube sidebar elements
-    let homeLink =
-      document.querySelector('a[href*="/feed/"]') ||
-      document.querySelector('a[href*="/"]') ||
-      document.querySelector("#guide-button") ||
-      document.querySelector("ytd-guide-entry-renderer a");
-
-    if (homeLink) {
-      // Try multiple ways to find the container
-      let guideEntry =
-        homeLink.closest("ytd-guide-entry-renderer") ||
-        homeLink.closest("#guide") ||
-        homeLink.closest("#secondary") ||
-        homeLink.parentElement;
-
-      if (guideEntry) {
+    // Find the Subscriptions button specifically - this is the key!
+    const subscriptionsLink = document.querySelector('a[href*="/feed/subscriptions"]');
+    
+    if (subscriptionsLink) {
+      // Find the subscriptions guide entry
+      const subscriptionsEntry = subscriptionsLink.closest("ytd-guide-entry-renderer");
+      
+      if (subscriptionsEntry) {
         // Find the parent container
-        let container = guideEntry.parentElement;
+        let container = subscriptionsEntry.parentElement;
 
         // Create our button as a proper guide entry
         const newGuideEntry = document.createElement(
@@ -121,8 +113,8 @@ function createSidebarButton() {
         newGuideEntry.style.opacity = "0";
         newGuideEntry.style.transition = "opacity 0.3s ease-in";
 
-        // Actually insert the button into the DOM
-        container.insertBefore(newGuideEntry, guideEntry.nextSibling);
+        // Actually insert the button into the DOM - right after subscriptions
+        container.insertBefore(newGuideEntry, subscriptionsEntry.nextSibling);
 
         // Trigger fade-in after insertion
         setTimeout(() => {
@@ -134,7 +126,7 @@ function createSidebarButton() {
     }
 
     return null;
-  }, 2000);
+  }, 1000);
 }
 
 function createLoginPrompt() {
@@ -158,24 +150,16 @@ function createLoginPrompt() {
 
   // Wait a bit for YouTube to fully load
   setTimeout(() => {
-    // Try multiple selectors to find YouTube sidebar elements
-    let homeLink =
-      document.querySelector('a[href*="/feed/"]') ||
-      document.querySelector('a[href*="/"]') ||
-      document.querySelector("#guide-button") ||
-      document.querySelector("ytd-guide-entry-renderer a");
-
-    if (homeLink) {
-      // Try multiple ways to find the container
-      let guideEntry =
-        homeLink.closest("ytd-guide-entry-renderer") ||
-        homeLink.closest("#guide") ||
-        homeLink.closest("#secondary") ||
-        homeLink.parentElement;
-
-      if (guideEntry) {
+    // Find the Subscriptions button specifically - this is the key!
+    const subscriptionsLink = document.querySelector('a[href*="/feed/subscriptions"]');
+    
+    if (subscriptionsLink) {
+      // Find the subscriptions guide entry
+      const subscriptionsEntry = subscriptionsLink.closest("ytd-guide-entry-renderer");
+      
+      if (subscriptionsEntry) {
         // Find the parent container
-        let container = guideEntry.parentElement;
+        let container = subscriptionsEntry.parentElement;
 
         // Create our login prompt as a proper guide entry
         const newGuideEntry = document.createElement(
@@ -252,8 +236,8 @@ function createLoginPrompt() {
         newGuideEntry.style.opacity = "0";
         newGuideEntry.style.transition = "opacity 0.3s ease-in";
 
-        // Actually insert the button into the DOM
-        container.insertBefore(newGuideEntry, guideEntry.nextSibling);
+        // Actually insert the button into the DOM - right after subscriptions
+        container.insertBefore(newGuideEntry, subscriptionsEntry.nextSibling);
 
         // Trigger fade-in after insertion
         setTimeout(() => {
@@ -265,7 +249,71 @@ function createLoginPrompt() {
       }
     }
 
-    logStatus("Failed to find YouTube sidebar for login prompt", "error");
+    // If subscriptions button not found, retry with a shorter delay
+    logStatus("Subscriptions button not found, retrying...", "warn");
+    setTimeout(() => {
+      const retrySubscriptionsLink = document.querySelector('a[href*="/feed/subscriptions"]');
+      if (retrySubscriptionsLink) {
+        const retrySubscriptionsEntry = retrySubscriptionsLink.closest("ytd-guide-entry-renderer");
+        if (retrySubscriptionsEntry) {
+          let container = retrySubscriptionsEntry.parentElement;
+          
+          // Create the same login prompt as above
+          const newGuideEntry = document.createElement("ytd-guide-entry-renderer");
+          newGuideEntry.id = "yt-manage-guide-entry";
+          newGuideEntry.innerHTML = `
+            <a id="yt-manage-link" href="#" class="yt-simple-endpoint style-scope ytd-guide-entry-renderer" aria-label="Login Required">
+              <div style="margin-right: 12px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+                <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" style="pointer-events: none; display: block; width: 20px; height: 20px; fill: white;">
+                  <g>
+                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"></path>
+                  </g>
+                </svg>
+              </div>
+              <span class="title style-scope ytd-guide-entry-renderer">LOGIN REQUIRED</span>
+            </a>
+          `;
+          
+          const link = newGuideEntry.querySelector("#yt-manage-link");
+          if (link) {
+            link.style.cssText = `
+              background-color: #ff9800 !important;
+              color: white !important;
+              display: flex !important;
+              align-items: center !important;
+              padding: 10px 16px !important;
+              text-decoration: none !important;
+              border-radius: 10px !important;
+              margin: 2px 0 !important;
+              width: 100% !important;
+              box-sizing: border-box !important;
+            `;
+            
+            const title = link.querySelector(".title");
+            if (title) {
+              title.style.cssText = `
+                color: white !important;
+                font-weight: 500 !important;
+                font-size: 14px !important;
+                white-space: nowrap !important;
+              `;
+            }
+            
+            link.addEventListener("click", (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              chrome.runtime.sendMessage({ action: "openPopup" });
+            });
+          }
+          
+          container.insertBefore(newGuideEntry, retrySubscriptionsEntry.nextSibling);
+          logStatus("Login prompt created on retry", "info");
+        }
+      } else {
+        logStatus("Failed to find Subscriptions button even on retry", "error");
+      }
+    }, 1000); // Retry after 1 second
+
     return null;
   }, 500);
 }
