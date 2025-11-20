@@ -1,0 +1,2545 @@
+<!-- @format -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Organize Subs - Design Exploration</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          sans-serif;
+        background: #f5f5f5;
+        padding: 20px;
+        line-height: 1.6;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+      }
+
+      h1 {
+        text-align: center;
+        color: #333;
+        margin-bottom: 40px;
+        font-size: 2.5rem;
+      }
+
+      .design-section {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        margin-bottom: 40px;
+        overflow: hidden;
+      }
+
+      .design-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 20px;
+        text-align: center;
+      }
+
+      .design-header h2 {
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+      }
+
+      .design-header p {
+        opacity: 0.9;
+        font-size: 1.1rem;
+      }
+
+      .design-content {
+        padding: 30px;
+      }
+
+      /* Design 1: Compact Grid */
+      .design-1 {
+        background: #fafafa;
+      }
+
+      .search-bar {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 25px;
+        padding: 12px 20px;
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .search-bar input {
+        border: none;
+        outline: none;
+        flex: 1;
+        font-size: 16px;
+        margin-left: 10px;
+      }
+
+      .search-bar .search-icon {
+        color: #666;
+        font-size: 18px;
+      }
+
+      .filter-tabs {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+      }
+
+      .filter-tab {
+        background: white;
+        border: 2px solid #e0e0e0;
+        border-radius: 20px;
+        padding: 8px 16px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        font-size: 14px;
+        font-weight: 500;
+      }
+
+      .filter-tab.active {
+        background: #1976d2;
+        color: white;
+        border-color: #1976d2;
+      }
+
+      .folder-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 15px;
+        margin-bottom: 20px;
+      }
+
+      .folder-card {
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid transparent;
+      }
+
+      .folder-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+        border-color: #1976d2;
+      }
+
+      .folder-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+
+      .folder-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        margin-right: 12px;
+      }
+
+      .folder-info h3 {
+        font-size: 16px;
+        margin-bottom: 4px;
+        color: #333;
+      }
+
+      .folder-count {
+        color: #666;
+        font-size: 14px;
+      }
+
+      .folder-preview {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 15px;
+      }
+
+      .sub-avatar {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      .folder-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .action-btn {
+        background: #f5f5f5;
+        border: none;
+        border-radius: 6px;
+        padding: 6px 12px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.3s ease;
+      }
+
+      .action-btn:hover {
+        background: #e0e0e0;
+      }
+
+      .action-btn.primary {
+        background: #1976d2;
+        color: white;
+      }
+
+      .action-btn.primary:hover {
+        background: #1565c0;
+      }
+
+      /* Design 2: Sidebar + Main */
+      .design-2 {
+        background: #f8f9fa;
+      }
+
+      .layout-2 {
+        display: flex;
+        gap: 20px;
+        height: 500px;
+      }
+
+      .sidebar-2 {
+        width: 250px;
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .sidebar-2 h3 {
+        margin-bottom: 20px;
+        color: #333;
+        font-size: 18px;
+      }
+
+      .folder-list {
+        list-style: none;
+      }
+
+      .folder-item {
+        display: flex;
+        align-items: center;
+        padding: 12px;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        margin-bottom: 4px;
+      }
+
+      .folder-item:hover {
+        background: #f0f0f0;
+      }
+
+      .folder-item.active {
+        background: #1976d2;
+        color: white;
+      }
+
+      .folder-item .icon {
+        width: 24px;
+        height: 24px;
+        border-radius: 4px;
+        margin-right: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 12px;
+        font-weight: bold;
+      }
+
+      .folder-item .name {
+        flex: 1;
+        font-size: 14px;
+      }
+
+      .folder-item .count {
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 12px;
+        padding: 2px 8px;
+        font-size: 12px;
+      }
+
+      .main-content-2 {
+        flex: 1;
+        background: white;
+        border-radius: 12px;
+        padding: 20px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        overflow-y: auto;
+      }
+
+      .content-header {
+        display: flex;
+        justify-content: between;
+        align-items: center;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+      }
+
+      .content-title {
+        font-size: 20px;
+        color: #333;
+      }
+
+      .sort-controls {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+
+      .sort-select {
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 8px 12px;
+        background: white;
+        cursor: pointer;
+      }
+
+      .subs-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 15px;
+      }
+
+      .sub-card {
+        background: #fafafa;
+        border-radius: 8px;
+        padding: 15px;
+        text-align: center;
+        transition: all 0.3s ease;
+        cursor: pointer;
+      }
+
+      .sub-card:hover {
+        background: #f0f0f0;
+        transform: translateY(-2px);
+      }
+
+      .sub-avatar-large {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 18px;
+        font-weight: bold;
+        margin: 0 auto 10px;
+      }
+
+      .sub-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 4px;
+      }
+
+      .sub-status {
+        font-size: 12px;
+        color: #666;
+      }
+
+      /* Subfolder Styles */
+      .subfolders-container {
+        height: 400px;
+        overflow-y: auto;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: #fafafa;
+      }
+
+      .subfolder-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+        padding: 20px;
+      }
+
+      .subfolder-card {
+        background: white;
+        border-radius: 8px;
+        padding: 15px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        cursor: pointer;
+        border: 2px solid transparent;
+      }
+
+      .subfolder-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        border-color: #1976d2;
+      }
+
+      .subfolder-header {
+        display: flex;
+        align-items: center;
+        margin-bottom: 12px;
+      }
+
+      .subfolder-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 10px;
+        margin-right: 10px;
+      }
+
+      .subfolder-info h4 {
+        font-size: 14px;
+        margin-bottom: 2px;
+        color: #333;
+      }
+
+      .subfolder-count {
+        color: #666;
+        font-size: 12px;
+      }
+
+      .subfolder-preview {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 10px;
+      }
+
+      .mini-avatar {
+        width: 24px;
+        height: 24px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 10px;
+        font-weight: bold;
+      }
+
+      /* Virtual Scroll Indicator */
+      .virtual-scroll-indicator {
+        position: sticky;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.95);
+        border-top: 1px solid #e0e0e0;
+        padding: 10px 20px;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        backdrop-filter: blur(10px);
+      }
+
+      .scroll-bar {
+        width: 4px;
+        height: 30px;
+        background: #e0e0e0;
+        border-radius: 2px;
+        position: relative;
+      }
+
+      .scroll-thumb {
+        position: absolute;
+        width: 100%;
+        background: #1976d2;
+        border-radius: 2px;
+        transition: all 0.3s ease;
+      }
+
+      .scroll-info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        text-align: center;
+        padding: 8px;
+        background: #f8f9fa;
+        border-radius: 6px;
+        margin: 8px 0;
+      }
+
+      .scroll-info span {
+        font-size: 11px;
+        color: #666;
+        font-weight: 500;
+      }
+
+      .scroll-hint {
+        color: #1976d2 !important;
+        font-weight: 500;
+      }
+
+      /* Subscriptions List View */
+      .subscriptions-list {
+        height: 400px;
+        overflow-y: auto;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        background: white;
+      }
+
+      .subscription-item {
+        display: flex;
+        align-items: center;
+        padding: 10px 12px;
+        border-bottom: 1px solid #f0f0f0;
+        transition: all 0.3s ease;
+        gap: 10px;
+        position: relative;
+      }
+
+      .subscription-item:hover {
+        background: #f8f9fa;
+      }
+
+      .sub-avatar-medium {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        font-size: 12px;
+        flex-shrink: 0;
+      }
+
+      .sub-info {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .sub-info .sub-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 2px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .sub-details {
+        font-size: 11px;
+        color: #666;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+
+      .sub-actions {
+        display: flex;
+        gap: 6px;
+        flex-shrink: 0;
+        align-items: center;
+      }
+
+      .action-btn-small {
+        background: #f8f9fa;
+        border: 1px solid #dee2e6;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 10px;
+        font-weight: 500;
+        transition: all 0.2s ease;
+        position: relative;
+        color: #495057;
+      }
+
+      .action-btn-small:hover {
+        background: #e9ecef;
+        border-color: #adb5bd;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+      }
+
+      .move-dropdown {
+        position: relative;
+        display: inline-block;
+      }
+
+      .sub-actions .action-btn-small {
+        width: 50px !important;
+        min-width: 50px !important;
+        max-width: 50px !important;
+        padding: 6px 4px !important;
+        box-sizing: border-box !important;
+        text-align: center !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        height: 28px !important;
+        line-height: 1 !important;
+        vertical-align: middle !important;
+      }
+
+      .sub-actions button[class*="action-btn-small"] {
+        width: 50px !important;
+        min-width: 50px !important;
+        max-width: 50px !important;
+        padding: 6px 4px !important;
+        box-sizing: border-box !important;
+        text-align: center !important;
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        height: 28px !important;
+        line-height: 1 !important;
+        vertical-align: middle !important;
+      }
+
+      .move-dropdown-content {
+        display: none;
+        position: absolute;
+        left: -250px;
+        top: 100%;
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        z-index: 1000;
+        min-width: 160px;
+        margin-top: 4px;
+        max-height: 300px;
+        overflow-y: auto;
+      }
+
+      .move-dropdown-content.show {
+        display: block;
+      }
+
+      .move-dropdown-header {
+        padding: 12px 16px;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 12px;
+        font-weight: 500;
+        color: #333;
+        background: #f8f9fa;
+      }
+
+      .move-dropdown-item {
+        padding: 8px 16px;
+        cursor: pointer;
+        font-size: 12px;
+        color: #333;
+        transition: background 0.2s ease;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .move-dropdown-item:hover {
+        background: #f0f0f0;
+      }
+
+      .move-dropdown-item .folder-icon {
+        width: 16px;
+        height: 16px;
+        border-radius: 3px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 8px;
+        font-weight: bold;
+      }
+
+      .remove-btn {
+        background: #fff5f5 !important;
+        border-color: #fecaca !important;
+        color: #dc2626 !important;
+        font-weight: 600 !important;
+      }
+
+      .remove-btn:hover {
+        background: #fef2f2 !important;
+        border-color: #fca5a5 !important;
+        color: #b91c1c !important;
+        transform: translateY(-1px);
+        box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
+      }
+
+      /* Design 3: Subfolder Subscription View */
+      .design-3 {
+        background: #fafafa;
+      }
+
+      /* Two Panel Layout */
+      .two-panel-layout {
+        display: flex;
+        gap: 0;
+        max-width: 800px;
+        margin: 0 auto;
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+      }
+
+      .subfolders-panel {
+        flex: 0 0 220px;
+        padding: 16px;
+        height: 500px;
+        overflow-y: auto;
+        border-right: 1px solid #e0e0e0;
+      }
+
+      .subfolders-panel h3 {
+        margin: 0 0 16px 0;
+        font-size: 14px;
+        font-weight: 600;
+        color: #333;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .move-instructions {
+        background: #fff3e0;
+        border: 2px solid #ff9800;
+        border-radius: 8px;
+        padding: 12px;
+        margin-bottom: 16px;
+        text-align: center;
+      }
+
+      .instruction-text {
+        color: #e65100;
+        font-size: 12px;
+        font-weight: 600;
+        margin: 0;
+      }
+
+      .subfolder-option {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 12px;
+        margin-bottom: 4px;
+        border-radius: 6px;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border: 2px solid transparent;
+      }
+
+      .subfolder-option:hover {
+        background: #f8f9fa;
+        border-color: #e9ecef;
+      }
+
+      .subfolder-option.move-target {
+        background: #e3f2fd;
+        border-color: #1976d2;
+        color: #1976d2;
+      }
+
+      .subfolder-option.current {
+        background: #f0f0f0;
+        color: #666;
+        cursor: default;
+      }
+
+      .subfolder-option .folder-icon {
+        width: 20px;
+        height: 20px;
+        border-radius: 4px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 10px;
+        font-weight: bold;
+        flex-shrink: 0;
+      }
+
+      .subfolder-option .folder-name {
+        font-size: 12px;
+        font-weight: 500;
+        flex: 1;
+      }
+
+      .subfolder-option .sub-count {
+        font-size: 10px;
+        color: #666;
+        background: #f0f0f0;
+        padding: 2px 6px;
+        border-radius: 10px;
+      }
+
+      .subscriptions-panel {
+        flex: 1;
+        overflow: hidden;
+      }
+
+      /* Breadcrumb Navigation */
+      .breadcrumb-nav {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 20px;
+        padding: 12px 16px;
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        max-width: 640px;
+        margin-left: auto;
+        margin-right: auto;
+      }
+
+      .breadcrumb-item {
+        color: #666;
+        font-size: 14px;
+        cursor: pointer;
+        transition: color 0.3s ease;
+      }
+
+      .breadcrumb-item:hover {
+        color: #1976d2;
+      }
+
+      .breadcrumb-item.active {
+        color: #1976d2;
+        font-weight: 500;
+      }
+
+      .breadcrumb-separator {
+        color: #ccc;
+        font-size: 16px;
+      }
+
+      .breadcrumb-count {
+        color: #666;
+        font-size: 12px;
+        margin-left: 8px;
+      }
+
+      /* Search and Filter Bar */
+      .search-filter-bar {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 16px;
+        gap: 12px;
+        flex-wrap: nowrap;
+        min-width: 0;
+        border-bottom: 1px solid #e0e0e0;
+      }
+
+      .search-section {
+        flex: 0 0 auto;
+        min-width: 180px;
+        max-width: 250px;
+      }
+
+      .search-input-container {
+        position: relative;
+        display: flex;
+        align-items: center;
+        background: white;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 8px 16px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        width: 100%;
+      }
+
+      .search-input-container .search-icon {
+        color: #666;
+        font-size: 16px;
+        margin-right: 8px;
+      }
+
+      .search-input-container input {
+        border: none;
+        outline: none;
+        flex: 1;
+        font-size: 14px;
+      }
+
+      .filter-section {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        flex: 1;
+        justify-content: flex-end;
+        min-width: 0;
+      }
+
+      .filter-select {
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 5px 6px;
+        background: white;
+        cursor: pointer;
+        font-size: 10px;
+        min-width: 80px;
+        max-width: 100px;
+      }
+
+      .action-btn {
+        background: #f5f5f5;
+        color: #333;
+        border: 1px solid #e0e0e0;
+        border-radius: 6px;
+        padding: 5px 8px;
+        cursor: pointer;
+        font-size: 10px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        white-space: nowrap;
+        min-width: 0;
+      }
+
+      .action-btn:hover {
+        background: #e0e0e0;
+        transform: translateY(-1px);
+      }
+
+      .action-btn:nth-child(3) {
+        background: #4caf50;
+        color: white;
+        border-color: #4caf50;
+      }
+
+      .action-btn:nth-child(3):hover {
+        background: #45a049;
+        border-color: #45a049;
+      }
+
+      .action-btn:nth-child(4) {
+        background: #ff9800;
+        color: white;
+        border-color: #ff9800;
+      }
+
+      .action-btn:nth-child(4):hover {
+        background: #f57c00;
+        border-color: #f57c00;
+      }
+
+      /* Subscriptions Container */
+      .subscriptions-container {
+        height: 400px;
+        overflow: hidden;
+        margin: 0;
+      }
+
+      @keyframes flash {
+        0%,
+        50% {
+          opacity: 1;
+        }
+        25%,
+        75% {
+          opacity: 0.3;
+        }
+      }
+
+      @keyframes pulse {
+        0% {
+          transform: scale(1);
+        }
+        50% {
+          transform: scale(1.2);
+        }
+        100% {
+          transform: scale(1);
+        }
+      }
+
+      .subscriptions-list {
+        height: 100%;
+        overflow-y: auto;
+        padding: 0;
+      }
+
+      .subscription-item.selected {
+        background: #e3f2fd;
+        border-left: 4px solid #1976d2;
+      }
+
+      /* Quick Stats */
+      .quick-stats {
+        display: flex;
+        justify-content: space-around;
+        padding: 20px;
+        margin-top: 0;
+        border-top: 1px solid #e0e0e0;
+      }
+
+      .stat-item {
+        text-align: center;
+      }
+
+      .stat-item .stat-number {
+        font-size: 28px;
+        font-weight: bold;
+        color: #1976d2;
+        margin-bottom: 4px;
+      }
+
+      .stat-item .stat-label {
+        font-size: 12px;
+        color: #666;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+      }
+
+      .virtual-container {
+        height: 400px;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        overflow: hidden;
+        background: white;
+      }
+
+      .virtual-header {
+        background: #f8f9fa;
+        padding: 15px 20px;
+        border-bottom: 2px solid #e0e0e0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .virtual-content {
+        height: calc(100% - 60px);
+        overflow-y: auto;
+      }
+
+      .virtual-item {
+        display: flex;
+        align-items: center;
+        padding: 12px 20px;
+        border-bottom: 1px solid #f0f0f0;
+        transition: all 0.3s ease;
+      }
+
+      .virtual-item:hover {
+        background: #f8f9fa;
+      }
+
+      .virtual-item.selected {
+        background: #e3f2fd;
+        border-left: 4px solid #1976d2;
+      }
+
+      .virtual-avatar {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background: linear-gradient(45deg, #ff6b6b, #4ecdc4);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-weight: bold;
+        margin-right: 15px;
+      }
+
+      .virtual-info {
+        flex: 1;
+      }
+
+      .virtual-name {
+        font-size: 14px;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 2px;
+      }
+
+      .virtual-folder {
+        font-size: 12px;
+        color: #666;
+      }
+
+      .virtual-actions {
+        display: flex;
+        gap: 8px;
+      }
+
+      .virtual-btn {
+        background: none;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        padding: 4px 8px;
+        cursor: pointer;
+        font-size: 12px;
+        transition: all 0.3s ease;
+      }
+
+      .virtual-btn:hover {
+        background: #f0f0f0;
+      }
+
+      .stats-bar {
+        background: #e3f2fd;
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+
+      .stat {
+        text-align: center;
+      }
+
+      .stat-number {
+        font-size: 24px;
+        font-weight: bold;
+        color: #1976d2;
+      }
+
+      .stat-label {
+        font-size: 12px;
+        color: #666;
+        margin-top: 4px;
+      }
+
+      .design-pros {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 20px;
+        margin-top: 20px;
+      }
+
+      .design-pros h4 {
+        color: #333;
+        margin-bottom: 15px;
+        font-size: 16px;
+      }
+
+      .pros-list {
+        list-style: none;
+      }
+
+      .pros-list li {
+        padding: 8px 0;
+        border-bottom: 1px solid #e0e0e0;
+        display: flex;
+        align-items: center;
+      }
+
+      .pros-list li:last-child {
+        border-bottom: none;
+      }
+
+      .pros-list li::before {
+        content: "✓";
+        color: #4caf50;
+        font-weight: bold;
+        margin-right: 10px;
+      }
+
+      .cons-list li::before {
+        content: "✗";
+        color: #f44336;
+      }
+
+      @media (max-width: 768px) {
+        .layout-2 {
+          flex-direction: column;
+          height: auto;
+        }
+
+        .sidebar-2 {
+          width: 100%;
+        }
+
+        .folder-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎯 Organize Subs - Design Exploration</h1>
+
+      <!-- Design 1: Compact Grid -->
+      <div class="design-section design-1">
+        <div class="design-header">
+          <h2>Design 1: Compact Grid Layout</h2>
+          <p>Card-based approach with folder previews and quick actions</p>
+        </div>
+        <div class="design-content">
+          <div class="search-bar">
+            <span class="search-icon">🔍</span>
+            <input
+              type="text"
+              placeholder="Search subscriptions..."
+              value="Gaming"
+            />
+          </div>
+
+          <div class="filter-tabs">
+            <div class="filter-tab active">All (1,247)</div>
+            <div class="filter-tab">Gaming (156)</div>
+            <div class="filter-tab">Tech (89)</div>
+            <div class="filter-tab">Music (234)</div>
+            <div class="filter-tab">Education (67)</div>
+            <div class="filter-tab">Unorganized (701)</div>
+          </div>
+
+          <div class="folder-grid">
+            <div class="folder-card">
+              <div class="folder-header">
+                <div
+                  class="folder-icon"
+                  style="background: linear-gradient(45deg, #ff6b6b, #ff8e8e)"
+                >
+                  G
+                </div>
+                <div class="folder-info">
+                  <h3>Gaming</h3>
+                  <div class="folder-count">156 subscriptions</div>
+                </div>
+              </div>
+              <div class="folder-preview">
+                <div class="sub-avatar">P</div>
+                <div class="sub-avatar">M</div>
+                <div class="sub-avatar">N</div>
+                <div class="sub-avatar">+153</div>
+              </div>
+              <div class="folder-actions">
+                <button class="action-btn">View All</button>
+                <button class="action-btn primary">Organize</button>
+              </div>
+            </div>
+
+            <div class="folder-card">
+              <div class="folder-header">
+                <div
+                  class="folder-icon"
+                  style="background: linear-gradient(45deg, #4ecdc4, #44a08d)"
+                >
+                  T
+                </div>
+                <div class="folder-info">
+                  <h3>Technology</h3>
+                  <div class="folder-count">89 subscriptions</div>
+                </div>
+              </div>
+              <div class="folder-preview">
+                <div class="sub-avatar">L</div>
+                <div class="sub-avatar">V</div>
+                <div class="sub-avatar">M</div>
+                <div class="sub-avatar">+86</div>
+              </div>
+              <div class="folder-actions">
+                <button class="action-btn">View All</button>
+                <button class="action-btn primary">Organize</button>
+              </div>
+            </div>
+
+            <div class="folder-card">
+              <div class="folder-header">
+                <div
+                  class="folder-icon"
+                  style="background: linear-gradient(45deg, #f093fb, #f5576c)"
+                >
+                  M
+                </div>
+                <div class="folder-info">
+                  <h3>Music</h3>
+                  <div class="folder-count">234 subscriptions</div>
+                </div>
+              </div>
+              <div class="folder-preview">
+                <div class="sub-avatar">A</div>
+                <div class="sub-avatar">B</div>
+                <div class="sub-avatar">C</div>
+                <div class="sub-avatar">+231</div>
+              </div>
+              <div class="folder-actions">
+                <button class="action-btn">View All</button>
+                <button class="action-btn primary">Organize</button>
+              </div>
+            </div>
+
+            <div class="folder-card">
+              <div class="folder-header">
+                <div
+                  class="folder-icon"
+                  style="background: linear-gradient(45deg, #4facfe, #00f2fe)"
+                >
+                  E
+                </div>
+                <div class="folder-info">
+                  <h3>Education</h3>
+                  <div class="folder-count">67 subscriptions</div>
+                </div>
+              </div>
+              <div class="folder-preview">
+                <div class="sub-avatar">K</div>
+                <div class="sub-avatar">T</div>
+                <div class="sub-avatar">C</div>
+                <div class="sub-avatar">+64</div>
+              </div>
+              <div class="folder-actions">
+                <button class="action-btn">View All</button>
+                <button class="action-btn primary">Organize</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="design-pros">
+            <h4>✅ Pros</h4>
+            <ul class="pros-list">
+              <li>Visual overview of all folders at once</li>
+              <li>Quick preview of folder contents</li>
+              <li>Easy to scan and understand</li>
+              <li>Good for users with moderate subscription counts</li>
+              <li>Mobile-friendly responsive design</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Design 2: Sidebar + Main -->
+      <div class="design-section design-2">
+        <div class="design-header">
+          <h2>Design 2: Parent → Subfolder → Subscriptions</h2>
+          <p>
+            Three-tier hierarchy: Parent folders → Subfolders → Subscriptions
+            with virtual scrolling
+          </p>
+        </div>
+        <div class="design-content">
+          <div class="layout-2">
+            <div class="sidebar-2">
+              <h3>📁 Parent Folders</h3>
+              <ul class="folder-list">
+                <li class="folder-item active">
+                  <div class="icon" style="background: #ff6b6b">G</div>
+                  <div class="name">Gaming</div>
+                  <div class="count">156</div>
+                </li>
+                <li class="folder-item">
+                  <div class="icon" style="background: #4ecdc4">T</div>
+                  <div class="name">Technology</div>
+                  <div class="count">89</div>
+                </li>
+                <li class="folder-item">
+                  <div class="icon" style="background: #f093fb">M</div>
+                  <div class="name">Music</div>
+                  <div class="count">234</div>
+                </li>
+                <li class="folder-item">
+                  <div class="icon" style="background: #4facfe">E</div>
+                  <div class="name">Education</div>
+                  <div class="count">67</div>
+                </li>
+                <li class="folder-item">
+                  <div class="icon" style="background: #ffd93d">C</div>
+                  <div class="name">Comedy</div>
+                  <div class="count">45</div>
+                </li>
+                <li class="folder-item">
+                  <div class="icon" style="background: #6c5ce7">N</div>
+                  <div class="name">News</div>
+                  <div class="count">23</div>
+                </li>
+                <li class="folder-item">
+                  <div class="icon" style="background: #a29bfe">U</div>
+                  <div class="name">Unorganized</div>
+                  <div class="count">701</div>
+                </li>
+              </ul>
+            </div>
+
+            <div class="main-content-2">
+              <div class="content-header">
+                <div class="content-title">
+                  Gaming Subfolders (8 subfolders)
+                </div>
+                <div class="sort-controls">
+                  <select class="sort-select">
+                    <option>Sort A-Z</option>
+                    <option>Sort Z-A</option>
+                    <option>Most Subscriptions</option>
+                    <option>Recently Created</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Subfolders Grid (Virtual Scrolling) -->
+              <div class="subfolders-container">
+                <div class="subfolder-grid">
+                  <div class="subfolder-card">
+                    <div class="subfolder-header">
+                      <div
+                        class="subfolder-icon"
+                        style="
+                          background: linear-gradient(45deg, #ff6b6b, #ff8e8e);
+                        "
+                      >
+                        FPS
+                      </div>
+                      <div class="subfolder-info">
+                        <h4>FPS Games</h4>
+                        <div class="subfolder-count">45 subscriptions</div>
+                      </div>
+                    </div>
+                    <div class="subfolder-preview">
+                      <div class="mini-avatar">P</div>
+                      <div class="mini-avatar">S</div>
+                      <div class="mini-avatar">D</div>
+                      <div class="mini-avatar">+42</div>
+                    </div>
+                  </div>
+
+                  <div class="subfolder-card">
+                    <div class="subfolder-header">
+                      <div
+                        class="subfolder-icon"
+                        style="
+                          background: linear-gradient(45deg, #4ecdc4, #44a08d);
+                        "
+                      >
+                        RPG
+                      </div>
+                      <div class="subfolder-info">
+                        <h4>RPG Games</h4>
+                        <div class="subfolder-count">32 subscriptions</div>
+                      </div>
+                    </div>
+                    <div class="subfolder-preview">
+                      <div class="mini-avatar">M</div>
+                      <div class="mini-avatar">N</div>
+                      <div class="mini-avatar">T</div>
+                      <div class="mini-avatar">+29</div>
+                    </div>
+                  </div>
+
+                  <div class="subfolder-card">
+                    <div class="subfolder-header">
+                      <div
+                        class="subfolder-icon"
+                        style="
+                          background: linear-gradient(45deg, #f093fb, #f5576c);
+                        "
+                      >
+                        MOBA
+                      </div>
+                      <div class="subfolder-info">
+                        <h4>MOBA Games</h4>
+                        <div class="subfolder-count">28 subscriptions</div>
+                      </div>
+                    </div>
+                    <div class="subfolder-preview">
+                      <div class="mini-avatar">L</div>
+                      <div class="mini-avatar">V</div>
+                      <div class="mini-avatar">C</div>
+                      <div class="mini-avatar">+25</div>
+                    </div>
+                  </div>
+
+                  <div class="subfolder-card">
+                    <div class="subfolder-header">
+                      <div
+                        class="subfolder-icon"
+                        style="
+                          background: linear-gradient(45deg, #4facfe, #00f2fe);
+                        "
+                      >
+                        IND
+                      </div>
+                      <div class="subfolder-info">
+                        <h4>Indie Games</h4>
+                        <div class="subfolder-count">23 subscriptions</div>
+                      </div>
+                    </div>
+                    <div class="subfolder-preview">
+                      <div class="mini-avatar">H</div>
+                      <div class="mini-avatar">B</div>
+                      <div class="mini-avatar">K</div>
+                      <div class="mini-avatar">+20</div>
+                    </div>
+                  </div>
+
+                  <div class="subfolder-card">
+                    <div class="subfolder-header">
+                      <div
+                        class="subfolder-icon"
+                        style="
+                          background: linear-gradient(45deg, #ffd93d, #ffb347);
+                        "
+                      >
+                        STR
+                      </div>
+                      <div class="subfolder-info">
+                        <h4>Strategy Games</h4>
+                        <div class="subfolder-count">18 subscriptions</div>
+                      </div>
+                    </div>
+                    <div class="subfolder-preview">
+                      <div class="mini-avatar">A</div>
+                      <div class="mini-avatar">R</div>
+                      <div class="mini-avatar">S</div>
+                      <div class="mini-avatar">+15</div>
+                    </div>
+                  </div>
+
+                  <div class="subfolder-card">
+                    <div class="subfolder-header">
+                      <div
+                        class="subfolder-icon"
+                        style="
+                          background: linear-gradient(45deg, #6c5ce7, #a29bfe);
+                        "
+                      >
+                        SIM
+                      </div>
+                      <div class="subfolder-info">
+                        <h4>Simulation Games</h4>
+                        <div class="subfolder-count">15 subscriptions</div>
+                      </div>
+                    </div>
+                    <div class="subfolder-preview">
+                      <div class="mini-avatar">E</div>
+                      <div class="mini-avatar">F</div>
+                      <div class="mini-avatar">G</div>
+                      <div class="mini-avatar">+12</div>
+                    </div>
+                  </div>
+
+                  <div class="subfolder-card">
+                    <div class="subfolder-header">
+                      <div
+                        class="subfolder-icon"
+                        style="
+                          background: linear-gradient(45deg, #fd79a8, #fdcb6e);
+                        "
+                      >
+                        SPT
+                      </div>
+                      <div class="subfolder-info">
+                        <h4>Sports Games</h4>
+                        <div class="subfolder-count">12 subscriptions</div>
+                      </div>
+                    </div>
+                    <div class="subfolder-preview">
+                      <div class="mini-avatar">I</div>
+                      <div class="mini-avatar">J</div>
+                      <div class="mini-avatar">W</div>
+                      <div class="mini-avatar">+9</div>
+                    </div>
+                  </div>
+
+                  <div class="subfolder-card">
+                    <div class="subfolder-header">
+                      <div
+                        class="subfolder-icon"
+                        style="
+                          background: linear-gradient(45deg, #00b894, #00cec9);
+                        "
+                      >
+                        RAC
+                      </div>
+                      <div class="subfolder-info">
+                        <h4>Racing Games</h4>
+                        <div class="subfolder-count">8 subscriptions</div>
+                      </div>
+                    </div>
+                    <div class="subfolder-preview">
+                      <div class="mini-avatar">X</div>
+                      <div class="mini-avatar">Y</div>
+                      <div class="mini-avatar">Z</div>
+                      <div class="mini-avatar">+5</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Virtual Scrolling Indicator -->
+                <div class="virtual-scroll-indicator">
+                  <div class="scroll-bar">
+                    <div
+                      class="scroll-thumb"
+                      style="height: 20%; top: 0%"
+                    ></div>
+                  </div>
+                  <div class="scroll-info">
+                    <span>Showing 8 of 8 subfolders</span>
+                    <span class="scroll-hint">Scroll for more...</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- When subfolder is clicked, show subscriptions -->
+              <div class="subscriptions-view" style="display: none">
+                <div class="content-header">
+                  <div class="content-title">FPS Games Subscriptions (45)</div>
+                  <div class="sort-controls">
+                    <select class="sort-select">
+                      <option>Sort A-Z</option>
+                      <option>Sort Z-A</option>
+                      <option>Most Active</option>
+                      <option>Recently Added</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="subscriptions-list">
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">P</div>
+                    <div class="sub-info">
+                      <div class="sub-name">PewDiePie</div>
+                      <div class="sub-details">67.2M subscribers • Gaming</div>
+                    </div>
+                    <div class="sub-actions">
+                      <button
+                        class="action-btn-small"
+                        id="move-pewdiepie"
+                        onclick="
+                          document.getElementById('move-instructions').style.display = 'block';
+                          this.textContent = 'Cancel';
+                          this.style.background = '#ff9800';
+                          
+                          // Ghost the current FPS folder
+                          const fpsFolder = document.getElementById('fps-games');
+                          if (fpsFolder) {
+                            fpsFolder.style.opacity = '0.3';
+                            fpsFolder.style.cursor = 'not-allowed';
+                          }
+                          
+                          // Make subfolders clickable
+                          const subfolders = document.querySelectorAll('.subfolder-option[data-target]');
+                          subfolders.forEach((folder) => {
+                            folder.style.cursor = 'pointer';
+                            folder.style.border = '2px solid #4caf50';
+                            folder.style.backgroundColor = '#e8f5e8';
+                            folder.style.color = '#2e7d32';
+                            folder.style.fontWeight = 'bold';
+                            
+                            folder.onclick = function() {
+                              const targetFolder = this.querySelector('.folder-name').textContent;
+                              const targetCount = this.querySelector('.sub-count');
+                              const currentCount = document.getElementById('fps-count');
+                              
+                              currentCount.textContent = parseInt(currentCount.textContent) - 1;
+                              targetCount.textContent = parseInt(targetCount.textContent) + 1;
+                              
+                              const instruction = document.querySelector('.instruction-text');
+                              instruction.textContent = '✓ Moved PewDiePie to ' + targetFolder;
+                              instruction.style.color = '#4caf50';
+                              
+                              // Store reference to the target folder
+                              const targetFolderElement = this;
+                              console.log('Target folder element:', targetFolderElement);
+                              
+                              // Reset after showing success
+                              setTimeout(() => {
+                                console.log('Resetting folders, keeping target highlighted');
+                                document.getElementById('move-instructions').style.display = 'none';
+                                
+                                // Reset Move button
+                                const moveBtn = document.getElementById('move-pewdiepie');
+                                moveBtn.textContent = 'Move';
+                                moveBtn.style.background = '';
+                                
+                                // Reset all subfolders except the target (keep it highlighted)
+                                subfolders.forEach(f => {
+                                  if (f !== targetFolderElement) { // Don't reset the target folder
+                                    console.log('Resetting folder:', f);
+                                    f.style.cursor = '';
+                                    f.style.border = '';
+                                    f.style.backgroundColor = '';
+                                    f.style.color = '';
+                                    f.style.fontWeight = '';
+                                    f.onclick = null;
+                                  } else {
+                                    console.log('Keeping target folder highlighted:', f);
+                                  }
+                                });
+                                
+                                // Reset FPS folder
+                                const fpsFolder = document.getElementById('fps-games');
+                                if (fpsFolder) {
+                                  fpsFolder.style.opacity = '1';
+                                  fpsFolder.style.cursor = '';
+                                }
+                                
+                                // Keep target folder highlighted but remove click handler
+                                targetFolderElement.onclick = null;
+                                targetFolderElement.style.cursor = 'default';
+                                console.log('Target folder final state:', targetFolderElement.style.backgroundColor);
+                              }, 2000);
+                            };
+                          });
+                        "
+                        style="
+                          background-color: lime;
+                          border: 2px solid red;
+                          font-weight: bold;
+                        "
+                      >
+                        Move
+                      </button>
+                      <button class="action-btn-small remove-btn">
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">S</div>
+                    <div class="sub-info">
+                      <div class="sub-name">Shroud</div>
+                      <div class="sub-details">7.2M subscribers • Gaming</div>
+                    </div>
+                    <div class="sub-actions">
+                      <button class="action-btn-small">Move</button>
+                      <button class="action-btn-small">Remove</button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">D</div>
+                    <div class="sub-info">
+                      <div class="sub-name">DrDisrespect</div>
+                      <div class="sub-details">4.1M subscribers • Gaming</div>
+                    </div>
+                    <div class="sub-actions">
+                      <button class="action-btn-small">Move</button>
+                      <button class="action-btn-small">Remove</button>
+                    </div>
+                  </div>
+
+                  <!-- Virtual Scrolling Indicator for Subscriptions -->
+                  <div class="virtual-scroll-indicator">
+                    <div class="scroll-bar">
+                      <div
+                        class="scroll-thumb"
+                        style="height: 8%; top: 0%"
+                      ></div>
+                    </div>
+                    <div class="scroll-info">
+                      <span>Showing 3 of 45 subscriptions</span>
+                      <span class="scroll-hint">Scroll for more...</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="design-pros">
+            <h4>✅ Pros</h4>
+            <ul class="pros-list">
+              <li>
+                Clear three-tier hierarchy: Parent → Subfolder → Subscriptions
+              </li>
+              <li>
+                Virtual scrolling for both subfolders and subscriptions (like
+                YouTube)
+              </li>
+              <li>Efficient navigation through large datasets</li>
+              <li>Familiar file manager interface</li>
+              <li>Scalable to thousands of subscriptions per subfolder</li>
+              <li>Quick preview of subfolder contents</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Design 3: Subfolder Subscription View -->
+      <div class="design-section design-3">
+        <div class="design-header">
+          <h2>Design 3: Improved Subfolder Subscription View</h2>
+          <p>
+            Static subfolders panel + dynamic subscriptions panel - click Move
+            then click target subfolder
+          </p>
+        </div>
+        <div class="design-content">
+          <!-- Breadcrumb Navigation -->
+          <div class="breadcrumb-nav">
+            <span class="breadcrumb-item">Gaming</span>
+            <span class="breadcrumb-separator">›</span>
+            <span class="breadcrumb-item active">FPS Games</span>
+            <span class="breadcrumb-count">(45 subscriptions)</span>
+          </div>
+
+          <!-- Two Panel Layout -->
+          <div class="two-panel-layout">
+            <!-- Subfolders Panel -->
+            <div class="subfolders-panel">
+              <h3>Subfolders</h3>
+
+              <div
+                id="move-instructions"
+                class="move-instructions"
+                style="display: none"
+              >
+                <div class="instruction-text">
+                  Click destination subfolder below
+                </div>
+              </div>
+              <div class="subfolder-option current" id="fps-games">
+                <div class="folder-icon" style="background: #ff6b6b">FPS</div>
+                <div class="folder-name">FPS Games</div>
+                <div class="sub-count" id="fps-count">45</div>
+              </div>
+              <div class="subfolder-option" id="rpg-games" data-target="rpg">
+                <div class="folder-icon" style="background: #4ecdc4">RPG</div>
+                <div class="folder-name">RPG Games</div>
+                <div class="sub-count" id="rpg-count">23</div>
+              </div>
+              <div class="subfolder-option" id="moba-games" data-target="moba">
+                <div class="folder-icon" style="background: #f093fb">MOBA</div>
+                <div class="folder-name">MOBA Games</div>
+                <div class="sub-count" id="moba-count">18</div>
+              </div>
+              <div
+                class="subfolder-option"
+                id="indie-games"
+                data-target="indie"
+              >
+                <div class="folder-icon" style="background: #4facfe">IND</div>
+                <div class="folder-name">Indie Games</div>
+                <div class="sub-count" id="indie-count">31</div>
+              </div>
+              <div
+                class="subfolder-option"
+                id="strategy-games"
+                data-target="strategy"
+              >
+                <div class="folder-icon" style="background: #ffd93d">STR</div>
+                <div class="folder-name">Strategy Games</div>
+                <div class="sub-count" id="strategy-count">12</div>
+              </div>
+              <div
+                class="subfolder-option"
+                id="simulation-games"
+                data-target="simulation"
+              >
+                <div class="folder-icon" style="background: #6c5ce7">SIM</div>
+                <div class="folder-name">Simulation Games</div>
+                <div class="sub-count" id="simulation-count">8</div>
+              </div>
+              <div
+                class="subfolder-option"
+                id="sports-games"
+                data-target="sports"
+              >
+                <div class="folder-icon" style="background: #fd79a8">SPT</div>
+                <div class="folder-name">Sports Games</div>
+                <div class="sub-count" id="sports-count">15</div>
+              </div>
+              <div
+                class="subfolder-option"
+                id="racing-games"
+                data-target="racing"
+              >
+                <div class="folder-icon" style="background: #00b894">RAC</div>
+                <div class="folder-name">Racing Games</div>
+                <div class="sub-count" id="racing-count">7</div>
+              </div>
+              <div
+                class="subfolder-option"
+                id="unorganized"
+                data-target="unorganized"
+              >
+                <div class="folder-icon" style="background: #a29bfe">U</div>
+                <div class="folder-name">Unorganized</div>
+                <div class="sub-count" id="unorganized-count">142</div>
+              </div>
+            </div>
+
+            <!-- Subscriptions Panel -->
+            <div class="subscriptions-panel">
+              <!-- Search and Filter Bar -->
+              <div class="search-filter-bar">
+                <div class="search-section">
+                  <div class="search-input-container">
+                    <span class="search-icon">🔍</span>
+                    <input
+                      type="text"
+                      placeholder="Search FPS Games subscriptions..."
+                      value="PewDiePie"
+                    />
+                  </div>
+                </div>
+                <div class="filter-section">
+                  <select class="filter-select">
+                    <option>Sort A-Z</option>
+                    <option>Sort Z-A</option>
+                    <option>Most Active</option>
+                    <option>Recently Added</option>
+                    <option>Most Subscribers</option>
+                  </select>
+                  <button class="action-btn">Select All</button>
+                  <button class="action-btn">Clear</button>
+                  <button class="action-btn">Export</button>
+                  <button class="action-btn">Import</button>
+                </div>
+              </div>
+
+              <!-- Subscriptions List with Virtual Scrolling -->
+              <div class="subscriptions-container">
+                <div class="subscriptions-list">
+                  <div class="subscription-item selected">
+                    <div class="sub-avatar-medium">P</div>
+                    <div class="sub-info">
+                      <div class="sub-name">PewDiePie</div>
+                      <div class="sub-details">
+                        67.2M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button class="action-btn-small">Move</button>
+                      <button class="action-btn-small remove-btn">
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">S</div>
+                    <div class="sub-info">
+                      <div class="sub-name">Shroud</div>
+                      <div class="sub-details">
+                        7.2M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button class="action-btn-small">Move</button>
+                      <button class="action-btn-small remove-btn">
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">D</div>
+                    <div class="sub-info">
+                      <div class="sub-name">DrDisrespect</div>
+                      <div class="sub-details">
+                        4.1M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button class="action-btn-small">Move</button>
+                      <button class="action-btn-small remove-btn">
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">T</div>
+                    <div class="sub-info">
+                      <div class="sub-name">Tfue</div>
+                      <div class="sub-details">
+                        11.8M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button class="action-btn-small">Move</button>
+                      <button class="action-btn-small">Remove</button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">N</div>
+                    <div class="sub-info">
+                      <div class="sub-name">Ninja</div>
+                      <div class="sub-details">
+                        24.1M subscribers • FPS Gaming • Inactive
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button class="action-btn-small">Move</button>
+                      <button class="action-btn-small">Remove</button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">M</div>
+                    <div class="sub-info">
+                      <div class="sub-name">MrBeast</div>
+                      <div class="sub-details">
+                        156M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button class="action-btn-small">Move</button>
+                      <button class="action-btn-small">Remove</button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">A</div>
+                    <div class="sub-info">
+                      <div class="sub-name">Aim Lab</div>
+                      <div class="sub-details">
+                        2.1M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button class="action-btn-small">Move</button>
+                      <button class="action-btn-small">Remove</button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">B</div>
+                    <div class="sub-info">
+                      <div class="sub-name">Battlegrounds</div>
+                      <div class="sub-details">
+                        8.7M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button class="action-btn-small">Move</button>
+                      <button class="action-btn-small">Remove</button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">C</div>
+                    <div class="sub-info">
+                      <div class="sub-name">CS:GO</div>
+                      <div class="sub-details">
+                        5.3M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button class="action-btn-small">Move</button>
+                      <button class="action-btn-small">Remove</button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">V</div>
+                    <div class="sub-info">
+                      <div class="sub-name">Valorant</div>
+                      <div class="sub-details">
+                        12.4M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button class="action-btn-small">Move</button>
+                      <button class="action-btn-small">Remove</button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">O</div>
+                    <div class="sub-info">
+                      <div class="sub-name">Overwatch</div>
+                      <div class="sub-details">
+                        9.8M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button class="action-btn-small">Move</button>
+                      <button class="action-btn-small">Remove</button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">F</div>
+                    <div class="sub-info">
+                      <div class="sub-name">Fortnite</div>
+                      <div class="sub-details">
+                        15.2M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button class="action-btn-small">Move</button>
+                      <button class="action-btn-small">Remove</button>
+                    </div>
+                  </div>
+
+                  <!-- Virtual Scrolling Indicator -->
+                  <div class="virtual-scroll-indicator">
+                    <div class="scroll-bar">
+                      <div
+                        class="scroll-thumb"
+                        style="height: 15%; top: 0%"
+                      ></div>
+                    </div>
+                    <div class="scroll-info">
+                      <span>Showing 12 of 45 FPS Games subscriptions</span>
+                      <span class="scroll-hint">Scroll for more...</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Quick Stats -->
+          <div class="quick-stats">
+            <div class="stat-item">
+              <div class="stat-number">45</div>
+              <div class="stat-label">Total FPS Subs</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">42</div>
+              <div class="stat-label">Active</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">3</div>
+              <div class="stat-label">Inactive</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">1.2B</div>
+              <div class="stat-label">Total Subscribers</div>
+            </div>
+          </div>
+
+          <div class="design-pros">
+            <h4>✅ Pros</h4>
+            <ul class="pros-list">
+              <li>Clean, focused view of subfolder contents</li>
+              <li>Virtual scrolling handles thousands of subscriptions</li>
+              <li>Breadcrumb navigation shows current location</li>
+              <li>Powerful search and filtering capabilities</li>
+              <li>Bulk actions for efficient management</li>
+              <li>Quick stats for overview</li>
+              <li>Consistent with Design 2's subscription view</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div
+        style="
+          text-align: center;
+          margin-top: 40px;
+          padding: 30px;
+          background: white;
+          border-radius: 12px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        "
+      >
+        <h3 style="color: #333; margin-bottom: 20px">
+          🎯 Design Recommendations
+        </h3>
+        <div
+          style="
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            text-align: left;
+          "
+        >
+          <div>
+            <h4 style="color: #1976d2; margin-bottom: 10px">
+              For 50-500 subscriptions:
+            </h4>
+            <p>
+              <strong>Design 1 (Compact Grid)</strong> - Visual, intuitive, easy
+              to scan
+            </p>
+          </div>
+          <div>
+            <h4 style="color: #1976d2; margin-bottom: 10px">
+              For 500-2000 subscriptions:
+            </h4>
+            <p>
+              <strong>Design 2 (Sidebar + Main)</strong> - Organized, scalable,
+              familiar
+            </p>
+          </div>
+          <div>
+            <h4 style="color: #1976d2; margin-bottom: 10px">
+              For 2000+ subscriptions:
+            </h4>
+            <p>
+              <strong>Design 3 (Virtual Scrolling)</strong> - High performance,
+              bulk operations
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      // Demo functionality for the move operation
+      let isMoving = false;
+      let selectedSubscription = null;
+
+      // Inline onclick function for the PewDiePie button
+      function demoMoveClick() {
+        alert("Button clicked!");
+        console.log(
+          "*** PEWDIEPIE MOVE BUTTON CLICKED ***",
+          "isMoving:",
+          isMoving
+        );
+
+        // Show instructions
+        const instructions = document.getElementById("move-instructions");
+        if (instructions) {
+          instructions.style.display = "block";
+          console.log("Instructions shown");
+        } else {
+          console.log("Instructions not found!");
+        }
+
+        // Change button text
+        const btn = document.getElementById("move-pewdiepie");
+        if (btn) {
+          btn.textContent = "Cancel";
+          btn.style.background = "#ff9800";
+          console.log("Button changed to Cancel");
+        } else {
+          console.log("Button not found!");
+        }
+
+        // Make subfolders clickable
+        const subfolders = document.querySelectorAll(
+          ".subfolder-option[data-target]"
+        );
+        console.log("Found subfolders:", subfolders.length);
+
+        subfolders.forEach((folder) => {
+          folder.style.cursor = "pointer";
+          folder.style.opacity = "1";
+        });
+      }
+
+      function cancelMove() {
+        isMoving = false;
+        selectedSubscription = null;
+
+        // Hide instructions
+        const instructions = document.getElementById("move-instructions");
+        if (instructions) {
+          instructions.style.display = "none";
+        }
+
+        // Reset button
+        const moveBtn = document.getElementById("move-pewdiepie");
+        if (moveBtn) {
+          moveBtn.textContent = "Move";
+          moveBtn.style.background = "";
+        }
+
+        // Reset subfolders
+        const subfolders = document.querySelectorAll(
+          ".subfolder-option[data-target]"
+        );
+        subfolders.forEach((folder) => {
+          folder.style.cursor = "";
+          folder.style.opacity = "";
+        });
+      }
+
+      // Simple setup with timeout to ensure DOM is ready
+      setTimeout(function () {
+        console.log("Setting up demo...");
+
+        // Move button click handler
+        const moveButton = document.getElementById("move-pewdiepie");
+        console.log("Move button found:", moveButton);
+
+        if (moveButton) {
+          // Force styling with setTimeout to override any conflicts
+          setTimeout(() => {
+            // Remove all existing classes and styles
+            moveButton.className = "";
+            moveButton.removeAttribute("style");
+
+            // Apply new styling
+            moveButton.style.cssText = `
+              border: 5px solid red !important;
+              background-color: lime !important;
+              color: black !important;
+              font-weight: bold !important;
+              font-size: 16px !important;
+              z-index: 9999 !important;
+              position: relative !important;
+              padding: 8px 16px !important;
+              border-radius: 4px !important;
+              cursor: pointer !important;
+            `;
+            moveButton.textContent = "PewDiePie MOVE";
+            console.log(
+              "PewDiePie button styled:",
+              moveButton.style.backgroundColor
+            );
+          }, 100);
+
+          // Remove any existing listeners and add a fresh one
+          moveButton.onclick = function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            console.log(
+              "*** PEWDIEPIE MOVE BUTTON CLICKED ***",
+              "isMoving:",
+              isMoving
+            );
+
+            if (!isMoving) {
+              // Start move mode
+              isMoving = true;
+              selectedSubscription = "PewDiePie";
+
+              // Show instructions
+              const instructions = document.getElementById("move-instructions");
+              if (instructions) {
+                instructions.style.display = "block";
+                console.log("Instructions shown");
+              }
+
+              // Change button text
+              this.textContent = "Cancel";
+              this.style.background = "#ff9800";
+
+              // Make subfolders clickable (except current)
+              const subfolders = document.querySelectorAll(
+                ".subfolder-option[data-target]"
+              );
+              console.log("Found subfolders:", subfolders.length);
+
+              subfolders.forEach((folder) => {
+                folder.style.cursor = "pointer";
+                folder.style.opacity = "1";
+              });
+            } else {
+              // Cancel move mode
+              cancelMove();
+            }
+          };
+        }
+
+        // Add click listener to the entire subscription item to debug
+        const subscriptionItem = document.querySelector(".subscription-item");
+        console.log("Subscription item found:", subscriptionItem);
+
+        if (subscriptionItem) {
+          // Make sure it's clickable
+          subscriptionItem.style.pointerEvents = "auto";
+          subscriptionItem.style.position = "relative";
+          subscriptionItem.style.zIndex = "1000";
+
+          subscriptionItem.addEventListener("click", function (e) {
+            console.log("Subscription item clicked, target:", e.target);
+            console.log("Is button?", e.target.id === "move-pewdiepie");
+            e.stopPropagation();
+          });
+        }
+
+        // Remove the test button
+        const testButton = document.getElementById("test-pewdiepie-button");
+        if (testButton) {
+          testButton.remove();
+          console.log("Test button removed");
+        }
+
+        // Create a completely new demo button at the top of the page
+        setTimeout(() => {
+          // Create new demo button
+          const demoBtn = document.createElement("button");
+          demoBtn.id = "demo-move-btn";
+          demoBtn.textContent = "DEMO MOVE - CLICK ME!";
+          demoBtn.style.cssText = `
+            position: fixed !important;
+            top: 20px !important;
+            left: 20px !important;
+            z-index: 99999 !important;
+            background-color: lime !important;
+            border: 5px solid red !important;
+            font-weight: bold !important;
+            padding: 20px !important;
+            border-radius: 8px !important;
+            cursor: pointer !important;
+            color: black !important;
+            font-size: 24px !important;
+            width: 300px !important;
+            height: 80px !important;
+            display: block !important;
+            visibility: visible !important;
+            opacity: 1 !important;
+          `;
+          demoBtn.onclick = function () {
+            document.getElementById("move-instructions").style.display =
+              "block";
+            this.textContent = "Cancel";
+            this.style.background = "#ff9800";
+            console.log("Demo move button clicked");
+
+            // Make subfolders clickable
+            const subfolders = document.querySelectorAll(
+              ".subfolder-option[data-target]"
+            );
+            console.log("Found subfolders:", subfolders.length);
+
+            subfolders.forEach((folder) => {
+              folder.style.cursor = "pointer";
+              folder.style.opacity = "1";
+              folder.style.border = "2px solid #1976d2";
+              folder.style.backgroundColor = "#e3f2fd";
+
+              // Add click handler to each subfolder
+              folder.onclick = function () {
+                const targetFolder =
+                  this.querySelector(".folder-name").textContent;
+                const targetCount = this.querySelector(".sub-count");
+                const currentCount = document.getElementById("fps-count");
+
+                // Update counts
+                const currentNum = parseInt(currentCount.textContent);
+                const targetNum = parseInt(targetCount.textContent);
+
+                currentCount.textContent = currentNum - 1;
+                targetCount.textContent = targetNum + 1;
+
+                // Show success message
+                const instruction = document.querySelector(".instruction-text");
+                instruction.textContent = `✓ Moved PewDiePie to ${targetFolder}`;
+                instruction.style.color = "#4caf50";
+
+                // Store reference to target folder
+                const targetFolderElement = this;
+
+                // Immediately clear all highlighting except target
+                subfolders.forEach((f) => {
+                  if (f !== targetFolderElement) {
+                    f.style.cursor = "";
+                    f.style.opacity = "";
+                    f.style.border = "";
+                    f.style.backgroundColor = "";
+                    f.style.color = "";
+                    f.style.fontWeight = "";
+                    f.onclick = null;
+                  }
+                });
+
+                // Keep target folder highlighted but remove click handler
+                targetFolderElement.onclick = null;
+                targetFolderElement.style.cursor = "default";
+
+                // Reset button
+                demoBtn.textContent = "DEMO MOVE - CLICK ME!";
+                demoBtn.style.background = "lime";
+
+                // Hide instructions after delay
+                setTimeout(() => {
+                  document.getElementById("move-instructions").style.display =
+                    "none";
+                }, 2000);
+
+                console.log(`Moved PewDiePie to ${targetFolder}`);
+              };
+            });
+          };
+
+          // Insert at the top of the page
+          document.body.insertBefore(demoBtn, document.body.firstChild);
+          console.log("Demo button created and inserted at top of page");
+          console.log("Button element:", demoBtn);
+          console.log("Button visible:", demoBtn.offsetWidth > 0);
+        }, 1000);
+
+        // Also add a global click listener to see what's being clicked
+        document.addEventListener("click", function (e) {
+          console.log("Global click on:", e.target);
+          if (e.target.id === "move-pewdiepie") {
+            console.log("*** GLOBAL: PewDiePie Move button clicked! ***");
+          } else if (
+            e.target.textContent.trim() === "Move" ||
+            e.target.textContent.trim() === "PewDiePie MOVE"
+          ) {
+            console.log(
+              "*** GLOBAL: Some Move button clicked, ID:",
+              e.target.id
+            );
+          }
+        });
+
+        // Subfolder click handlers
+        const subfolders = document.querySelectorAll(
+          ".subfolder-option[data-target]"
+        );
+        console.log(
+          "Setting up subfolder handlers for:",
+          subfolders.length,
+          "folders"
+        );
+
+        subfolders.forEach((folder) => {
+          folder.addEventListener("click", function () {
+            console.log(
+              "Subfolder clicked, isMoving:",
+              isMoving,
+              "selectedSubscription:",
+              selectedSubscription
+            );
+
+            if (isMoving && selectedSubscription) {
+              const targetFolder =
+                this.querySelector(".folder-name").textContent;
+              const targetCount = this.querySelector(".sub-count");
+              const currentCount = document.getElementById("fps-count");
+
+              console.log("Moving to:", targetFolder);
+
+              // Update counts
+              const currentNum = parseInt(currentCount.textContent);
+              const targetNum = parseInt(targetCount.textContent);
+
+              currentCount.textContent = currentNum - 1;
+              targetCount.textContent = targetNum + 1;
+
+              // Show success message
+              const instruction = document.querySelector(".instruction-text");
+              if (instruction) {
+                instruction.textContent = `✓ Moved ${selectedSubscription} to ${targetFolder}`;
+                instruction.style.color = "#4caf50";
+              }
+
+              // Reset after 2 seconds
+              setTimeout(() => {
+                cancelMove();
+              }, 2000);
+            }
+          });
+        });
+      }, 1000); // 1 second delay to ensure DOM is ready
+    </script>
+  </body>
+</html>

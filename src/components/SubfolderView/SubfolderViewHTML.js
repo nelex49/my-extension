@@ -115,6 +115,105 @@ function generateSubfolderOptionsHTML(
 }
 
 /**
+ * Generate HTML for subfolder options grouped by parent folder (for move mode)
+ * @param {Object} folderData - Current folder data
+ * @param {string} currentSubfolderName - Currently selected subfolder name (to exclude from targets)
+ * @param {string} currentFolderName - Currently selected folder name (to exclude from targets)
+ * @param {number} uncategorizedCount - Count of uncategorized subscriptions
+ * @returns {string} HTML string for grouped subfolder options
+ */
+function generateGroupedSubfoldersHTML(
+  folderData,
+  currentSubfolderName,
+  currentFolderName,
+  uncategorizedCount
+) {
+  let groupedHTML = "";
+
+  // Add Uncategorized option at the top (if not current)
+  if (
+    currentFolderName !== "Uncategorized" &&
+    currentSubfolderName !== "Uncategorized"
+  ) {
+    groupedHTML += `
+      <div class="subfolder-option uncategorized" 
+           id="uncategorized" 
+           data-target="uncategorized"
+           data-folder-name="Uncategorized"
+           data-subfolder-name="Uncategorized"
+           style="border-left: 3px solid #ff9800;">
+        <div class="folder-icon" style="background: #ff9800;">📦</div>
+        <div class="folder-name">Uncategorized</div>
+        <div class="sub-count" id="uncategorized-count">${uncategorizedCount}</div>
+      </div>
+    `;
+  }
+
+  // Group subfolders by parent folder
+  Object.keys(folderData).forEach((folderName) => {
+    const folderInfo = folderData[folderName];
+    if (folderInfo && folderInfo.subfolders) {
+      const subfolders = folderInfo.subfolders;
+      const subfolderEntries = Object.entries(subfolders);
+
+      // Only show parent folder group if it has subfolders
+      if (subfolderEntries.length > 0) {
+        const folderId = folderName.replace(/\s+/g, "-").toLowerCase();
+        const iconColor = folderInfo.color || "#667eea";
+        const iconLetter = folderName.charAt(0).toUpperCase();
+
+        groupedHTML += `
+          <div class="parent-folder-group">
+            <div class="parent-folder-group-header" data-folder-id="${folderId}">
+              <div class="parent-folder-group-icon" style="background: ${iconColor}">${iconLetter}</div>
+              <span class="parent-folder-group-name">${folderName}</span>
+              <span class="parent-folder-group-toggle">▼</span>
+            </div>
+            <div class="parent-folder-group-content" id="group-${folderId}" style="display: block;">
+        `;
+
+        subfolderEntries.forEach(([subfolderName, subfolderInfo]) => {
+          // Skip current subfolder - can't move to same folder
+          if (
+            folderName === currentFolderName &&
+            subfolderName === currentSubfolderName
+          ) {
+            return;
+          }
+
+          const subCount = subfolderInfo.subscriptions?.length || 0;
+          const iconColor = subfolderInfo.color || "#1976d2";
+          const iconText = subfolderName.substring(0, 3).toUpperCase();
+
+          groupedHTML += `
+            <div class="subfolder-option" 
+                 id="${subfolderName.replace(/\s+/g, "-").toLowerCase()}" 
+                 data-target="${subfolderName
+                   .replace(/\s+/g, "-")
+                   .toLowerCase()}"
+                 data-folder-name="${folderName}"
+                 data-subfolder-name="${subfolderName}">
+              <div class="folder-icon" style="background: ${iconColor}">${iconText}</div>
+              <div class="folder-name">${subfolderName}</div>
+              <div class="sub-count" id="${subfolderName
+                .replace(/\s+/g, "-")
+                .toLowerCase()}-count">${subCount}</div>
+            </div>
+          `;
+        });
+
+        groupedHTML += `
+            </div>
+          </div>
+        `;
+      }
+    }
+  });
+
+  return groupedHTML;
+}
+
+/**
  * Generate HTML for a single subscription item
  * @param {Object} sub - Subscription object
  * @param {string} selectedParentFolder - Currently selected parent folder
@@ -346,6 +445,7 @@ function generateModalHTML({
 // Make functions globally available
 window.generateParentFolderTabsHTML = generateParentFolderTabsHTML;
 window.generateSubfolderOptionsHTML = generateSubfolderOptionsHTML;
+window.generateGroupedSubfoldersHTML = generateGroupedSubfoldersHTML;
 window.generateSubscriptionItemHTML = generateSubscriptionItemHTML;
 window.generateSubscriptionsListHTML = generateSubscriptionsListHTML;
 window.generateModalHTML = generateModalHTML;

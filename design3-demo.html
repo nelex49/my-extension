@@ -1,0 +1,592 @@
+<!-- @format -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>SubfolderView Demo - Improved Layout</title>
+    <link rel="stylesheet" href="src/styles/subfolder-view.css" />
+  </head>
+  <body>
+    <div class="container">
+      <h1>🎯 SubfolderView Demo - Improved Layout</h1>
+
+      <div class="demo-section">
+        <div class="demo-header">
+          <h2>SubfolderView: Improved Subfolder Subscription View</h2>
+          <p>
+            Enhanced layout with parent folders, repositioned buttons, and
+            better Clear functionality
+          </p>
+        </div>
+        <div class="demo-content">
+
+          <!-- Two Panel Layout -->
+          <div class="two-panel-layout">
+            <!-- Parent Folder Header -->
+            <div class="parent-folder-header">
+              <div class="parent-folder-title-section">
+                <h3>Parent Folders</h3>
+                <div class="parent-folder-stats">
+                  <div class="stat-item-small">
+                    <div class="stat-number-small">45</div>
+                    <div class="stat-label-small">Total FPS Subs</div>
+                  </div>
+                  <div class="stat-item-small">
+                    <div class="stat-number-small">42</div>
+                    <div class="stat-label-small">Active</div>
+                  </div>
+                  <div class="stat-item-small">
+                    <div class="stat-number-small">3</div>
+                    <div class="stat-label-small">Inactive</div>
+                  </div>
+                  <div class="stat-item-small">
+                    <div class="stat-number-small">1.2B</div>
+                    <div class="stat-label-small">Total Subscribers</div>
+                  </div>
+                </div>
+              </div>
+              <div class="parent-folder-tabs" id="parent-folder-tabs">
+                <div class="parent-folder-tab active" data-name="gaming">
+                  <div class="icon" style="background: #ff6b6b">G</div>
+                  <span>Gaming</span>
+                  <div class="count">117</div>
+                </div>
+                <div class="parent-folder-tab" data-name="tech">
+                  <div class="icon" style="background: #4ecdc4">T</div>
+                  <span>Technology</span>
+                  <div class="count">89</div>
+                </div>
+                <div class="parent-folder-tab" data-name="music">
+                  <div class="icon" style="background: #f093fb">M</div>
+                  <span>Music</span>
+                  <div class="count">234</div>
+                </div>
+                <div class="parent-folder-tab" data-name="education">
+                  <div class="icon" style="background: #4facfe">E</div>
+                  <span>Education</span>
+                  <div class="count">67</div>
+                </div>
+                <div class="parent-folder-tab" data-name="comedy">
+                  <div class="icon" style="background: #ffd93d">C</div>
+                  <span>Comedy</span>
+                  <div class="count">45</div>
+                </div>
+                <div class="parent-folder-tab" data-name="news">
+                  <div class="icon" style="background: #6c5ce7">N</div>
+                  <span>News</span>
+                  <div class="count">23</div>
+                </div>
+                <div class="parent-folder-tab" data-name="sports">
+                  <div class="icon" style="background: #fd79a8">S</div>
+                  <span>Sports</span>
+                  <div class="count">34</div>
+                </div>
+                <div class="parent-folder-tab" data-name="cooking">
+                  <div class="icon" style="background: #00b894">K</div>
+                  <span>Cooking</span>
+                  <div class="count">28</div>
+                </div>
+                <div class="parent-folder-tab" data-name="travel">
+                  <div class="icon" style="background: #e17055">T</div>
+                  <span>Travel</span>
+                  <div class="count">19</div>
+                </div>
+                <div class="parent-folder-tab" data-name="unorganized">
+                  <div class="icon" style="background: #a29bfe">U</div>
+                  <span>Unorganized</span>
+                  <div class="count">701</div>
+                </div>
+              </div>
+              <div class="parent-folder-toggle">
+                <button onclick="toggleParentFolders()">Show More</button>
+              </div>
+            </div>
+            
+            <!-- Main Panels Container -->
+            <div class="main-panels">
+              <!-- Subfolders Panel -->
+              <div class="subfolders-panel">
+              <!-- Breadcrumb Navigation -->
+              <div class="breadcrumb-nav">
+                <div class="breadcrumb-path">
+                  <span class="breadcrumb-item">Gaming</span>
+                  <span class="breadcrumb-separator">›</span>
+                  <span class="breadcrumb-item active">FPS Games</span>
+                </div>
+                <span class="breadcrumb-count">45 subs</span>
+              </div>
+
+              <h3>Subfolders</h3>
+
+              <div
+                id="move-instructions"
+                class="move-instructions"
+                style="display: none"
+              >
+                <div class="instruction-text">
+                  Click destination subfolder below
+                </div>
+              </div>
+
+              <div class="subfolder-option current" id="fps-games">
+                <div class="folder-icon" style="background: #ff6b6b">FPS</div>
+                <div class="folder-name">FPS Games</div>
+                <div class="sub-count" id="fps-count">45</div>
+              </div>
+              <div class="subfolder-option" id="rpg-games" data-target="rpg">
+                <div class="folder-icon" style="background: #4ecdc4">RPG</div>
+                <div class="folder-name">RPG Games</div>
+                <div class="sub-count" id="rpg-count">23</div>
+              </div>
+              <div class="subfolder-option" id="moba-games" data-target="moba">
+                <div class="folder-icon" style="background: #f093fb">MOBA</div>
+                <div class="folder-name">MOBA Games</div>
+                <div class="sub-count" id="moba-count">18</div>
+              </div>
+              <div
+                class="subfolder-option"
+                id="indie-games"
+                data-target="indie"
+              >
+                <div class="folder-icon" style="background: #4facfe">IND</div>
+                <div class="folder-name">Indie Games</div>
+                <div class="sub-count" id="indie-count">31</div>
+              </div>
+              <div
+                class="subfolder-option"
+                id="strategy-games"
+                data-target="strategy"
+              >
+                <div class="folder-icon" style="background: #ffd93d">STR</div>
+                <div class="folder-name">Strategy Games</div>
+                <div class="sub-count" id="strategy-count">12</div>
+              </div>
+              <div
+                class="subfolder-option"
+                id="simulation-games"
+                data-target="simulation"
+              >
+                <div class="folder-icon" style="background: #6c5ce7">SIM</div>
+                <div class="folder-name">Simulation Games</div>
+                <div class="sub-count" id="simulation-count">8</div>
+              </div>
+              <div
+                class="subfolder-option"
+                id="sports-games"
+                data-target="sports"
+              >
+                <div class="folder-icon" style="background: #fd79a8">SPT</div>
+                <div class="folder-name">Sports Games</div>
+                <div class="sub-count" id="sports-count">15</div>
+              </div>
+              <div
+                class="subfolder-option"
+                id="racing-games"
+                data-target="racing"
+              >
+                <div class="folder-icon" style="background: #00b894">RAC</div>
+                <div class="folder-name">Racing Games</div>
+                <div class="sub-count" id="racing-count">7</div>
+              </div>
+              <div
+                class="subfolder-option"
+                id="unorganized"
+                data-target="unorganized"
+              >
+                <div class="folder-icon" style="background: #a29bfe">U</div>
+                <div class="folder-name">Unorganized</div>
+                <div class="sub-count" id="unorganized-count">142</div>
+              </div>
+            </div>
+
+            <!-- Subscriptions Panel -->
+            <div class="subscriptions-panel">
+              <!-- Search and Filter Bar -->
+              <div class="search-filter-bar">
+                <div class="search-section">
+                  <div class="search-input-container">
+                    <span class="search-icon">⌕</span>
+                    <input
+                      type="text"
+                      placeholder="Search FPS Games subscriptions..."
+                      value="PewDiePie"
+                    />
+                  </div>
+                </div>
+                <div class="filter-section">
+                  <select class="filter-select">
+                    <option>Sort A-Z</option>
+                    <option>Sort Z-A</option>
+                    <option>Most Active</option>
+                    <option>Recently Added</option>
+                    <option>Most Subscribers</option>
+                  </select>
+                  <button class="action-btn">All</button>
+                  <button class="action-btn" onclick="clearFilters()">
+                    Clear
+                  </button>
+                  <button class="action-btn">Export</button>
+                  <button class="action-btn">Import</button>
+                </div>
+              </div>
+
+              <!-- Subscriptions List with Virtual Scrolling -->
+              <div class="subscriptions-container">
+                <div class="subscriptions-list">
+                  <div class="subscription-item selected">
+                    <div class="sub-avatar-medium">P</div>
+                    <div class="sub-info">
+                      <div class="sub-name">PewDiePie</div>
+                      <div class="sub-details">
+                        67.2M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button
+                        class="action-btn-small"
+                        onclick="startMove('PewDiePie')"
+                      >
+                        Move
+                      </button>
+                      <button
+                        class="action-btn-small remove-btn"
+                        onclick="removeSubscription('PewDiePie')"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">S</div>
+                    <div class="sub-info">
+                      <div class="sub-name">Shroud</div>
+                      <div class="sub-details">
+                        7.2M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button
+                        class="action-btn-small"
+                        onclick="startMove('Shroud')"
+                      >
+                        Move
+                      </button>
+                      <button
+                        class="action-btn-small remove-btn"
+                        onclick="removeSubscription('Shroud')"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">D</div>
+                    <div class="sub-info">
+                      <div class="sub-name">DrDisrespect</div>
+                      <div class="sub-details">
+                        4.1M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button
+                        class="action-btn-small"
+                        onclick="startMove('DrDisrespect')"
+                      >
+                        Move
+                      </button>
+                      <button
+                        class="action-btn-small remove-btn"
+                        onclick="removeSubscription('DrDisrespect')"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">T</div>
+                    <div class="sub-info">
+                      <div class="sub-name">Tfue</div>
+                      <div class="sub-details">
+                        11.8M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button
+                        class="action-btn-small"
+                        onclick="startMove('Tfue')"
+                      >
+                        Move
+                      </button>
+                      <button
+                        class="action-btn-small remove-btn"
+                        onclick="removeSubscription('Tfue')"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">N</div>
+                    <div class="sub-info">
+                      <div class="sub-name">Ninja</div>
+                      <div class="sub-details">
+                        24.1M subscribers • FPS Gaming • Inactive
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button
+                        class="action-btn-small"
+                        onclick="startMove('Ninja')"
+                      >
+                        Move
+                      </button>
+                      <button
+                        class="action-btn-small remove-btn"
+                        onclick="removeSubscription('Ninja')"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">M</div>
+                    <div class="sub-info">
+                      <div class="sub-name">MrBeast</div>
+                      <div class="sub-details">
+                        156M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button
+                        class="action-btn-small"
+                        onclick="startMove('MrBeast')"
+                      >
+                        Move
+                      </button>
+                      <button
+                        class="action-btn-small remove-btn"
+                        onclick="removeSubscription('MrBeast')"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">A</div>
+                    <div class="sub-info">
+                      <div class="sub-name">Aim Lab</div>
+                      <div class="sub-details">
+                        2.1M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button
+                        class="action-btn-small"
+                        onclick="startMove('Aim Lab')"
+                      >
+                        Move
+                      </button>
+                      <button
+                        class="action-btn-small remove-btn"
+                        onclick="removeSubscription('Aim Lab')"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">B</div>
+                    <div class="sub-info">
+                      <div class="sub-name">Battlegrounds</div>
+                      <div class="sub-details">
+                        8.7M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button
+                        class="action-btn-small"
+                        onclick="startMove('Battlegrounds')"
+                      >
+                        Move
+                      </button>
+                      <button
+                        class="action-btn-small remove-btn"
+                        onclick="removeSubscription('Battlegrounds')"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">C</div>
+                    <div class="sub-info">
+                      <div class="sub-name">CS:GO</div>
+                      <div class="sub-details">
+                        5.3M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button
+                        class="action-btn-small"
+                        onclick="startMove('CS:GO')"
+                      >
+                        Move
+                      </button>
+                      <button
+                        class="action-btn-small remove-btn"
+                        onclick="removeSubscription('CS:GO')"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">V</div>
+                    <div class="sub-info">
+                      <div class="sub-name">Valorant</div>
+                      <div class="sub-details">
+                        12.4M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button
+                        class="action-btn-small"
+                        onclick="startMove('Valorant')"
+                      >
+                        Move
+                      </button>
+                      <button
+                        class="action-btn-small remove-btn"
+                        onclick="removeSubscription('Valorant')"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">O</div>
+                    <div class="sub-info">
+                      <div class="sub-name">Overwatch</div>
+                      <div class="sub-details">
+                        9.8M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button
+                        class="action-btn-small"
+                        onclick="startMove('Overwatch')"
+                      >
+                        Move
+                      </button>
+                      <button
+                        class="action-btn-small remove-btn"
+                        onclick="removeSubscription('Overwatch')"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">F</div>
+                    <div class="sub-info">
+                      <div class="sub-name">Fortnite</div>
+                      <div class="sub-details">
+                        15.2M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button
+                        class="action-btn-small"
+                        onclick="startMove('Fortnite')"
+                      >
+                        Move
+                      </button>
+                      <button
+                        class="action-btn-small remove-btn"
+                        onclick="removeSubscription('Fortnite')"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">V</div>
+                    <div class="sub-info">
+                      <div class="sub-name">
+                        VeryLongChannelNameThatShouldBeTruncated
+                      </div>
+                      <div class="sub-details">
+                        2.1M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button
+                        class="action-btn-small"
+                        onclick="startMove('VeryLongChannelNameThatShouldBeTruncated')"
+                      >
+                        Move
+                      </button>
+                      <button
+                        class="action-btn-small remove-btn"
+                        onclick="removeSubscription('VeryLongChannelNameThatShouldBeTruncated')"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="subscription-item">
+                    <div class="sub-avatar-medium">A</div>
+                    <div class="sub-info">
+                      <div class="sub-name">
+                        AnotherExtremelyLongChannelNameForTesting
+                      </div>
+                      <div class="sub-details">
+                        1.5M subscribers • FPS Gaming • Active
+                      </div>
+                    </div>
+                    <div class="sub-actions">
+                      <button
+                        class="action-btn-small"
+                        onclick="startMove('AnotherExtremelyLongChannelNameForTesting')"
+                      >
+                        Move
+                      </button>
+                      <button
+                        class="action-btn-small remove-btn"
+                        onclick="removeSubscription('AnotherExtremelyLongChannelNameForTesting')"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+
+        </div>
+      </div>
+    </div>
+
+    <script src="src/components/SubfolderView/MoveManager.js"></script>
+    <script src="src/components/SubfolderView/ParentFolderSelector.js"></script>
+    <script src="src/components/SubfolderView/SubscriptionList.js"></script>
+    <script src="src/components/SubfolderView/subfolder-view-main.js"></script>
+  </body>
+</html>

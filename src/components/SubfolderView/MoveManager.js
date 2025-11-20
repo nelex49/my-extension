@@ -5,6 +5,7 @@
 
 let isMoving = false;
 let selectedSubscription = null;
+let originalSubfoldersHTML = null; // Store original subfolders HTML to restore later
 
 function startMove(subscriptionName, channelId) {
   // Toggle behavior: if already moving, cancel
@@ -15,6 +16,57 @@ function startMove(subscriptionName, channelId) {
 
   isMoving = true;
   selectedSubscription = { name: subscriptionName, channelId: channelId };
+
+  // Get current subfolder info
+  const currentSubfolder = document.querySelector(".subfolder-option.current");
+  const currentFolderName = currentSubfolder?.dataset.folderName || "";
+  const currentSubfolderName = currentSubfolder?.dataset.subfolderName || "";
+
+  // Store original subfolders HTML
+  const subfoldersContainer = document.querySelector(".subfolders-panel");
+  if (subfoldersContainer) {
+    const h3 = subfoldersContainer.querySelector("h3");
+    const moveInstructions =
+      subfoldersContainer.querySelector("#move-instructions");
+    const existingSubfolders = subfoldersContainer.querySelectorAll(
+      ".subfolder-option, .parent-folder-group"
+    );
+
+    // Store original HTML
+    originalSubfoldersHTML = Array.from(existingSubfolders)
+      .map((el) => el.outerHTML)
+      .join("");
+
+    // Generate grouped subfolders HTML
+    const currentFolderData = window.folderData || {};
+    const uncategorizedSubs = window.getUncategorizedSubscriptions
+      ? window.getUncategorizedSubscriptions()
+      : [];
+    const uncategorizedCount = uncategorizedSubs.length;
+
+    const groupedHTML = window.generateGroupedSubfoldersHTML
+      ? window.generateGroupedSubfoldersHTML(
+          currentFolderData,
+          currentSubfolderName,
+          currentFolderName,
+          uncategorizedCount
+        )
+      : "";
+
+    // Replace subfolders with grouped view
+    existingSubfolders.forEach((el) => el.remove());
+
+    if (h3 && moveInstructions) {
+      const tempDiv = document.createElement("div");
+      tempDiv.innerHTML = groupedHTML;
+      while (tempDiv.firstChild) {
+        subfoldersContainer.insertBefore(tempDiv.firstChild, moveInstructions);
+      }
+    }
+
+    // Setup collapsible group headers
+    setupCollapsibleGroups();
+  }
 
   // Show instructions
   const instructionsEl = document.getElementById("move-instructions");
@@ -109,7 +161,7 @@ function startMove(subscriptionName, channelId) {
         }, 100);
       }
 
-      // Reset after 2 seconds
+      // Restore original view and reset after 2 seconds
       setTimeout(() => {
         cancelMove();
       }, 2000);
@@ -127,7 +179,36 @@ function cancelMove() {
     instructionsEl.classList.add("hidden");
   }
 
-  // Reset subfolders
+  // Restore original subfolders view
+  if (originalSubfoldersHTML) {
+    const subfoldersContainer = document.querySelector(".subfolders-panel");
+    if (subfoldersContainer) {
+      const h3 = subfoldersContainer.querySelector("h3");
+      const moveInstructions =
+        subfoldersContainer.querySelector("#move-instructions");
+      const existingSubfolders = subfoldersContainer.querySelectorAll(
+        ".subfolder-option, .parent-folder-group"
+      );
+
+      // Remove grouped view
+      existingSubfolders.forEach((el) => el.remove());
+
+      // Restore original HTML
+      if (h3 && moveInstructions && originalSubfoldersHTML) {
+        const tempDiv = document.createElement("div");
+        tempDiv.innerHTML = originalSubfoldersHTML;
+        while (tempDiv.firstChild) {
+          subfoldersContainer.insertBefore(
+            tempDiv.firstChild,
+            moveInstructions
+          );
+        }
+      }
+    }
+    originalSubfoldersHTML = null;
+  }
+
+  // Reset subfolders styling
   const subfolders = document.querySelectorAll(
     ".subfolder-option[data-target]"
   );
@@ -140,6 +221,33 @@ function cancelMove() {
     folder.style.fontWeight = "";
     folder.classList.remove("move-target");
     folder.onclick = null;
+  });
+}
+
+/**
+ * Setup collapsible group headers for parent folder groups
+ */
+function setupCollapsibleGroups() {
+  const groupHeaders = document.querySelectorAll(".parent-folder-group-header");
+  groupHeaders.forEach((header) => {
+    header.addEventListener("click", function () {
+      const folderId = this.dataset.folderId;
+      const content = document.getElementById(`group-${folderId}`);
+      const toggle = this.querySelector(".parent-folder-group-toggle");
+
+      if (content) {
+        if (content.style.display === "none") {
+          content.style.display = "block";
+          toggle.textContent = "▼";
+        } else {
+          content.style.display = "none";
+          toggle.textContent = "▶";
+        }
+      }
+    });
+
+    // Make header look clickable
+    header.style.cursor = "pointer";
   });
 }
 
