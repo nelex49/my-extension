@@ -14,6 +14,7 @@
   "content_scripts": [
     {
       "matches": ["https://www.youtube.com/*"],
+      "css": ["src/styles/subfolder-view.css"],
       "js": [
         "src/utils/constants.js",
         "src/utils/helpers.js",
@@ -26,6 +27,9 @@
         "src/components/FolderModals.js",
         "src/components/FolderDropdown.js",
         "src/components/SidebarButton.js",
+        "src/components/SubfolderView/SubfolderViewHelpers.js",
+        "src/components/SubfolderView/SubfolderViewHTML.js",
+        "src/components/SubfolderView/SubfolderViewEvents.js",
         "src/components/SubfolderView/MoveManager.js",
         "src/components/SubfolderView/ParentFolderSelector.js",
         "src/components/SubfolderView/SubscriptionList.js",

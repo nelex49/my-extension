@@ -19,15 +19,12 @@ function startMove(subscriptionName, channelId) {
   // Show instructions
   const instructionsEl = document.getElementById("move-instructions");
   if (instructionsEl) {
-    instructionsEl.style.display = "block";
+    instructionsEl.classList.remove("hidden");
     const instructionText = instructionsEl.querySelector(".instruction-text");
     if (instructionText) {
       instructionText.textContent = "Click destination subfolder below";
       instructionText.style.color = "#e65100";
     }
-  } else {
-    // Instructions element might not exist yet, log for debugging
-    console.warn("Move instructions element not found");
   }
 
   // Make subfolders clickable (except current)
@@ -127,7 +124,7 @@ function cancelMove() {
   // Hide instructions
   const instructionsEl = document.getElementById("move-instructions");
   if (instructionsEl) {
-    instructionsEl.style.display = "none";
+    instructionsEl.classList.add("hidden");
   }
 
   // Reset subfolders

@@ -25,12 +25,6 @@ function initializeParentFolderTabs() {
       parentTabs.forEach((t) => t.classList.remove("active"));
       // Add active class to clicked tab
       this.classList.add("active");
-
-      // In a real app, this would load the subfolders for the selected parent folder
-      console.log(
-        "Switched to parent folder:",
-        this.querySelector("span").textContent
-      );
     });
   });
 }

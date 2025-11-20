@@ -279,6 +279,8 @@ h1 {
 .main-panels {
   display: flex;
   height: 500px;
+  flex: 1;
+  overflow: hidden;
 }
 
 .subfolders-panel {
@@ -310,6 +312,10 @@ h1 {
   padding: 12px;
   margin-bottom: 16px;
   text-align: center;
+}
+
+.move-instructions.hidden {
+  display: none;
 }
 
 .instruction-text {
@@ -753,4 +759,59 @@ h1 {
 
 .clear-explanation li {
   margin-bottom: 4px;
+}
+
+/* Modal Overlay */
+#subfolder-view-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 99999;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Two Panel Layout - Modal Version */
+#subfolder-view-modal .two-panel-layout {
+  max-width: 800px;
+  width: 95%;
+  max-height: 90vh;
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Close Button */
+#close-subfolder-view {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(0, 0, 0, 0.1);
+  border: none;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 16px;
+  color: #333;
+  z-index: 10001;
+  transition: all 0.2s;
+}
+
+#close-subfolder-view:hover {
+  background: rgba(0, 0, 0, 0.2);
 }
