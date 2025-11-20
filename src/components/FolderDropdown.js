@@ -460,7 +460,18 @@ function createFolderDropdown() {
   const allSubsBtn = folderDropdown.querySelector("#view-all-subs");
   if (allSubsBtn) {
     allSubsBtn.addEventListener("click", () => {
-      showAllSubscriptions();
+      console.log("Organize Subs clicked - checking for showSubfolderView...");
+      console.log("showSubfolderView type:", typeof window.showSubfolderView);
+      if (typeof window.showSubfolderView === "function") {
+        console.log("Calling showSubfolderView...");
+        window.showSubfolderView();
+      } else {
+        console.warn("showSubfolderView not found, falling back to old panel");
+        // Fallback to old panel if SubfolderView not loaded
+        if (typeof window.showAllSubscriptions_OLD === "function") {
+          window.showAllSubscriptions_OLD();
+        }
+      }
     });
   }
 }
@@ -669,7 +680,14 @@ function showFolderManagementPanel(folderName) {
 
   panel.querySelector("#view-subscriptions").addEventListener("click", () => {
     panel.remove();
-    showAllSubscriptions();
+    if (typeof window.showSubfolderView === "function") {
+      window.showSubfolderView();
+    } else {
+      // Fallback to old panel if SubfolderView not loaded
+      if (typeof window.showAllSubscriptions_OLD === "function") {
+        window.showAllSubscriptions_OLD();
+      }
+    }
   });
 
   panel.querySelector("#add-subfolder").addEventListener("click", () => {

@@ -289,7 +289,14 @@ function createSubfolderModal(
     // Add subscriptions button
     if (e.target.id === "add-subscriptions-to-folder") {
       modal.remove();
-      showAllSubscriptions();
+      if (typeof window.showSubfolderView === "function") {
+        window.showSubfolderView();
+      } else {
+        // Fallback to old panel if SubfolderView not loaded
+        if (typeof window.showAllSubscriptions_OLD === "function") {
+          window.showAllSubscriptions_OLD();
+        }
+      }
     }
 
     // Organize this folder button
@@ -298,7 +305,14 @@ function createSubfolderModal(
       e.target.closest("#organize-this-folder")
     ) {
       modal.remove();
-      showAllSubscriptions();
+      if (typeof window.showSubfolderView === "function") {
+        window.showSubfolderView();
+      } else {
+        // Fallback to old panel if SubfolderView not loaded
+        if (typeof window.showAllSubscriptions_OLD === "function") {
+          window.showAllSubscriptions_OLD();
+        }
+      }
     }
   });
 
@@ -310,15 +324,22 @@ function createSubfolderModal(
   });
 }
 
-// Show all subscriptions for organization
-function showAllSubscriptions() {
+// Show all subscriptions for organization (OLD - DISABLED - kept for rollback)
+function showAllSubscriptions_OLD() {
   // Try to load subscriptions from storage if they're not loaded
   if (userSubscriptions.length === 0) {
     chrome.storage.local.get(["userSubscriptions"], (result) => {
       if (result.userSubscriptions && result.userSubscriptions.length > 0) {
         userSubscriptions = result.userSubscriptions;
         // Recursively call this function now that we have data
-        showAllSubscriptions();
+        if (typeof window.showSubfolderView === "function") {
+          window.showSubfolderView();
+        } else {
+          // Fallback to old panel if SubfolderView not loaded
+          if (typeof window.showAllSubscriptions_OLD === "function") {
+            window.showAllSubscriptions_OLD();
+          }
+        }
         return;
       } else {
         showLoginPrompt();
@@ -553,7 +574,14 @@ function showAllSubscriptions() {
         // Refresh the modal to show updated locations
         setTimeout(() => {
           modal.remove();
-          showAllSubscriptions();
+          if (typeof window.showSubfolderView === "function") {
+            window.showSubfolderView();
+          } else {
+            // Fallback to old panel if SubfolderView not loaded
+            if (typeof window.showAllSubscriptions_OLD === "function") {
+              window.showAllSubscriptions_OLD();
+            }
+          }
         }, 300);
       }
     }
@@ -599,4 +627,5 @@ function showAllSubscriptions() {
 // Make them globally available
 window.findSubscriptionLocation = findSubscriptionLocation;
 window.showSubfolderSubscriptions = showSubfolderSubscriptions;
-window.showAllSubscriptions = showAllSubscriptions;
+// OLD function disabled - using showSubfolderView instead
+// window.showAllSubscriptions = showAllSubscriptions_OLD;

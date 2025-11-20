@@ -26,6 +26,11 @@
         "src/components/FolderModals.js",
         "src/components/FolderDropdown.js",
         "src/components/SidebarButton.js",
+        "src/components/SubfolderView/MoveManager.js",
+        "src/components/SubfolderView/ParentFolderSelector.js",
+        "src/components/SubfolderView/SubscriptionList.js",
+        "src/components/SubfolderView/SubfolderViewPanel.js",
+        "src/components/SubfolderView/subfolder-view-main.js",
         "src/core/App.js",
         "src/main.js"
       ]
