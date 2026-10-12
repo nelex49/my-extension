@@ -1,344 +1,93 @@
 /** @format */
 
-// SidebarButton component for YouTube Subscription Manager
+// One mount routine for both authentication states. YouTube may replace its guide.
+let sidebarGuideObserver = null;
+let sidebarMountQueued = false;
 
-function createSidebarButton() {
-  // Check if button already exists to prevent duplicates
-  const existingButton = document.querySelector("#yt-manage-guide-entry");
-  if (existingButton) {
-    return existingButton;
+function mountSidebarEntry(loggedIn = isLoggedIn) {
+  const section = document.querySelector("ytd-guide-section-renderer");
+  const container = section?.querySelector("#items") ||
+    section?.querySelector("ytd-guide-entry-renderer")?.parentElement;
+  if (!container) return null;
+
+  let entry = document.getElementById("yt-manage-guide-entry");
+  if (entry && entry.parentElement !== container) {
+    entry.remove();
+    folderDropdown = null;
+    window.folderDropdown = null;
+    entry = null;
+  }
+  const state = loggedIn ? "ready" : "login";
+  if (entry?.dataset.state === state) {
+    sizeSidebarLauncher(entry, container);
+    return entry;
   }
 
-  // Set flag immediately to prevent duplicate calls
-  if (window.sidebarButtonCreated) {
-    return null;
+  if (!entry) {
+    entry = document.createElement("div");
+    entry.id = "yt-manage-guide-entry";
+    container.prepend(entry);
   }
+  entry.replaceChildren();
+  entry.dataset.state = state;
+  folderDropdown = null;
+  window.folderDropdown = null;
 
-  // Mark as creating to prevent duplicate calls
+  const button = document.createElement("button");
+  button.type = "button";
+  button.className = "ytsm-launcher";
+  const label = loggedIn ? "Subscription Folders" : "Sign in to Organise Subs";
+  button.setAttribute("aria-label", label);
+  button.title = label;
+  const icon = document.createElement("span");
+  icon.className = loggedIn ? "ytsm-launcher-icon ytsm-launcher-folder" :
+    "ytsm-launcher-icon ytsm-launcher-signin";
+  icon.setAttribute("aria-hidden", "true");
+  if (!loggedIn) icon.textContent = "↪";
+  const text = document.createElement("span");
+  text.className = "ytsm-launcher-label";
+  text.textContent = label;
+  button.append(icon, text);
+  if (loggedIn) {
+    button.setAttribute("aria-expanded", "false");
+    button.setAttribute("aria-controls", "yt-folder-dropdown");
+  }
+  button.addEventListener("click", () => {
+    if (entry.dataset.state === "ready") toggleFolderDropdown();
+    else chrome.runtime.sendMessage({ action: "openPopup" });
+  });
+  entry.append(button);
+  sizeSidebarLauncher(entry, container);
   window.sidebarButtonCreated = true;
-
-  // Wait a bit for YouTube to fully load
-  setTimeout(() => {
-    // Find the first guide section (main navigation section) - this is more stable
-    const guideSections = document.querySelectorAll(
-      "ytd-guide-section-renderer",
-    );
-
-    if (guideSections.length > 0) {
-      // Get the first guide section (main navigation)
-      const firstSection = guideSections[0];
-
-      // Find the container that holds guide entries within the section
-      // Try multiple possible container structures
-      let container =
-        firstSection.querySelector("#items") ||
-        firstSection.querySelector("ytd-guide-entry-renderer")?.parentElement ||
-        firstSection.firstElementChild;
-
-      if (container) {
-        // Create our button as a proper guide entry
-        const newGuideEntry = document.createElement(
-          "ytd-guide-entry-renderer",
-        );
-        newGuideEntry.id = "yt-manage-guide-entry";
-
-        // Create blue background button with white text and star icon
-        newGuideEntry.innerHTML = `
-          <a id="yt-manage-link" href="#" class="yt-simple-endpoint style-scope ytd-guide-entry-renderer" aria-label="Manage YT">
-            <div style="margin-right: 12px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-              <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" style="pointer-events: none; display: block; width: 20px; height: 20px; fill: white;">
-                <g>
-                  <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path>
-                </g>
-              </svg>
-            </div>
-            <span class="title style-scope ytd-guide-entry-renderer">MANAGE YT SUBS</span>
-          </a>
-        `;
-
-        // Apply aggressive styling after creation
-        const link = newGuideEntry.querySelector("#yt-manage-link");
-        if (link) {
-          // Force all the styles
-          link.style.cssText = `
-            background-color: #1976d2 !important;
-            color: white !important;
-            display: flex !important;
-            align-items: center !important;
-            padding: 10px 16px !important;
-            text-decoration: none !important;
-            border-radius: 10px !important;
-            margin: 2px 0 !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-          `;
-
-          // Force text color and ensure it fits
-          const title = link.querySelector(".title");
-          if (title) {
-            title.style.cssText = `
-              color: white !important;
-              font-weight: 500 !important;
-              font-size: 14px !important;
-              white-space: nowrap !important;
-            `;
-          }
-        }
-
-        // Add hover effect
-        if (link) {
-          link.addEventListener("mouseenter", () => {
-            link.style.backgroundColor = "#1565c0";
-          });
-          link.addEventListener("mouseleave", () => {
-            link.style.backgroundColor = "#1976d2";
-          });
-        }
-
-        // Add click handler
-        const manageLink = newGuideEntry.querySelector("#yt-manage-link");
-        if (manageLink) {
-          manageLink.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            // Temporary visual feedback
-            manageLink.style.backgroundColor = "#ff9800";
-            setTimeout(() => {
-              manageLink.style.backgroundColor = "#1976d2";
-            }, 200);
-
-            // Call the dropdown function
-            if (typeof window.toggleFolderDropdown === "function") {
-              window.toggleFolderDropdown();
-            }
-          });
-        }
-
-        // Add fade-in animation
-        newGuideEntry.style.opacity = "0";
-        newGuideEntry.style.transition = "opacity 0.3s ease-in";
-
-        // Insert the button as the FIRST item in the main navigation section
-        container.insertBefore(newGuideEntry, container.firstChild);
-
-        // Trigger fade-in after insertion
-        setTimeout(() => {
-          newGuideEntry.style.opacity = "1";
-        }, 10);
-
-        return newGuideEntry;
-      }
-    }
-
-    return null;
-  }, 1000);
+  return entry;
 }
 
-function createLoginPrompt() {
-  logStatus("createLoginPrompt called", "info");
-
-  // Check if button already exists to prevent duplicates
-  const existingButton = document.querySelector("#yt-manage-guide-entry");
-  if (existingButton) {
-    logStatus("Login prompt already exists, returning existing", "info");
-    return existingButton;
-  }
-
-  // Set flag immediately to prevent duplicate calls
-  if (window.sidebarButtonCreated) {
-    logStatus("Button creation flag is true, skipping login prompt", "warn");
-    return null;
-  }
-
-  // Mark as creating to prevent duplicate calls
-  window.sidebarButtonCreated = true;
-
-  // Wait a bit for YouTube to fully load
-  setTimeout(() => {
-    // Find the first guide section (main navigation section) - this is more stable
-    const guideSections = document.querySelectorAll(
-      "ytd-guide-section-renderer",
-    );
-
-    if (guideSections.length > 0) {
-      // Get the first guide section (main navigation)
-      const firstSection = guideSections[0];
-
-      // Find the container that holds guide entries within the section
-      // Try multiple possible container structures
-      let container =
-        firstSection.querySelector("#items") ||
-        firstSection.querySelector("ytd-guide-entry-renderer")?.parentElement ||
-        firstSection.firstElementChild;
-
-      if (container) {
-        // Create our login prompt as a proper guide entry
-        const newGuideEntry = document.createElement(
-          "ytd-guide-entry-renderer",
-        );
-        newGuideEntry.id = "yt-manage-guide-entry";
-
-        // Create orange background button with white text and lock icon
-        newGuideEntry.innerHTML = `
-          <a id="yt-manage-link" href="#" class="yt-simple-endpoint style-scope ytd-guide-entry-renderer" aria-label="Login Required">
-            <div style="margin-right: 12px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-              <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" style="pointer-events: none; display: block; width: 20px; height: 20px; fill: white;">
-                <g>
-                  <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"></path>
-                </g>
-              </svg>
-            </div>
-            <span class="title style-scope ytd-guide-entry-renderer">LOGIN REQUIRED</span>
-          </a>
-        `;
-
-        // Apply aggressive styling after creation
-        const link = newGuideEntry.querySelector("#yt-manage-link");
-        if (link) {
-          // Force all the styles
-          link.style.cssText = `
-            background-color: #ff9800 !important;
-            color: white !important;
-            display: flex !important;
-            align-items: center !important;
-            padding: 10px 16px !important;
-            text-decoration: none !important;
-            border-radius: 10px !important;
-            margin: 2px 0 !important;
-            width: 100% !important;
-            box-sizing: border-box !important;
-          `;
-
-          // Force text color and ensure it fits
-          const title = link.querySelector(".title");
-          if (title) {
-            title.style.cssText = `
-              color: white !important;
-              font-weight: 500 !important;
-              font-size: 14px !important;
-              white-space: nowrap !important;
-            `;
-          }
-        }
-
-        // Add hover effect
-        if (link) {
-          link.addEventListener("mouseenter", () => {
-            link.style.backgroundColor = "#f57c00";
-          });
-          link.addEventListener("mouseleave", () => {
-            link.style.backgroundColor = "#ff9800";
-          });
-        }
-
-        // Add click handler
-        const manageLink = newGuideEntry.querySelector("#yt-manage-link");
-        if (manageLink) {
-          manageLink.addEventListener("click", (e) => {
-            e.preventDefault();
-            e.stopPropagation();
-
-            // Just open extension popup for login - don't fade out yet
-            chrome.runtime.sendMessage({ action: "openPopup" });
-          });
-        }
-
-        // Add fade-in animation
-        newGuideEntry.style.opacity = "0";
-        newGuideEntry.style.transition = "opacity 0.3s ease-in";
-
-        // Insert the button as the FIRST item in the main navigation section
-        container.insertBefore(newGuideEntry, container.firstChild);
-
-        // Trigger fade-in after insertion
-        setTimeout(() => {
-          newGuideEntry.style.opacity = "1";
-        }, 10);
-
-        logStatus("Login prompt created successfully", "info");
-        return newGuideEntry;
-      }
-    }
-
-    // If guide section not found, retry with a shorter delay
-    logStatus("Guide section not found, retrying...", "warn");
-    setTimeout(() => {
-      const retryGuideSections = document.querySelectorAll(
-        "ytd-guide-section-renderer",
-      );
-      if (retryGuideSections.length > 0) {
-        const retryFirstSection = retryGuideSections[0];
-        let retryContainer =
-          retryFirstSection.querySelector("#items") ||
-          retryFirstSection.querySelector("ytd-guide-entry-renderer")
-            ?.parentElement ||
-          retryFirstSection.firstElementChild;
-
-        if (retryContainer) {
-          // Create the same login prompt as above
-          const newGuideEntry = document.createElement(
-            "ytd-guide-entry-renderer",
-          );
-          newGuideEntry.id = "yt-manage-guide-entry";
-          newGuideEntry.innerHTML = `
-            <a id="yt-manage-link" href="#" class="yt-simple-endpoint style-scope ytd-guide-entry-renderer" aria-label="Login Required">
-              <div style="margin-right: 12px; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
-                <svg viewBox="0 0 24 24" preserveAspectRatio="xMidYMid meet" focusable="false" style="pointer-events: none; display: block; width: 20px; height: 20px; fill: white;">
-                  <g>
-                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"></path>
-                  </g>
-                </svg>
-              </div>
-              <span class="title style-scope ytd-guide-entry-renderer">LOGIN REQUIRED</span>
-            </a>
-          `;
-
-          const link = newGuideEntry.querySelector("#yt-manage-link");
-          if (link) {
-            link.style.cssText = `
-              background-color: #ff9800 !important;
-              color: white !important;
-              display: flex !important;
-              align-items: center !important;
-              padding: 10px 16px !important;
-              text-decoration: none !important;
-              border-radius: 10px !important;
-              margin: 2px 0 !important;
-              width: 100% !important;
-              box-sizing: border-box !important;
-            `;
-
-            const title = link.querySelector(".title");
-            if (title) {
-              title.style.cssText = `
-                color: white !important;
-                font-weight: 500 !important;
-                font-size: 14px !important;
-                white-space: nowrap !important;
-              `;
-            }
-
-            link.addEventListener("click", (e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              chrome.runtime.sendMessage({ action: "openPopup" });
-            });
-          }
-
-          // Insert as first item
-          retryContainer.insertBefore(newGuideEntry, retryContainer.firstChild);
-          logStatus("Login prompt created on retry", "info");
-        }
-      } else {
-        logStatus("Failed to find guide section even on retry", "error");
-      }
-    }, 1000); // Retry after 1 second
-
-    return null;
-  }, 500);
+// Use the neighbouring native guide row's dimensions, with CSS fallbacks.
+function sizeSidebarLauncher(entry, container) {
+  const nativeRow = container.querySelector("ytd-guide-entry-renderer");
+  const target = nativeRow?.querySelector("#endpoint") || nativeRow;
+  const bounds = target?.getBoundingClientRect();
+  if (!bounds?.width || !bounds.height) return;
+  entry.style.setProperty("--launcher-width", bounds.width + "px");
+  entry.style.setProperty("--launcher-height", bounds.height + "px");
 }
 
-// Make it globally available
+function createSidebarButton() { return mountSidebarEntry(true); }
+function createLoginPrompt() { return mountSidebarEntry(false); }
+
+function watchSidebarGuide() {
+  if (sidebarGuideObserver) return;
+  sidebarGuideObserver = new MutationObserver(() => {
+    if (sidebarMountQueued) return;
+    sidebarMountQueued = true;
+    requestAnimationFrame(() => {
+      sidebarMountQueued = false;
+      mountSidebarEntry();
+    });
+  });
+  sidebarGuideObserver.observe(document.body, { childList: true, subtree: true });
+  mountSidebarEntry();
+}
+
 window.createSidebarButton = createSidebarButton;
 window.createLoginPrompt = createLoginPrompt;

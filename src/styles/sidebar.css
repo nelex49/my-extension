@@ -1,0 +1,277 @@
+/* Sidebar styles stay inside the extension root. */
+#yt-manage-guide-entry {
+  width: 100%;
+  font: 13px/1.4 Roboto, Arial, sans-serif;
+  color: #f1f1f1;
+}
+#yt-manage-guide-entry *, #yt-manage-guide-entry *::before,
+#yt-manage-guide-entry *::after { box-sizing: border-box; }
+#yt-manage-guide-entry button {
+  font: inherit;
+  cursor: pointer;
+  border: 0;
+  text-align: left;
+}
+#yt-manage-guide-entry button:focus-visible {
+  outline: 2px solid #a8c7fa;
+  outline-offset: 2px;
+}
+#yt-manage-guide-entry .ytsm-launcher {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: min(100%, var(--launcher-width, 100%));
+  height: var(--launcher-height, 40px);
+  margin: 0;
+  padding: 0 12px;
+  border-radius: 10px;
+  background: #243f59;
+  color: #f1f1f1;
+  font-weight: 500;
+  overflow: hidden;
+}
+#yt-manage-guide-entry .ytsm-launcher:hover { background: #2d4b68; }
+#yt-manage-guide-entry[data-state="login"] .ytsm-launcher {
+  background: #272727;
+  box-shadow: inset 0 0 0 1px #79653e;
+}
+#yt-manage-guide-entry[data-state="login"] .ytsm-launcher:hover { background: #34312b; }
+#yt-manage-guide-entry .ytsm-launcher-label {
+  min-width: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+#yt-manage-guide-entry .ytsm-launcher-icon {
+  position: relative;
+  flex: 0 0 16px;
+  width: 16px;
+  color: #bfcfe0;
+}
+#yt-manage-guide-entry .ytsm-launcher-folder {
+  height: 12px;
+  border: 1.5px solid currentColor;
+  border-radius: 2px;
+}
+#yt-manage-guide-entry .ytsm-launcher-folder::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: -1.5px;
+  width: 8px;
+  height: 4px;
+  border: 1.5px solid currentColor;
+  border-bottom: 0;
+  border-radius: 2px 2px 0 0;
+}
+#yt-manage-guide-entry .ytsm-launcher-signin {
+  font-size: 20px;
+  line-height: 1;
+  color: #c6aa71;
+}
+#yt-manage-guide-entry .ytsm-sidebar {
+  width: min(100%, var(--launcher-width, 100%));
+  margin: 6px 0;
+  padding: 10px 8px;
+  border: 1px solid #383838;
+  border-radius: 12px;
+  background: #181818;
+  max-height: 65vh;
+  overflow-y: auto;
+  scrollbar-width: auto;
+  scrollbar-gutter: stable;
+}
+#yt-manage-guide-entry [hidden] { display: none; }
+#yt-manage-guide-entry .ytsm-heading {
+  margin: 0 4px 8px;
+  padding: 0;
+  color: #b9b9b9;
+  font: 600 12px/1.4 Roboto, Arial, sans-serif;
+}
+#yt-manage-guide-entry .ytsm-folders { display: grid; gap: 8px; }
+#yt-manage-guide-entry .ytsm-folder {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 36px;
+  padding: 8px 10px;
+  border-radius: 9px;
+  background: var(--folder-color, #365b86);
+  color: #f1f1f1;
+}
+#yt-manage-guide-entry .ytsm-folder:hover { filter: brightness(1.12); }
+#yt-manage-guide-entry .ytsm-folder-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+#yt-manage-guide-entry .ytsm-count { font-size: 11px; opacity: .85; }
+#yt-manage-guide-entry .ytsm-empty { margin: 8px 4px; color: #b9b9b9; }
+#yt-manage-guide-entry .ytsm-footer {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #383838;
+}
+#yt-manage-guide-entry .ytsm-manage,
+#yt-manage-guide-entry .ytsm-create {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 8px;
+  background: #243f59;
+  color: #f1f1f1;
+  text-align: center;
+}
+#yt-manage-guide-entry .ytsm-create {
+  background: #22262a;
+  color: #d4d9df;
+  box-shadow: inset 0 0 0 1px #505861;
+}
+#yt-manage-guide-entry .ytsm-manage {
+  box-shadow: inset 0 0 0 1px #779abb;
+}
+#yt-manage-guide-entry .ytsm-manage:hover {
+  background: #2d4b68;
+  box-shadow: inset 0 0 0 1px #a0bed9;
+}
+#yt-manage-guide-entry .ytsm-create:hover { background: #30363d; }
+#yt-manage-guide-entry .ytsm-action-icon { flex: 0 0 auto; }
+#yt-manage-guide-entry .ytsm-action-label { min-width: 0; }
+
+#yt-manage-guide-entry .ytsm-parent-group,
+#yt-manage-guide-entry .ytsm-subfolder-group { min-width: 0; }
+#yt-manage-guide-entry .ytsm-subfolders {
+  display: grid;
+  gap: 6px;
+  margin: 6px 0 0 12px;
+}
+#yt-manage-guide-entry .ytsm-subfolder {
+  min-height: 32px;
+  padding: 6px 9px;
+  background: linear-gradient(rgba(0,0,0,.18), rgba(0,0,0,.18)), var(--folder-color);
+}
+#yt-manage-guide-entry .ytsm-subfolder[aria-expanded="true"] {
+  box-shadow: inset 0 0 0 1px #8493a3;
+}
+#yt-manage-guide-entry .ytsm-arrow { width: 10px; flex: 0 0 10px; color: #c8d0d8; }
+#yt-manage-guide-entry .ytsm-folder-icon {
+  position: relative;
+  width: 14px;
+  height: 11px;
+  flex: 0 0 14px;
+  border: 1.5px solid #c2cbd5;
+  border-radius: 2px;
+}
+#yt-manage-guide-entry .ytsm-folder-icon::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: -1.5px;
+  width: 7px;
+  height: 4px;
+  border: 1.5px solid #c2cbd5;
+  border-bottom: 0;
+  border-radius: 2px 2px 0 0;
+}
+#yt-manage-guide-entry .ytsm-subfolder .ytsm-folder-icon {
+  transform: scale(.9);
+}
+#yt-manage-guide-entry .ytsm-channels {
+  max-height: 180px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: auto;
+  scrollbar-gutter: stable;
+  margin-top: 5px;
+  padding: 4px 0;
+  border-radius: 8px;
+  background: #22262a;
+}
+#yt-manage-guide-entry .ytsm-channels:focus-visible {
+  outline: 2px solid #a8c7fa;
+  outline-offset: 1px;
+}
+#yt-manage-guide-entry .ytsm-channel {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  min-height: 30px;
+  padding: 5px 8px;
+  color: #f1f1f1;
+  text-decoration: none;
+  font: inherit;
+}
+#yt-manage-guide-entry a.ytsm-channel:hover { background: #343a40; }
+#yt-manage-guide-entry a.ytsm-channel:focus-visible {
+  outline: 2px solid #a8c7fa;
+  outline-offset: -2px;
+}
+#yt-manage-guide-entry .ytsm-play {
+  width: 14px;
+  height: 14px;
+  flex: 0 0 14px;
+  border-radius: 50%;
+  background: #bfc3c8;
+  color: #22262a;
+  font-size: 8px;
+  line-height: 14px;
+  text-align: center;
+}
+#yt-manage-guide-entry .ytsm-channel-name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Rounded Chrome scrollbars without end-arrow buttons. */
+#yt-manage-guide-entry .ytsm-sidebar::-webkit-scrollbar,
+#yt-manage-guide-entry .ytsm-channels::-webkit-scrollbar {
+  width: 6px;
+}
+#yt-manage-guide-entry .ytsm-sidebar::-webkit-scrollbar-button,
+#yt-manage-guide-entry .ytsm-channels::-webkit-scrollbar-button,
+#yt-manage-guide-entry .ytsm-sidebar::-webkit-scrollbar-button:vertical:start,
+#yt-manage-guide-entry .ytsm-sidebar::-webkit-scrollbar-button:vertical:end,
+#yt-manage-guide-entry .ytsm-channels::-webkit-scrollbar-button:vertical:start,
+#yt-manage-guide-entry .ytsm-channels::-webkit-scrollbar-button:vertical:end {
+  -webkit-appearance: none;
+  display: none;
+  width: 0;
+  height: 0;
+  min-width: 0;
+  min-height: 0;
+  max-width: 0;
+  max-height: 0;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+}
+#yt-manage-guide-entry .ytsm-sidebar::-webkit-scrollbar-track,
+#yt-manage-guide-entry .ytsm-channels::-webkit-scrollbar-track {
+  background: transparent;
+  margin-block: 12px;
+}
+#yt-manage-guide-entry .ytsm-sidebar::-webkit-scrollbar-thumb,
+#yt-manage-guide-entry .ytsm-channels::-webkit-scrollbar-thumb {
+  background: #62666b;
+  border-radius: 8px;
+}
+#yt-manage-guide-entry .ytsm-sidebar::-webkit-scrollbar-thumb:hover,
+#yt-manage-guide-entry .ytsm-channels::-webkit-scrollbar-thumb:hover {
+  background: #858a90;
+}
+
+/* Host-page colour rules suppress Chrome's custom scrollbar pseudo-elements. */
+#yt-manage-guide-entry .ytsm-sidebar,
+#yt-manage-guide-entry .ytsm-channels {
+  scrollbar-color: auto !important;
+}

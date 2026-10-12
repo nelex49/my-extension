@@ -1,749 +1,197 @@
 /** @format */
 
-// FolderDropdown component for YouTube Subscription Manager
-
-// Show context menu for folder management
-function showFolderContextMenu(event, folderName, type, subfolderName = null) {
-  // Remove any existing context menu
-  const existingMenu = document.querySelector("#folder-context-menu");
-  if (existingMenu) {
-    existingMenu.remove();
-  }
-
-  const menu = document.createElement("div");
-  menu.id = "folder-context-menu";
-  menu.style.cssText = `
-    position: fixed;
-    top: ${event.clientY}px;
-    left: ${event.clientX}px;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-    z-index: 10001;
-    min-width: 150px;
-    padding: 4px 0;
-  `;
-
-  const isParent = type === "parent";
-  const displayName = isParent
-    ? folderName
-    : `${folderName} > ${subfolderName}`;
-
-  const currentFolderData = window.folderData || {};
-
-  menu.innerHTML = `
-    <div style="padding: 8px 12px; border-bottom: 1px solid #eee; font-size: 12px; color: #666; font-weight: 500;">
-      ${displayName}
-    </div>
-    ${
-      isParent
-        ? `
-      <div class="context-menu-item" data-action="add-subfolder" style="padding: 8px 12px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px;">
-        <span>➕</span>
-        <span>Add Subfolder ${
-          Object.keys(currentFolderData[folderName]?.subfolders || {}).length >=
-          2
-            ? "(Limit Reached)"
-            : `(${
-                Object.keys(currentFolderData[folderName]?.subfolders || {})
-                  .length
-              }/2)`
-        }</span>
-      </div>
-    `
-        : ""
-    }
-    <div class="context-menu-item" data-action="delete" style="padding: 8px 12px; cursor: pointer; font-size: 13px; display: flex; align-items: center; gap: 8px; color: #dc3545;">
-      <span>🗑️</span>
-      <span>Delete ${isParent ? "Folder" : "Subfolder"}</span>
-    </div>
-  `;
-
-  // Add hover effects
-  const style = document.createElement("style");
-  style.textContent = `
-    .context-menu-item:hover {
-      background-color: #f8f9fa !important;
-    }
-  `;
-  document.head.appendChild(style);
-
-  document.body.appendChild(menu);
-
-  // Add click handlers
-  menu.addEventListener("click", (e) => {
-    const action = e.target.closest(".context-menu-item")?.dataset.action;
-    if (action === "delete") {
-      if (isParent) {
-        if (typeof window.deleteParentFolder === "function") {
-          window.deleteParentFolder(folderName);
-        }
-      } else {
-        if (typeof window.deleteSubfolder === "function") {
-          window.deleteSubfolder(folderName, subfolderName);
-        }
-      }
-    } else if (action === "add-subfolder") {
-      // Check limit before showing modal
-      if (
-        Object.keys(currentFolderData[folderName]?.subfolders || {}).length >= 2
-      ) {
-        if (typeof window.showUserNotification === "function") {
-          window.showUserNotification(
-            "Maximum of 2 subfolders per parent folder reached. Upgrade to Premium for unlimited subfolders!",
-            "warn"
-          );
-        }
-        return;
-      }
-      if (typeof window.showCreateSubfolderModal === "function") {
-        window.showCreateSubfolderModal(folderName);
-      }
-    }
-    menu.remove();
-    style.remove();
-  });
-
-  // Close menu when clicking outside
-  const closeMenu = (e) => {
-    if (!menu.contains(e.target)) {
-      menu.remove();
-      style.remove();
-      document.removeEventListener("click", closeMenu);
-    }
-  };
-  setTimeout(() => document.addEventListener("click", closeMenu), 100);
-}
+// Browsing state stays local to the sidebar, separate from saved folder records.
+const sidebarExpandedParents = new Set();
+const sidebarExpandedSubfolders = new Set();
 
 function toggleFolderDropdown() {
-  if (folderDropdown && folderDropdown.parentNode) {
-    // Toggle existing dropdown
-    const currentDisplay = folderDropdown.style.display;
-    if (currentDisplay === "none") {
-      folderDropdown.style.display = "block";
-    } else {
-      folderDropdown.style.display = "none";
-    }
-  } else {
-    // Remove any existing dropdowns first
-    const existingDropdowns = document.querySelectorAll(
-      "[id^='yt-folder-dropdown']"
-    );
-    existingDropdowns.forEach((dropdown) => dropdown.remove());
-    folderDropdown = null;
-
-    // Create new dropdown
-    createFolderDropdown();
-  }
+  if (!folderDropdown?.isConnected) createFolderDropdown();
+  if (!folderDropdown) return;
+  folderDropdown.hidden = !folderDropdown.hidden;
+  document.querySelector("#yt-manage-guide-entry .ytsm-launcher")
+    ?.setAttribute("aria-expanded", String(!folderDropdown.hidden));
 }
 
-// Create the simple folder dropdown
 function createFolderDropdown() {
-  // Only migrate old data that doesn't have expanded property
-  let needsSave = false;
-  const currentFolderData = window.folderData || {};
-  Object.keys(currentFolderData).forEach((folderName) => {
-    if (
-      currentFolderData[folderName] &&
-      currentFolderData[folderName].expanded === undefined
-    ) {
-      currentFolderData[folderName].expanded = false;
-      needsSave = true;
-    }
-  });
-
-  // Save migration changes if any
-  if (needsSave) {
-    chrome.storage.local.set({ folderData: currentFolderData }, () => {});
-  }
-
-  const manageButton = document.querySelector("#yt-manage-guide-entry");
-  if (!manageButton) {
-    return;
-  }
-
-  // Remove existing dropdown if any
-  const existingDropdowns = document.querySelectorAll(
-    "[id^='yt-folder-dropdown']"
-  );
-  existingDropdowns.forEach((dropdown) => dropdown.remove());
-
-  // Reset the global variable
-  folderDropdown = null;
-
-  // Create dropdown container
-  folderDropdown = document.createElement("div");
-  folderDropdown.id = "yt-folder-dropdown-" + Date.now();
-  folderDropdown.style.cssText = `
-    position: absolute !important;
-    top: 100% !important;
-    left: 0 !important;
-    right: 0 !important;
-    background: white !important;
-    border: 1px solid #ddd !important;
-    border-radius: 8px !important;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15) !important;
-    z-index: 10000 !important;
-    margin-top: 5px !important;
-    padding: 10px !important;
-    font-family: 'Roboto', sans-serif !important;
-    font-size: 14px !important;
-    display: block !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-  `;
-
-  // Create folder content based on current state
-  // Use global folderData to ensure we have the latest data
-  const folderCount = Object.keys(currentFolderData).length;
-  const isPremium = window.isPremium || false;
-  const folderLimit = window.folderLimit || 3;
-  const canCreateMore = isPremium || folderCount < folderLimit;
-
-  folderDropdown.innerHTML = `
-    <div style="margin-bottom: 10px; font-weight: bold; color: #1976d2; border-bottom: 1px solid #eee; padding-bottom: 5px;">
-      📁 Your Folders ${
-        !isPremium ? `(${folderCount}/${folderLimit} free)` : "(Premium)"
-      }
-    </div>
-    <div id="folder-list">
-      ${
-        folderCount === 0
-          ? '<div style="text-align: center; padding: 20px; color: #666;"><p>No folders yet!</p><p style="font-size: 12px;">Create your first folder to organize your subscriptions</p></div>'
-          : Object.entries(currentFolderData)
-              .map(([folderName, folderInfo]) => {
-                const totalSubs =
-                  (folderInfo.subscriptions?.length || 0) +
-                  Object.values(folderInfo.subfolders || {}).reduce(
-                    (sum, sub) => sum + (sub.subscriptions?.length || 0),
-                    0
-                  );
-                const expandIcon = folderInfo.expanded ? "▼" : "▶";
-
-                return `
-                    <div class="parent-folder-container">
-                      <div class="folder-item parent-folder" data-folder="${folderName}" style="background-color: ${
-                  folderInfo.color || "#1976d2"
-                } !important; border-radius: 4px; margin: 2px 0; position: relative; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; min-height: 40px; cursor: pointer;">
-                        <span class="folder-content" style="display: flex; align-items: center; flex: 1; min-width: 0;">
-                          <span class="expand-icon" style="margin-right: 8px; font-size: 14px; cursor: pointer; background: rgba(255,255,255,0.2); border-radius: 50%; width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center; transition: all 0.2s; flex-shrink: 0; color: #ffffff;" title="Click to expand/collapse">${expandIcon}</span>
-                          <span class="folder-name" style="max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; color: ${
-                            folderInfo.textColor || "#ffffff"
-                          };" title="${folderName}">${folderName}</span>
-                        </span>
-                        <span class="folder-actions" style="display: flex; flex-direction: column; align-items: center; flex-shrink: 0;">
-                          <span style="font-size: 9px; color: ${
-                            folderInfo.textColor || "#ffffff"
-                          }; opacity: 0.8; margin-bottom: 1px; font-weight: bold;">subs</span>
-                          <span class="count" style="font-size: 11px; color: ${
-                            folderInfo.textColor || "#ffffff"
-                          };">(${totalSubs})</span>
-                        </span>
-                      </div>
-                      ${
-                        folderInfo.expanded
-                          ? `
-                        <div class="subfolders-container" style="margin-left: 16px; margin-top: 2px;">
-                          ${Object.entries(folderInfo.subfolders || {})
-                            .map(([subName, subInfo]) => {
-                              return `
-                              <div class="folder-item subfolder" data-folder="${folderName}" data-subfolder="${subName}" style="background-color: ${
-                                subInfo.color || "#6c757d"
-                              }; border-radius: 4px; margin: 2px 0; padding: 8px 12px; font-size: 14px; display: flex; align-items: center; justify-content: space-between; min-height: 40px;">
-                                <span class="folder-content" style="display: flex; align-items: center; flex: 1; min-width: 0;">
-                                  <span class="folder-icon" style="background-color: rgba(255,255,255,0.2); border-radius: 50%; padding: 3px 5px; margin-right: 8px; display: inline-block; font-size: 12px; flex-shrink: 0; color: #ffffff;">${
-                                    subInfo.icon || "📂"
-                                  }</span>
-                                  <span class="folder-name" style="max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; color: ${
-                                    subInfo.textColor || "#ffffff"
-                                  };" title="${subName}">${subName}</span>
-                                </span>
-                                <span class="folder-actions" style="display: flex; align-items: center; flex-shrink: 0;">
-                                  <button class="quick-view-subfolder-btn" data-folder="${folderName}" data-subfolder="${subName}" style="background: rgba(255,255,255,0.2); border: none; border-radius: 3px; padding: 3px 6px; color: #ffffff; cursor: pointer; font-size: 11px; margin-right: 4px; transition: all 0.2s;" title="Quick view subscriptions" onmouseover="this.style.background='rgba(255,255,255,0.3)'; this.style.transform='scale(1.05)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'; this.style.transform='scale(1)'">▶️</button>
-                                  <span style="display: flex; flex-direction: column; align-items: center;">
-                                    <span style="font-size: 8px; color: ${
-                                      subInfo.textColor || "#ffffff"
-                                    }; opacity: 0.8; margin-bottom: 1px; font-weight: bold;">subs</span>
-                                    <span class="count" style="font-size: 11px; color: ${
-                                      subInfo.textColor || "#ffffff"
-                                    };">(${
-                                subInfo.subscriptions?.length || 0
-                              })</span>
-                                  </span>
-                                </span>
-                              </div>
-                            `;
-                            })
-                            .join("")}
-                        </div>
-                      `
-                          : ""
-                      }
-                    </div>
-                  `;
-              })
-              .join("")
-      }
-      
-      <!-- Create New Folder Button (styled like a folder item) -->
-      ${
-        canCreateMore
-          ? `<div id="create-folder-item" style="background-color: #f8f9fa; color: #495057; border: 1px solid #dee2e6; border-radius: 4px; margin: 2px 0; cursor: pointer; transition: all 0.2s;">
-               <span class="folder-content" style="display: flex; align-items: center; padding: 6px 10px;">
-                 <span class="folder-icon" style="background-color: #e9ecef; border-radius: 50%; padding: 3px 5px; margin-right: 6px; display: inline-block; color: #6c757d;">➕</span>
-                 <span class="folder-name" style="flex: 1; color: #495057;">${
-                   folderCount === 0
-                     ? "Create Your First Folder"
-                     : "Create New Folder"
-                 }</span>
-               </span>
-             </div>`
-          : `<div id="upgrade-premium-item" style="background-color: #fff3cd; color: #856404; border: 1px solid #ffeaa7; border-radius: 4px; margin: 2px 0; cursor: pointer; transition: all 0.2s;">
-               <span class="folder-content" style="display: flex; align-items: center; padding: 6px 10px;">
-                 <span class="folder-icon" style="background-color: #ffeaa7; border-radius: 50%; padding: 3px 5px; margin-right: 6px; display: inline-block;">⭐</span>
-                 <span class="folder-name" style="flex: 1; color: #856404;">Upgrade to Premium (${folderCount}/${folderLimit})</span>
-               </span>
-             </div>`
-      }
-    </div>
-    
-    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px solid #eee; text-align: center;">
-        <button id="view-all-subs" style="background: #6c757d; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 500; transition: all 0.2s; display: flex; align-items: center; gap: 6px; margin: 0 auto; box-shadow: 0 2px 4px rgba(108,117,125,0.3);">
-          <span style="font-size: 14px;">▶️</span>
-          <span>Organize Subs</span>
-        </button>
-    </div>
-  `;
-
-  // Position the dropdown
-  manageButton.style.position = "relative";
-  manageButton.appendChild(folderDropdown);
-
-  // Disabled click-outside-to-close functionality to prevent interference with modals
-  // Users can close the dropdown by clicking the "MANAGE YT SUBS" button again
-
-  // Add styles for folder items
-  const style = document.createElement("style");
-  style.textContent = `
-    #yt-folder-dropdown .folder-item {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px 10px;
-      margin: 2px 0;
-      border-radius: 4px;
-      cursor: pointer;
-      transition: all 0.2s;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-    }
-    #yt-folder-dropdown .folder-item:hover {
-      transform: translateY(-1px);
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    }
-    #yt-folder-dropdown .folder-content {
-      display: flex;
-      align-items: center;
-    }
-    #yt-folder-dropdown .folder-actions {
-      display: flex;
-      align-items: center;
-    }
-    #yt-folder-dropdown .folder-icon {
-      background-color: rgba(255,255,255,0.2) !important;
-      border-radius: 50%;
-      padding: 4px 6px;
-      margin-right: 8px;
-      display: inline-block;
-      font-size: 14px;
-    }
-    #yt-folder-dropdown .parent-folder {
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-      color: white !important;
-      font-weight: 500;
-    }
-    #yt-folder-dropdown .subfolder {
-      background: linear-gradient(135deg, #6c757d 0%, #495057 100%) !important;
-      color: white !important;
-    }
-    #yt-folder-dropdown .quick-view-subfolder-btn:hover {
-      background: rgba(255,255,255,0.3) !important;
-      transform: scale(1.05);
-    }
-    #yt-folder-dropdown #view-all-subs:hover {
-      background: #5a6268 !important;
-      transform: translateY(-1px);
-      box-shadow: 0 4px 8px rgba(108,117,125,0.4) !important;
-    }
-  `;
-  document.head.appendChild(style);
-
-  // Add click listeners for parent folder items (expand/collapse)
-  const parentFolders = folderDropdown.querySelectorAll(".parent-folder");
-  parentFolders.forEach((item) => {
-    const folderName = item.dataset.folder;
-    const expandIcon = item.querySelector(".expand-icon");
-
-    // Expand/collapse functionality
-    if (expandIcon) {
-      expandIcon.addEventListener("click", (e) => {
-        e.stopPropagation();
-        toggleFolderExpansion(folderName);
-      });
-    }
-
-    // Click on folder to show subscriptions
-    item.addEventListener("click", (e) => {
-      if (e.target !== expandIcon) {
-        showFolderSubscriptions(folderName);
-      }
-    });
-
-    // Right-click on parent folder to show context menu
-    item.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-      if (typeof window.showFolderContextMenu === "function") {
-        window.showFolderContextMenu(e, folderName, "parent");
-      }
-    });
-  });
-
-  // Add click listeners for subfolder items
-  const subfolders = folderDropdown.querySelectorAll(".subfolder");
-  subfolders.forEach((item) => {
-    const folderName = item.dataset.folder;
-    const subfolderName = item.dataset.subfolder;
-
-    item.addEventListener("click", (e) => {
-      if (!e.target.classList.contains("quick-view-subfolder-btn")) {
-        showSubfolderSubscriptions(folderName, subfolderName);
-      }
-    });
-
-    // Quick view button
-    const quickViewBtn = item.querySelector(".quick-view-subfolder-btn");
-    if (quickViewBtn) {
-      quickViewBtn.addEventListener("click", (e) => {
-        e.stopPropagation();
-        showSubfolderSubscriptions(folderName, subfolderName);
-      });
-    }
-
-    // Right-click on subfolder to show context menu
-    item.addEventListener("contextmenu", (e) => {
-      e.preventDefault();
-      if (typeof window.showFolderContextMenu === "function") {
-        window.showFolderContextMenu(e, folderName, "subfolder", subfolderName);
-      }
-    });
-  });
-
-  // Add click listener for create folder button
-  const createFolderItem = folderDropdown.querySelector("#create-folder-item");
-  if (createFolderItem) {
-    createFolderItem.addEventListener("click", () => {
-      showUnifiedFolderManager();
-    });
-  }
-
-  // Add click listener for upgrade premium button
-  const upgradePremiumItem = folderDropdown.querySelector(
-    "#upgrade-premium-item"
-  );
-  if (upgradePremiumItem) {
-    upgradePremiumItem.addEventListener("click", () => {
-      // Premium features coming soon
-    });
-  }
-
-  // Add click listener for "All Subs" button
-  const allSubsBtn = folderDropdown.querySelector("#view-all-subs");
-  if (allSubsBtn) {
-    allSubsBtn.addEventListener("click", () => {
-      console.log("Organize Subs clicked - checking for showSubfolderView...");
-      console.log("showSubfolderView type:", typeof window.showSubfolderView);
-      if (typeof window.showSubfolderView === "function") {
-        console.log("Calling showSubfolderView...");
-        window.showSubfolderView();
-      } else {
-        console.warn("showSubfolderView not found, falling back to old panel");
-        // Fallback to old panel if SubfolderView not loaded
-        if (typeof window.showAllSubscriptions_OLD === "function") {
-          window.showAllSubscriptions_OLD();
-        }
-      }
-    });
-  }
+  const entry = document.getElementById("yt-manage-guide-entry");
+  if (!entry || entry.dataset.state !== "ready") return;
+  if (folderDropdown?.isConnected) { refreshFolderDropdown(); return; }
+  folderDropdown = document.createElement("section");
+  folderDropdown.id = "yt-folder-dropdown";
+  folderDropdown.className = "ytsm-sidebar";
+  folderDropdown.setAttribute("aria-label", "Subscription folders");
+  folderDropdown.hidden = true;
+  entry.append(folderDropdown);
+  window.folderDropdown = folderDropdown;
+  refreshFolderDropdown();
 }
 
-function toggleFolderExpansion(folderName) {
-  const currentFolderData = window.folderData || {};
-  if (currentFolderData[folderName]) {
-    currentFolderData[folderName].expanded =
-      !currentFolderData[folderName].expanded;
+const SIDEBAR_FOLDER_PALETTE = [
+  "#44345d", "#53303d", "#243f59", "#24494e", "#3b414c", "#354454", "#51303f"
+];
 
-    // Update global variable
-    window.folderData = currentFolderData;
+// Suggest the first unused palette colour, then the least-used colour.
+function nextFolderColour() {
+  const counts = new Map(SIDEBAR_FOLDER_PALETTE.map(colour => [colour, 0]));
+  Object.values(window.folderData || {}).forEach((folder, index) => {
+    const colour = sidebarFolderColour(folder.color, index);
+    if (counts.has(colour)) counts.set(colour, counts.get(colour) + 1);
+  });
+  return SIDEBAR_FOLDER_PALETTE.reduce((best, colour) =>
+    counts.get(colour) < counts.get(best) ? colour : best, SIDEBAR_FOLDER_PALETTE[0]);
+}
 
-    // Save to storage
-    chrome.storage.local.set({ folderData: currentFolderData }, () => {});
+// Translate saved colours into a restrained display palette; never change storage.
+function sidebarFolderColour(hex, index) {
+  const palette = SIDEBAR_FOLDER_PALETTE;
+  const saved = (hex || "").toLowerCase();
+  if (palette.includes(saved)) return saved;
+  if (!/^#[0-9a-f]{6}$/i.test(hex || "")) return palette[index % palette.length];
+  const rgb = [1, 3, 5].map(offset => parseInt(hex.slice(offset, offset + 2), 16) / 255);
+  const max = Math.max(...rgb), min = Math.min(...rgb), delta = max - min;
+  if (delta < .08) return "#3b414c";
+  let hue = max === rgb[0] ? ((rgb[1] - rgb[2]) / delta) % 6 :
+    max === rgb[1] ? (rgb[2] - rgb[0]) / delta + 2 : (rgb[0] - rgb[1]) / delta + 4;
+  hue = (hue * 60 + 360) % 360;
+  if (hue < 35 || hue >= 330) return "#53303d";
+  if (hue < 80) return "#51462e";
+  if (hue < 165) return "#304a3b";
+  if (hue < 200) return "#24494e";
+  if (hue < 255) return "#243f59";
+  return "#44345d";
+}
 
-    // Refresh the dropdown to show/hide subfolders
-    refreshFolderDropdown();
-  }
+function sidebarElement(tag, className, text) {
+  const element = document.createElement(tag);
+  element.className = className;
+  if (text !== undefined) element.textContent = text;
+  return element;
+}
+
+function sidebarFolderRow(name, count, expanded, subfolder, colour) {
+  const row = sidebarElement("button", subfolder ? "ytsm-folder ytsm-subfolder" : "ytsm-folder");
+  row.type = "button";
+  row.style.setProperty("--folder-color", colour);
+  row.title = name;
+  row.setAttribute("aria-expanded", String(expanded));
+  const arrow = sidebarElement("span", "ytsm-arrow", expanded ? "▾" : "▸");
+  arrow.setAttribute("aria-hidden", "true");
+  const icon = sidebarElement("span", "ytsm-folder-icon");
+  icon.setAttribute("aria-hidden", "true");
+  row.append(arrow, icon, sidebarElement("span", "ytsm-folder-name", name),
+    sidebarElement("span", "ytsm-count", String(count)));
+  return row;
+}
+
+function sidebarChannelList(subscriptions, key) {
+  const list = sidebarElement("div", "ytsm-channels");
+  list.dataset.scrollKey = key;
+  list.setAttribute("role", "region");
+  list.setAttribute("aria-label", "Channels");
+  list.tabIndex = 0;
+  if (!subscriptions.length) list.append(sidebarElement("p", "ytsm-empty", "No channels yet."));
+  subscriptions.forEach(sub => {
+    const channelId = sub.snippet?.resourceId?.channelId;
+    const title = sub.snippet?.title || "Unknown channel";
+    const valid = typeof channelId === "string" && /^[A-Za-z0-9_-]+$/.test(channelId);
+    const channel = sidebarElement(valid ? "a" : "span", "ytsm-channel");
+    if (valid) {
+      channel.href = "https://www.youtube.com/channel/" + channelId;
+      channel.target = "_blank";
+      channel.rel = "noopener noreferrer";
+    }
+    channel.title = title;
+    const play = sidebarElement("span", "ytsm-play", "▶");
+    play.setAttribute("aria-hidden", "true");
+    channel.append(play, sidebarElement("span", "ytsm-channel-name", title));
+    list.append(channel);
+  });
+  return list;
+}
+
+function toggleSidebarSet(set, key) {
+  if (set.has(key)) set.delete(key); else set.add(key);
+  refreshFolderDropdown();
 }
 
 function refreshFolderDropdown() {
-  // Store current expansion states before refreshing
-  const expansionStates = {};
-  const currentFolderData = window.folderData || {};
-  if (folderDropdown) {
-    const folderItems = folderDropdown.querySelectorAll(".parent-folder");
-
-    folderItems.forEach((item) => {
-      const folderName = item.dataset.folder;
-      if (folderName && currentFolderData[folderName]) {
-        expansionStates[folderName] = currentFolderData[folderName].expanded;
-      }
-    });
-
-    // Remove the old dropdown
-    folderDropdown.remove();
-    folderDropdown = null;
-  }
-
-  // Create a new one with current state
-  createFolderDropdown();
-
-  // Restore expansion states and save to storage
-  Object.keys(expansionStates).forEach((folderName) => {
-    if (currentFolderData[folderName]) {
-      currentFolderData[folderName].expanded = expansionStates[folderName];
+  if (!folderDropdown?.isConnected) return;
+  const scrollTop = folderDropdown.scrollTop;
+  const channelScroll = new Map(Array.from(folderDropdown.querySelectorAll(".ytsm-channels"),
+    list => [list.dataset.scrollKey, list.scrollTop]));
+  const focused = folderDropdown.contains(document.activeElement) ?
+    document.activeElement.dataset.focusKey : null;
+  const heading = sidebarElement("h2", "ytsm-heading", "Your folders");
+  const list = sidebarElement("div", "ytsm-folders");
+  const folders = Object.entries(window.folderData || {});
+  if (!folders.length) list.append(sidebarElement("p", "ytsm-empty", "No folders yet."));
+  const validParents = new Set(), validSubfolders = new Set();
+  folders.forEach(([name, info], index) => {
+    validParents.add(name);
+    const colour = sidebarFolderColour(info.color, index);
+    const group = sidebarElement("div", "ytsm-parent-group");
+    const subfolders = Object.entries(info.subfolders || {});
+    const directSubscriptions = info.subscriptions || [];
+    const count = directSubscriptions.length + subfolders.reduce((sum, [,sub]) => sum + (sub.subscriptions?.length || 0), 0);
+    const expanded = sidebarExpandedParents.has(name);
+    const row = sidebarFolderRow(name, count, expanded, false, colour);
+    row.dataset.focusKey = JSON.stringify([name]);
+    row.addEventListener("click", () => toggleSidebarSet(sidebarExpandedParents, name));
+    group.append(row);
+    subfolders.forEach(([subName]) => validSubfolders.add(JSON.stringify([name, subName])));
+    if (expanded) {
+      const children = sidebarElement("div", "ytsm-subfolders");
+      // Retain access to any older records that held channels directly on parents.
+      if (directSubscriptions.length) children.append(sidebarChannelList(directSubscriptions, JSON.stringify([name])));
+      if (!subfolders.length && !directSubscriptions.length)
+        children.append(sidebarElement("p", "ytsm-empty", "No subfolders yet."));
+      subfolders.forEach(([subName, subInfo]) => {
+        const key = JSON.stringify([name, subName]);
+        const open = sidebarExpandedSubfolders.has(key);
+        const subGroup = sidebarElement("div", "ytsm-subfolder-group");
+        const subRow = sidebarFolderRow(subName, subInfo.subscriptions?.length || 0, open, true, colour);
+        subRow.dataset.focusKey = key;
+        subRow.addEventListener("click", () => toggleSidebarSet(sidebarExpandedSubfolders, key));
+        subGroup.append(subRow);
+        if (open) subGroup.append(sidebarChannelList(subInfo.subscriptions || [], key));
+        children.append(subGroup);
+      });
+      group.append(children);
     }
+    list.append(group);
   });
-
-  // Save the expansion states to storage
-  if (Object.keys(expansionStates).length > 0) {
-    chrome.storage.local.set({ folderData: currentFolderData }, () => {});
-    window.folderData = currentFolderData;
-  }
-
-  // Show the new dropdown
-  if (folderDropdown) {
-    folderDropdown.style.display = "block";
-  }
+  for (const key of sidebarExpandedParents) if (!validParents.has(key)) sidebarExpandedParents.delete(key);
+  for (const key of sidebarExpandedSubfolders) if (!validSubfolders.has(key)) sidebarExpandedSubfolders.delete(key);
+  const footer = sidebarElement("div", "ytsm-footer");
+  const manage = sidebarElement("button", "ytsm-manage");
+  const settingsIcon = sidebarElement("span", "ytsm-action-icon", "⚙");
+  settingsIcon.setAttribute("aria-hidden", "true");
+  manage.append(settingsIcon, sidebarElement("span", "ytsm-action-label", "Manage Subscriptions"));
+  manage.type = "button";
+  manage.addEventListener("click", () => window.showSubfolderView());
+  // Quick creation uses the same dialog and operations as folder management.
+  const create = sidebarElement("button", "ytsm-create");
+  const plusIcon = sidebarElement("span", "ytsm-action-icon", "+");
+  plusIcon.setAttribute("aria-hidden", "true");
+  create.append(plusIcon, sidebarElement("span", "ytsm-action-label", "Create Folder"));
+  create.type = "button";
+  create.addEventListener("click", () => showUnifiedFolderManager());
+  footer.append(manage, create);
+  folderDropdown.replaceChildren(heading, list, footer);
+  folderDropdown.scrollTop = scrollTop;
+  folderDropdown.querySelectorAll(".ytsm-channels").forEach(channelList => {
+    channelList.scrollTop = channelScroll.get(channelList.dataset.scrollKey) || 0;
+  });
+  if (focused) Array.from(folderDropdown.querySelectorAll("button"))
+    .find(button => button.dataset.focusKey === focused)?.focus({ preventScroll: true });
 }
 
-function showFolderSubscriptions(folderName) {
-  showFolderManagementPanel(folderName);
+// Compatibility entry point for existing callers. Expansion is now presentation state.
+function toggleFolderExpansion(folderName) {
+  toggleSidebarSet(sidebarExpandedParents, folderName);
 }
 
-function showFolderManagementPanel(folderName) {
-  const currentFolderData = window.folderData || {};
-  const folderInfo = currentFolderData[folderName];
-  if (!folderInfo) return;
-
-  // Remove any existing management panel
-  const existingPanel = document.querySelector("#folder-management-panel");
-  if (existingPanel) {
-    existingPanel.remove();
-  }
-
-  const panel = document.createElement("div");
-  panel.id = "folder-management-panel";
-  panel.style.cssText = `
-    position: fixed;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    border-radius: 12px;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.2);
-    z-index: 10001;
-    width: 90%;
-    max-width: 600px;
-    max-height: 80vh;
-    overflow-y: auto;
-  `;
-
-  const totalSubs =
-    (folderInfo.subscriptions?.length || 0) +
-    Object.values(folderInfo.subfolders || {}).reduce(
-      (sum, sub) => sum + (sub.subscriptions?.length || 0),
-      0
-    );
-
-  panel.innerHTML = `
-    <div id="panel-header" style="background: linear-gradient(135deg, ${
-      folderInfo.color
-    }, ${lightenColor(
-    folderInfo.color,
-    20
-  )}); color: white; padding: 20px; border-radius: 12px 12px 0 0; position: relative; cursor: move;">
-      <button id="close-management-panel" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; border-radius: 50%; width: 30px; height: 30px; color: white; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;">✕</button>
-      <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 10px;">
-        <span style="font-size: 24px; background: rgba(255,255,255,0.2); border-radius: 50%; padding: 8px; display: inline-block;">📁</span>
-        <div>
-          <h2 style="margin: 0; font-size: 20px; font-weight: 600;">${folderName}</h2>
-          <p style="margin: 0; opacity: 0.9; font-size: 14px;">${totalSubs} total subscriptions</p>
-        </div>
-      </div>
-    </div>
-
-    <div style="padding: 20px;">
-      <!-- Action Buttons -->
-      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 25px;">
-        <!-- Row 1 -->
-        <button id="edit-folder" style="background: linear-gradient(135deg, #6f42c1, #5a32a3); color: white; border: none; border-radius: 10px; padding: 14px 16px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; justify-content: center; box-shadow: 0 3px 8px rgba(111, 66, 193, 0.3); transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 12px rgba(111, 66, 193, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 8px rgba(111, 66, 193, 0.3)'">
-          <span style="font-size: 16px;">✏️</span>
-          <span>Edit Folder</span>
-        </button>
-        <button id="view-subscriptions" style="background: linear-gradient(135deg, #007bff, #0056b3); color: white; border: none; border-radius: 10px; padding: 14px 16px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; justify-content: center; box-shadow: 0 3px 8px rgba(0, 123, 255, 0.3); transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 12px rgba(0, 123, 255, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 8px rgba(0, 123, 255, 0.3)'">
-          <span style="font-size: 16px;">📺</span>
-          <span>Organize Subs</span>
-        </button>
-        
-        <!-- Row 2 -->
-        <button id="add-subfolder" style="background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; border-radius: 10px; padding: 14px 16px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; justify-content: center; box-shadow: 0 3px 8px rgba(40, 167, 69, 0.3); transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 12px rgba(40, 167, 69, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 8px rgba(40, 167, 69, 0.3)'">
-          <span style="font-size: 16px; font-weight: bold;">+</span>
-          <span>Add Subfolder</span>
-        </button>
-        <button id="delete-folder" style="background: linear-gradient(135deg, #dc3545, #c82333); color: white; border: none; border-radius: 10px; padding: 14px 16px; cursor: pointer; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; justify-content: center; box-shadow: 0 3px 8px rgba(220, 53, 69, 0.3); transition: all 0.2s ease;" onmouseover="this.style.transform='translateY(-2px)'; this.style.boxShadow='0 5px 12px rgba(220, 53, 69, 0.4)'" onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='0 3px 8px rgba(220, 53, 69, 0.3)'">
-          <span style="font-size: 16px;">🗑️</span>
-          <span>Delete Folder</span>
-        </button>
-      </div>
-
-      <!-- Subfolders Section -->
-      <div>
-        <h3 style="margin: 0 0 15px 0; color: #333; font-size: 16px; display: flex; align-items: center; gap: 8px;">
-          <span>📁</span>
-          <span>Subfolders (${
-            Object.keys(folderInfo.subfolders || {}).length
-          })</span>
-        </h3>
-        
-        ${
-          Object.keys(folderInfo.subfolders || {}).length === 0
-            ? '<div style="text-align: center; padding: 20px; color: #666; background: #f8f9fa; border-radius: 8px; border: 2px dashed #dee2e6;"><p style="margin: 0;">No subfolders yet</p><p style="margin: 5px 0 0 0; font-size: 12px;">Click "Add Subfolder" to create one</p></div>'
-            : `<div style="display: grid; gap: 8px;">
-               ${Object.entries(folderInfo.subfolders || {})
-                 .map(
-                   ([subName, subInfo]) => `
-                 <div class="subfolder-item" data-folder="${folderName}" data-subfolder="${subName}" style="background: ${
-                     subInfo.color
-                   }; color: ${
-                     subInfo.textColor || "#ffffff"
-                   }; border-radius: 8px; padding: 12px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; transition: all 0.2s;">
-                   <div style="display: flex; align-items: center; gap: 10px;">
-                     <span style="background: rgba(255,255,255,0.2); border-radius: 50%; padding: 6px; font-size: 14px;">${
-                       subInfo.icon
-                     }</span>
-                     <div>
-                       <div style="font-weight: 500; font-size: 14px;">${subName}</div>
-                       <div style="font-size: 12px; opacity: 0.9;">${
-                         subInfo.subscriptions?.length || 0
-                       } subscriptions</div>
-                     </div>
-                   </div>
-                   <div style="display: flex; gap: 8px;">
-                     <button class="view-subfolder" data-folder="${folderName}" data-subfolder="${subName}" style="background: rgba(255,255,255,0.2); border: none; border-radius: 4px; padding: 6px 10px; color: white; cursor: pointer; font-size: 12px;">View</button>
-                     <button class="edit-subfolder" data-folder="${folderName}" data-subfolder="${subName}" style="background: rgba(0,123,255,0.8); border: none; border-radius: 4px; padding: 6px 10px; color: white; cursor: pointer; font-size: 12px;">Edit</button>
-                     <button class="delete-subfolder" data-folder="${folderName}" data-subfolder="${subName}" style="background: rgba(220,53,69,0.8); border: none; border-radius: 4px; padding: 6px 10px; color: white; cursor: pointer; font-size: 12px;">Delete</button>
-                   </div>
-                 </div>
-               `
-                 )
-                 .join("")}
-             </div>`
-        }
-      </div>
-    </div>
-  `;
-
-  document.body.appendChild(panel);
-
-  // Make panel draggable
-  makePanelDraggable(panel, "#panel-header");
-
-  // Add event listeners
-  panel
-    .querySelector("#close-management-panel")
-    .addEventListener("click", () => {
-      panel.remove();
-    });
-
-  panel.querySelector("#edit-folder").addEventListener("click", () => {
-    panel.remove();
-    showUnifiedFolderManager(folderName, "edit");
-  });
-
-  panel.querySelector("#view-subscriptions").addEventListener("click", () => {
-    panel.remove();
-    if (typeof window.showSubfolderView === "function") {
-      window.showSubfolderView();
-    } else {
-      // Fallback to old panel if SubfolderView not loaded
-      if (typeof window.showAllSubscriptions_OLD === "function") {
-        window.showAllSubscriptions_OLD();
-      }
-    }
-  });
-
-  panel.querySelector("#add-subfolder").addEventListener("click", () => {
-    panel.remove();
-    if (typeof window.showCreateSubfolderModal === "function") {
-      window.showCreateSubfolderModal(folderName);
-    }
-  });
-
-  panel.querySelector("#delete-folder").addEventListener("click", () => {
-    panel.remove();
-    if (typeof window.deleteParentFolder === "function") {
-      window.deleteParentFolder(folderName);
-    }
-  });
-
-  // Subfolder event listeners
-  panel.querySelectorAll(".view-subfolder").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const folder = btn.dataset.folder;
-      const subfolder = btn.dataset.subfolder;
-      panel.remove();
-      showSubfolderSubscriptions(folder, subfolder);
-    });
-  });
-
-  panel.querySelectorAll(".edit-subfolder").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const folder = btn.dataset.folder;
-      const subfolder = btn.dataset.subfolder;
-      panel.remove();
-      showCreateSubfolderModal(folder, subfolder);
-    });
-  });
-
-  panel.querySelectorAll(".delete-subfolder").forEach((btn) => {
-    btn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const folder = btn.dataset.folder;
-      const subfolder = btn.dataset.subfolder;
-      panel.remove();
-      deleteSubfolder(folder, subfolder);
-    });
-  });
-
-  // Close on outside click
-  panel.addEventListener("click", (e) => {
-    if (e.target === panel) {
-      panel.remove();
-    }
-  });
-}
-
-// Helper function to lighten colors for subfolders
+// Shared by the existing folder editors; retain until those editors are replaced.
 function lightenColor(color, percent) {
   const num = parseInt(color.replace("#", ""), 16);
   const amt = Math.round(2.55 * percent);
@@ -763,16 +211,6 @@ function lightenColor(color, percent) {
   );
 }
 
-// Functions moved to SubscriptionDisplay.js
 
-// Show context menu for folder management
-
-// Make them globally available
-window.toggleFolderDropdown = toggleFolderDropdown;
-window.createFolderDropdown = createFolderDropdown;
-window.toggleFolderExpansion = toggleFolderExpansion;
-window.refreshFolderDropdown = refreshFolderDropdown;
-window.showFolderSubscriptions = showFolderSubscriptions;
-window.showFolderManagementPanel = showFolderManagementPanel;
-window.lightenColor = lightenColor;
-window.showFolderContextMenu = showFolderContextMenu;
+Object.assign(window, { toggleFolderDropdown, createFolderDropdown,
+  refreshFolderDropdown, toggleFolderExpansion, lightenColor });

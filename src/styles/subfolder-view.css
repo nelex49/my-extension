@@ -1,31 +1,23 @@
-/** @format */
-
-* {
+/* Existing Manage styles scoped to its modal; redesign follows later. */
+#subfolder-view-modal * {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-  background: #f5f5f5;
-  padding: 20px;
-  line-height: 1.6;
-}
-
-.container {
+#subfolder-view-modal .container {
   max-width: 1200px;
   margin: 0 auto;
 }
 
-h1 {
+#subfolder-view-modal h1 {
   text-align: center;
   color: #333;
   margin-bottom: 40px;
   font-size: 2.5rem;
 }
 
-.demo-section {
+#subfolder-view-modal .demo-section {
   background: white;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
@@ -33,29 +25,28 @@ h1 {
   overflow: hidden;
 }
 
-.demo-header {
+#subfolder-view-modal .demo-header {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;
   padding: 20px;
   text-align: center;
 }
 
-.demo-header h2 {
+#subfolder-view-modal .demo-header h2 {
   font-size: 1.8rem;
   margin-bottom: 10px;
 }
 
-.demo-header p {
+#subfolder-view-modal .demo-header p {
   opacity: 0.9;
   font-size: 1.1rem;
 }
 
-.demo-content {
+#subfolder-view-modal .demo-content {
   padding: 30px;
 }
 
-/* Parent Folder Selector */
-.parent-folder-selector {
+#subfolder-view-modal .parent-folder-selector {
   background: #f8f9fa;
   border-radius: 8px;
   padding: 16px;
@@ -66,7 +57,7 @@ h1 {
   margin-right: auto;
 }
 
-.parent-folder-selector h3 {
+#subfolder-view-modal .parent-folder-selector h3 {
   margin-bottom: 12px;
   font-size: 14px;
   font-weight: 600;
@@ -75,7 +66,7 @@ h1 {
   letter-spacing: 0.5px;
 }
 
-.parent-folder-tabs {
+#subfolder-view-modal .parent-folder-tabs {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
@@ -84,7 +75,7 @@ h1 {
   padding-right: 8px;
 }
 
-.parent-folder-tab {
+#subfolder-view-modal .parent-folder-tab {
   background: white;
   border: 2px solid #e0e0e0;
   border-radius: 20px;
@@ -99,18 +90,18 @@ h1 {
   flex-shrink: 0;
 }
 
-.parent-folder-tab:hover {
+#subfolder-view-modal .parent-folder-tab:hover {
   background: #f0f0f0;
   border-color: #1976d2;
 }
 
-.parent-folder-tab.active {
+#subfolder-view-modal .parent-folder-tab.active {
   background: #1976d2;
   color: white;
   border-color: #1976d2;
 }
 
-.parent-folder-tab .icon {
+#subfolder-view-modal .parent-folder-tab .icon {
   width: 16px;
   height: 16px;
   border-radius: 3px;
@@ -122,19 +113,18 @@ h1 {
   font-weight: bold;
 }
 
-.parent-folder-tab .count {
+#subfolder-view-modal .parent-folder-tab .count {
   background: rgba(255, 255, 255, 0.2);
   border-radius: 10px;
   padding: 2px 6px;
   font-size: 9px;
 }
 
-/* Parent folder search */
-.parent-folder-search {
+#subfolder-view-modal .parent-folder-search {
   margin-bottom: 12px;
 }
 
-.parent-folder-search input {
+#subfolder-view-modal .parent-folder-search input {
   width: 100%;
   padding: 6px 12px;
   border: 1px solid #e0e0e0;
@@ -143,20 +133,18 @@ h1 {
   background: white;
 }
 
-.parent-folder-search input:focus {
+#subfolder-view-modal .parent-folder-search input:focus {
   outline: none;
   border-color: #1976d2;
   box-shadow: 0 0 0 2px rgba(25, 118, 210, 0.1);
 }
 
-/* Show more/less for parent folders */
-.parent-folder-toggle {
+#subfolder-view-modal .parent-folder-toggle {
   text-align: center;
   margin-top: 8px;
 }
 
-/* Two Panel Layout */
-.two-panel-layout {
+#subfolder-view-modal .two-panel-layout {
   display: flex;
   flex-direction: column;
   max-width: 550px;
@@ -167,20 +155,20 @@ h1 {
   overflow: hidden;
 }
 
-.parent-folder-header {
+#subfolder-view-modal .parent-folder-header {
   background: #f8f9fa;
   padding: 16px;
   border-bottom: 1px solid #e0e0e0;
 }
 
-.parent-folder-title-section {
+#subfolder-view-modal .parent-folder-title-section {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 20px;
 }
 
-.parent-folder-header h3 {
+#subfolder-view-modal .parent-folder-header h3 {
   margin: 0;
   font-size: 12px;
   font-weight: 700;
@@ -195,18 +183,18 @@ h1 {
   flex-shrink: 0;
 }
 
-.parent-folder-stats {
+#subfolder-view-modal .parent-folder-stats {
   display: flex;
   gap: 16px;
   align-items: center;
 }
 
-.stat-item-small {
+#subfolder-view-modal .stat-item-small {
   text-align: center;
   min-width: 50px;
 }
 
-.stat-number-small {
+#subfolder-view-modal .stat-number-small {
   font-size: 16px;
   font-weight: bold;
   color: #1976d2;
@@ -214,7 +202,7 @@ h1 {
   margin-bottom: 2px;
 }
 
-.stat-label-small {
+#subfolder-view-modal .stat-label-small {
   font-size: 9px;
   color: #666;
   text-transform: uppercase;
@@ -222,26 +210,26 @@ h1 {
   line-height: 1;
 }
 
-.parent-folder-header .parent-folder-tabs {
+#subfolder-view-modal .parent-folder-header .parent-folder-tabs {
   display: flex;
   gap: 6px;
   flex-wrap: wrap;
-  max-height: 80px; /* Show 2 rows by default (4 per row) */
+  max-height: 80px; 
   overflow: hidden;
   margin-bottom: 0;
   transition: max-height 0.3s ease;
 }
 
-.parent-folder-header .parent-folder-tabs.expanded {
-  max-height: none; /* Show all when expanded */
+#subfolder-view-modal .parent-folder-header .parent-folder-tabs.expanded {
+  max-height: none; 
 }
 
-.parent-folder-header .parent-folder-toggle {
+#subfolder-view-modal .parent-folder-header .parent-folder-toggle {
   text-align: center;
   margin-top: 8px;
 }
 
-.parent-folder-header .parent-folder-toggle button {
+#subfolder-view-modal .parent-folder-header .parent-folder-toggle button {
   background: #f8f9fa;
   border: 1px solid #e0e0e0;
   color: #1976d2;
@@ -253,13 +241,13 @@ h1 {
   transition: all 0.2s ease;
 }
 
-.parent-folder-header .parent-folder-toggle button:hover {
+#subfolder-view-modal .parent-folder-header .parent-folder-toggle button:hover {
   background: #e3f2fd !important;
   border-color: #1976d2 !important;
   transform: translateY(-1px);
 }
 
-.parent-folder-toggle button {
+#subfolder-view-modal .parent-folder-toggle button {
   background: #f8f9fa !important;
   border: 1px solid #e0e0e0 !important;
   color: #1976d2 !important;
@@ -271,19 +259,19 @@ h1 {
   transition: all 0.2s ease !important;
 }
 
-.parent-folder-header .parent-folder-tab {
-  flex: 0 0 calc(25% - 4.5px); /* 4 per row with gap */
+#subfolder-view-modal .parent-folder-header .parent-folder-tab {
+  flex: 0 0 calc(25% - 4.5px); 
   min-width: 0;
 }
 
-.main-panels {
+#subfolder-view-modal .main-panels {
   display: flex;
   height: 500px;
   flex: 1;
   overflow: hidden;
 }
 
-.subfolders-panel {
+#subfolder-view-modal .subfolders-panel {
   flex: 0 0 220px;
   padding: 12px;
   height: 500px;
@@ -291,7 +279,7 @@ h1 {
   border-right: 1px solid #e0e0e0;
 }
 
-.subfolders-panel h3 {
+#subfolder-view-modal .subfolders-panel h3 {
   margin: 0 0 16px 0;
   font-size: 12px;
   font-weight: 700;
@@ -305,7 +293,7 @@ h1 {
   text-align: center;
 }
 
-.move-instructions {
+#subfolder-view-modal .move-instructions {
   background: #fff3e0;
   border: 2px solid #ff9800;
   border-radius: 8px;
@@ -314,16 +302,15 @@ h1 {
   text-align: center;
 }
 
-.move-instructions.hidden {
+#subfolder-view-modal .move-instructions.hidden {
   display: none;
 }
 
-/* Parent Folder Groups (for move mode) */
-.parent-folder-group {
+#subfolder-view-modal .parent-folder-group {
   margin-bottom: 8px;
 }
 
-.parent-folder-group-header {
+#subfolder-view-modal .parent-folder-group-header {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -336,12 +323,12 @@ h1 {
   margin-bottom: 4px;
 }
 
-.parent-folder-group-header:hover {
+#subfolder-view-modal .parent-folder-group-header:hover {
   background: #e9ecef;
   border-color: #1976d2;
 }
 
-.parent-folder-group-icon {
+#subfolder-view-modal .parent-folder-group-icon {
   width: 24px;
   height: 24px;
   border-radius: 4px;
@@ -354,32 +341,32 @@ h1 {
   flex-shrink: 0;
 }
 
-.parent-folder-group-name {
+#subfolder-view-modal .parent-folder-group-name {
   flex: 1;
   font-size: 12px;
   font-weight: 600;
   color: #333;
 }
 
-.parent-folder-group-toggle {
+#subfolder-view-modal .parent-folder-group-toggle {
   font-size: 10px;
   color: #666;
   transition: transform 0.2s ease;
 }
 
-.parent-folder-group-content {
+#subfolder-view-modal .parent-folder-group-content {
   padding-left: 8px;
   margin-top: 4px;
 }
 
-.instruction-text {
+#subfolder-view-modal .instruction-text {
   color: #e65100;
   font-size: 12px;
   font-weight: 600;
   margin: 0;
 }
 
-.subfolder-option {
+#subfolder-view-modal .subfolder-option {
   display: flex;
   align-items: center;
   gap: 8px;
@@ -391,24 +378,24 @@ h1 {
   border: 2px solid transparent;
 }
 
-.subfolder-option:hover {
+#subfolder-view-modal .subfolder-option:hover {
   background: #f8f9fa;
   border-color: #e9ecef;
 }
 
-.subfolder-option.move-target {
+#subfolder-view-modal .subfolder-option.move-target {
   background: #e3f2fd;
   border-color: #1976d2;
   color: #1976d2;
 }
 
-.subfolder-option.current {
+#subfolder-view-modal .subfolder-option.current {
   background: #f0f0f0;
   color: #666;
   cursor: default;
 }
 
-.subfolder-option .folder-icon {
+#subfolder-view-modal .subfolder-option .folder-icon {
   width: 20px;
   height: 20px;
   border-radius: 4px;
@@ -421,13 +408,13 @@ h1 {
   flex-shrink: 0;
 }
 
-.subfolder-option .folder-name {
+#subfolder-view-modal .subfolder-option .folder-name {
   font-size: 12px;
   font-weight: 500;
   flex: 1;
 }
 
-.subfolder-option .sub-count {
+#subfolder-view-modal .subfolder-option .sub-count {
   font-size: 10px;
   color: #666;
   background: #f0f0f0;
@@ -435,13 +422,12 @@ h1 {
   border-radius: 10px;
 }
 
-.subscriptions-panel {
+#subfolder-view-modal .subscriptions-panel {
   flex: 1;
   overflow: hidden;
 }
 
-/* Breadcrumb Navigation */
-.breadcrumb-nav {
+#subfolder-view-modal .breadcrumb-nav {
   display: flex;
   flex-direction: column;
   gap: 4px;
@@ -453,41 +439,40 @@ h1 {
   font-size: 12px;
 }
 
-.breadcrumb-path {
+#subfolder-view-modal .breadcrumb-path {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.breadcrumb-item {
+#subfolder-view-modal .breadcrumb-item {
   color: #666;
   font-size: 12px;
   cursor: pointer;
   transition: color 0.3s ease;
 }
 
-.breadcrumb-item:hover {
+#subfolder-view-modal .breadcrumb-item:hover {
   color: #1976d2;
 }
 
-.breadcrumb-item.active {
+#subfolder-view-modal .breadcrumb-item.active {
   color: #1976d2;
   font-weight: 500;
 }
 
-.breadcrumb-separator {
+#subfolder-view-modal .breadcrumb-separator {
   color: #ccc;
   font-size: 12px;
 }
 
-.breadcrumb-count {
+#subfolder-view-modal .breadcrumb-count {
   color: #666;
   font-size: 11px;
   margin-top: 2px;
 }
 
-/* Search and Filter Bar */
-.search-filter-bar {
+#subfolder-view-modal .search-filter-bar {
   display: flex;
   flex-direction: column;
   padding: 12px 16px;
@@ -495,12 +480,12 @@ h1 {
   border-bottom: 1px solid #e0e0e0;
 }
 
-.search-section {
+#subfolder-view-modal .search-section {
   width: 100%;
   max-width: 400px;
 }
 
-.search-input-container {
+#subfolder-view-modal .search-input-container {
   position: relative;
   display: flex;
   align-items: center;
@@ -513,14 +498,14 @@ h1 {
   transition: all 0.2s ease;
 }
 
-.search-input-container:focus-within {
+#subfolder-view-modal .search-input-container:focus-within {
   border-color: #1976d2;
   background: white;
   box-shadow: 0 4px 12px rgba(25, 118, 210, 0.15);
   transform: translateY(-1px);
 }
 
-.search-input-container .search-icon {
+#subfolder-view-modal .search-input-container .search-icon {
   color: #6c757d;
   font-size: 18px;
   font-weight: bold;
@@ -529,11 +514,11 @@ h1 {
   opacity: 0.7;
 }
 
-.search-input-container:focus-within .search-icon {
+#subfolder-view-modal .search-input-container:focus-within .search-icon {
   color: #1976d2;
 }
 
-.search-input-container input {
+#subfolder-view-modal .search-input-container input {
   border: none;
   outline: none;
   flex: 1;
@@ -542,12 +527,12 @@ h1 {
   color: #333;
 }
 
-.search-input-container input::placeholder {
+#subfolder-view-modal .search-input-container input::placeholder {
   color: #6c757d;
   font-weight: 400;
 }
 
-.filter-section {
+#subfolder-view-modal .filter-section {
   display: flex;
   gap: 6px;
   align-items: center;
@@ -556,7 +541,7 @@ h1 {
   overflow-x: auto;
 }
 
-.filter-select {
+#subfolder-view-modal .filter-select {
   border: 1px solid #e0e0e0;
   border-radius: 6px;
   padding: 5px 6px;
@@ -567,7 +552,7 @@ h1 {
   max-width: 100px;
 }
 
-.action-btn {
+#subfolder-view-modal .action-btn {
   background: #f8f9fa;
   color: #495057;
   border: 1px solid #e9ecef;
@@ -586,7 +571,7 @@ h1 {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.action-btn:hover {
+#subfolder-view-modal .action-btn:hover {
   background: #f1f3f4;
   border-color: #dadce0;
   color: #333;
@@ -594,42 +579,41 @@ h1 {
   transform: none;
 }
 
-.action-btn:nth-child(3) {
+#subfolder-view-modal .action-btn:nth-child(3) {
   background: #4caf50;
   color: white;
   border-color: #4caf50;
 }
 
-.action-btn:nth-child(3):hover {
+#subfolder-view-modal .action-btn:nth-child(3):hover {
   background: #45a049;
   border-color: #45a049;
 }
 
-.action-btn:nth-child(4) {
+#subfolder-view-modal .action-btn:nth-child(4) {
   background: #ff9800;
   color: white;
   border-color: #ff9800;
 }
 
-.action-btn:nth-child(4):hover {
+#subfolder-view-modal .action-btn:nth-child(4):hover {
   background: #f57c00;
   border-color: #f57c00;
 }
 
-/* Subscriptions Container */
-.subscriptions-container {
+#subfolder-view-modal .subscriptions-container {
   height: 400px;
   overflow: hidden;
   margin: 0;
 }
 
-.subscriptions-list {
+#subfolder-view-modal .subscriptions-list {
   height: 100%;
   overflow-y: auto;
   padding: 0;
 }
 
-.subscription-item {
+#subfolder-view-modal .subscription-item {
   display: flex;
   align-items: center;
   padding: 8px 8px 8px 12px;
@@ -640,17 +624,16 @@ h1 {
   min-height: 48px;
 }
 
-.subscription-item:hover {
+#subfolder-view-modal .subscription-item:hover {
   background: #f8f9fa;
 }
 
-.subscription-item.selected {
+#subfolder-view-modal .subscription-item.selected {
   background: #e3f2fd;
   border-left: 4px solid #1976d2;
 }
 
-/* Action buttons positioned after channel info */
-.sub-actions {
+#subfolder-view-modal .sub-actions {
   display: flex;
   gap: 4px;
   align-items: center;
@@ -658,7 +641,7 @@ h1 {
   flex-shrink: 0;
 }
 
-.action-btn-small {
+#subfolder-view-modal .action-btn-small {
   background: #f8f9fa;
   border: 1px solid #e9ecef;
   border-radius: 4px;
@@ -683,7 +666,7 @@ h1 {
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
-.action-btn-small:hover {
+#subfolder-view-modal .action-btn-small:hover {
   background: #f1f3f4;
   border-color: #dadce0;
   color: #333;
@@ -691,7 +674,7 @@ h1 {
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
 }
 
-.filter-section .action-btn-small {
+#subfolder-view-modal .filter-section .action-btn-small {
   width: 45px;
   min-width: 45px;
   max-width: 45px;
@@ -700,14 +683,14 @@ h1 {
   padding: 4px 2px;
 }
 
-.remove-btn {
+#subfolder-view-modal .remove-btn {
   background: #fff5f5 !important;
   border-color: #fecaca !important;
   color: #dc2626 !important;
   font-weight: 600 !important;
 }
 
-.remove-btn:hover {
+#subfolder-view-modal .remove-btn:hover {
   background: #fef2f2 !important;
   border-color: #fca5a5 !important;
   color: #b91c1c !important;
@@ -715,7 +698,7 @@ h1 {
   box-shadow: 0 2px 4px rgba(220, 38, 38, 0.2);
 }
 
-.sub-avatar-medium {
+#subfolder-view-modal .sub-avatar-medium {
   width: 32px;
   height: 32px;
   border-radius: 50%;
@@ -729,7 +712,7 @@ h1 {
   flex-shrink: 0;
 }
 
-.sub-info {
+#subfolder-view-modal .sub-info {
   width: 300px;
   min-width: 0;
   display: flex;
@@ -738,7 +721,7 @@ h1 {
   margin-right: 8px;
 }
 
-.sub-info .sub-name {
+#subfolder-view-modal .sub-info .sub-name {
   font-size: 14px;
   font-weight: 500;
   color: #333;
@@ -746,10 +729,10 @@ h1 {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  max-width: 200px; /* Limit width to prevent overflow */
+  max-width: 200px; 
 }
 
-.sub-details {
+#subfolder-view-modal .sub-details {
   font-size: 11px;
   color: #666;
   white-space: nowrap;
@@ -757,8 +740,7 @@ h1 {
   text-overflow: ellipsis;
 }
 
-/* Quick Stats */
-.quick-stats {
+#subfolder-view-modal .quick-stats {
   display: flex;
   justify-content: space-around;
   padding: 20px;
@@ -766,26 +748,25 @@ h1 {
   border-top: 1px solid #e0e0e0;
 }
 
-.stat-item {
+#subfolder-view-modal .stat-item {
   text-align: center;
 }
 
-.stat-item .stat-number {
+#subfolder-view-modal .stat-item .stat-number {
   font-size: 28px;
   font-weight: bold;
   color: #1976d2;
   margin-bottom: 4px;
 }
 
-.stat-item .stat-label {
+#subfolder-view-modal .stat-item .stat-label {
   font-size: 12px;
   color: #666;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-/* Clear button explanation */
-.clear-explanation {
+#subfolder-view-modal .clear-explanation {
   background: #e3f2fd;
   border-radius: 8px;
   padding: 15px;
@@ -793,29 +774,28 @@ h1 {
   border-left: 4px solid #1976d2;
 }
 
-.clear-explanation h4 {
+#subfolder-view-modal .clear-explanation h4 {
   color: #1976d2;
   margin-bottom: 10px;
   font-size: 14px;
 }
 
-.clear-explanation p {
+#subfolder-view-modal .clear-explanation p {
   color: #333;
   font-size: 12px;
   margin-bottom: 8px;
 }
 
-.clear-explanation ul {
+#subfolder-view-modal .clear-explanation ul {
   color: #666;
   font-size: 11px;
   margin-left: 20px;
 }
 
-.clear-explanation li {
+#subfolder-view-modal .clear-explanation li {
   margin-bottom: 4px;
 }
 
-/* Modal Overlay */
 #subfolder-view-modal {
   position: fixed;
   top: 0;
@@ -829,7 +809,6 @@ h1 {
   align-items: center;
 }
 
-/* Two Panel Layout - Modal Version */
 #subfolder-view-modal .two-panel-layout {
   max-width: 800px;
   width: 95%;
@@ -846,8 +825,7 @@ h1 {
   flex-direction: column;
 }
 
-/* Close Button */
-#close-subfolder-view {
+#subfolder-view-modal #close-subfolder-view {
   position: absolute;
   top: 15px;
   right: 15px;
@@ -866,6 +844,6 @@ h1 {
   transition: all 0.2s;
 }
 
-#close-subfolder-view:hover {
+#subfolder-view-modal #close-subfolder-view:hover {
   background: rgba(0, 0, 0, 0.2);
 }

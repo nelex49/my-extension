@@ -6,6 +6,7 @@
 function showUnifiedFolderManager(folderName = null, mode = "create") {
   const isEditMode = mode === "edit" && folderName;
   const folderInfo = isEditMode ? folderData[folderName] : null;
+  const initialColour = isEditMode ? folderInfo.color : nextFolderColour();
 
   const modal = document.createElement("div");
   modal.style.cssText = `
@@ -137,7 +138,7 @@ function showUnifiedFolderManager(folderName = null, mode = "create") {
               <div style="background: #f8f9fa; border-radius: 6px; padding: 10px; border: 1px solid #dee2e6; margin-top: 18px;">
                 <h4 style="margin: 0 0 8px 0; color: #495057; font-size: 12px;">Preview:</h4>
                 <div id="folder-preview" style="background: ${
-                  isEditMode ? folderInfo.color : "#007bff"
+                  initialColour
                 }; color: ${
     isEditMode ? folderInfo.textColor || "#ffffff" : "#ffffff"
   }; border-radius: 4px; padding: 6px 10px; display: flex; align-items: center; gap: 6px; font-size: 13px;">
@@ -153,24 +154,11 @@ function showUnifiedFolderManager(folderName = null, mode = "create") {
             <div style="flex: 0 0 60%; min-width: 200px; padding-right: 0px;">
               <label style="display: block; margin-bottom: 6px; font-weight: 500; color: #555;">Background Color:</label>
               <div style="display: grid; grid-template-columns: repeat(6, 32px); gap: 4px; margin-bottom: 8px;"> <!-- Updated spacing -->
-                ${[
-                  "#ff6b6b",
-                  "#4ecdc4",
-                  "#9b59b6",
-                  "#e74c3c",
-                  "#f39c12",
-                  "#27ae60",
-                  "#3498db",
-                  "#34495e",
-                  "#e67e22",
-                  "#1abc9c",
-                  "#f1c40f",
-                  "#e91e63",
-                ]
+                ${SIDEBAR_FOLDER_PALETTE
                   .map(
                     (color) => `
                   <button class="unified-color-option" data-color="${color}" style="padding: 10px; border: 2px solid ${
-                      isEditMode && color === folderInfo.color
+                      color === initialColour
                         ? "#007bff"
                         : "#ddd"
                     }; border-radius: 4px; background: ${color}; cursor: pointer; transition: all 0.2s; width: 32px; height: 32px; padding: 0;"></button>
@@ -340,7 +328,7 @@ function showUnifiedFolderManager(folderName = null, mode = "create") {
   }, 10);
 
   // Initialize with current selections
-  let selectedColor = isEditMode ? folderInfo.color : "#007bff";
+  let selectedColor = initialColour;
   let selectedTextColor = isEditMode
     ? folderInfo.textColor || "#ffffff"
     : "#ffffff";

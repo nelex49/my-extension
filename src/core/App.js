@@ -1,171 +1,54 @@
 /** @format */
 
-// Main App class for YouTube Subscription Manager
-
-// Global state variables
+// Keep existing global entry points while one controller owns startup and state.
 let folderPanel = null;
 let isLoggedIn = false;
 let sidebarButtonCreated = false;
 let folderDropdown = null;
 let userSubscriptions = [];
+let folderData = {};
+let folderLimit = 3;
+let isPremium = false;
+let appInitialization = null;
 
-let folderData = {}; // Will be loaded from Chrome storage or start empty
-let folderLimit = 3; // Free users can create 3 folders
-let isPremium = false; // Will be determined later
-
-function collapseAllFoldersOnLoad() {
-  // Force all folders to be collapsed on page load
-  let needsSave = false;
-  Object.keys(folderData).forEach((folderName) => {
-    if (folderData[folderName]) {
-      folderData[folderName].expanded = false;
-      needsSave = true;
-    }
-  });
-
-  // Save changes to ensure all folders are collapsed on page load
-  if (needsSave) {
-    chrome.storage.local.set({ folderData: folderData }, () => {
-      logStatus("All folders collapsed on page load", "info");
-    });
-  }
+function syncSubscriptions(subscriptions) {
+  userSubscriptions = subscriptions || [];
+  window.userSubscriptions = userSubscriptions;
 }
 
 function initialize() {
-  logStatus("Initializing extension", "info");
-
-  // Load saved folder data from storage first
-  safeLoadFolderData()
-    .then((data) => {
-      folderData = data;
-      // Make it globally available immediately
+  if (appInitialization) return appInitialization;
+  appInitialization = new Promise((resolve) => {
+    chrome.storage.local.get(["folderData", "userSubscriptions", "accessToken"], (data) => {
+      folderData = data.folderData || {};
       window.folderData = folderData;
-
-      // Collapse all folders on page load
-      collapseAllFoldersOnLoad();
-
-      // Button text is set during creation
-
-      // Check login status first, only create panel if logged in
-      chrome.storage.local.get("accessToken", ({ accessToken }) => {
-        if (accessToken) {
-          // User is logged in, create sidebar button (no panel needed)
-
-          // Delay sidebar button creation to give YouTube time to load
-          setTimeout(() => {
-            let sidebarButton = createSidebarButton();
-
-            if (!sidebarButton) {
-              logStatus("Failed to create button", "error");
-            } else {
-              logStatus("Button created successfully", "info");
-            }
-          }, 1000);
-
-          // No panel needed - just create the sidebar button
-          logStatus("Sidebar button creation attempted", "info");
-          handleLoginState(accessToken);
-        } else {
-          // User not logged in, show login prompt instead of button
-          logStatus("User not logged in, showing login prompt", "info");
-
-          // Delay login prompt creation to give YouTube time to load
-          setTimeout(() => {
-            let loginPrompt = createLoginPrompt();
-
-            if (!loginPrompt) {
-              logStatus("Failed to create login prompt", "error");
-            } else {
-              logStatus("Login prompt created successfully", "info");
-            }
-          }, 1000);
-        }
-      });
-    })
-    .catch((error) => {
-      handleError(error, "Failed to load folder data");
-      folderData = {}; // Start with empty data if loading fails
+      syncSubscriptions(data.userSubscriptions);
+      handleLoginState(data.accessToken);
+      watchSidebarGuide();
+      window.appInitialized = true;
+      resolve();
     });
+  });
+  return appInitialization;
 }
 
-// Listen for storage changes (when user logs in/out)
 chrome.storage.onChanged.addListener((changes, namespace) => {
-  if (namespace === "local" && changes.accessToken) {
-    logStatus("Token updated, handling login state", "info");
-
-    const newToken = changes.accessToken.newValue;
-    if (newToken) {
-      // User logged in - remove login prompt and create regular button
-      const existingButton = document.querySelector("#yt-manage-guide-entry");
-      if (existingButton && existingButton.parentNode) {
-        existingButton.parentNode.removeChild(existingButton);
-      }
-
-      // Reset the button creation flag
-      window.sidebarButtonCreated = false;
-
-      // Create the regular sidebar button
-      setTimeout(() => {
-        let sidebarButton = createSidebarButton();
-        if (sidebarButton) {
-          logStatus("Button created after login", "info");
-        }
-      }, 200);
-    }
-
-    handleLoginState(newToken);
+  if (namespace !== "local") return;
+  if (changes.folderData) {
+    folderData = changes.folderData.newValue || {};
+    window.folderData = folderData;
+    refreshFolderDropdown();
   }
+  if (changes.userSubscriptions) syncSubscriptions(changes.userSubscriptions.newValue);
+  if (changes.accessToken) handleLoginState(changes.accessToken.newValue);
 });
 
-// Listen for subscription updates from background script
-chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener((message) => {
   if (message.type === "subscriptionsUpdated") {
-    userSubscriptions = message.subscriptions || [];
-    logStatus(`Found ${userSubscriptions.length} subscriptions`, "info");
-
-    // Refresh dropdown if it exists
-    if (folderDropdown) {
-      refreshFolderDropdown();
-    }
+    syncSubscriptions(message.subscriptions);
+    refreshFolderDropdown();
   }
 });
 
-// Extension loaded successfully
-
-// Load subscriptions from storage on startup
-chrome.storage.local.get(["userSubscriptions"], (result) => {
-  if (result.userSubscriptions && result.userSubscriptions.length > 0) {
-    userSubscriptions = result.userSubscriptions;
-  }
-});
-
-// Initialize the extension
-if (document.querySelector("#secondary")) {
-  try {
-    initialize();
-  } catch (error) {
-    handleError(error, "App Initialization");
-  }
-} else {
-  // Wait for sidebar to appear
-  setTimeout(() => {
-    if (document.querySelector("#secondary")) {
-      try {
-        initialize();
-      } catch (error) {
-        handleError(error, "App Retry Initialization");
-      }
-    }
-  }, 2000);
-}
-
-// Make them globally available
-window.folderPanel = null;
-window.isLoggedIn = isLoggedIn;
-window.sidebarButtonCreated = sidebarButtonCreated;
-window.folderDropdown = folderDropdown;
-window.userSubscriptions = userSubscriptions;
-window.folderData = folderData;
-window.folderLimit = folderLimit;
-window.isPremium = isPremium;
-window.initialize = initialize;
+Object.assign(window, { folderPanel, isLoggedIn, sidebarButtonCreated,
+  folderDropdown, userSubscriptions, folderData, folderLimit, isPremium, initialize });
