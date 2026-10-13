@@ -3,7 +3,7 @@
 // Complex folder management modals for YouTube Subscription Manager
 
 // Show unified folder manager (for both create and edit modes)
-function showUnifiedFolderManager(folderName = null, mode = "create") {
+function showUnifiedFolderManager(folderName = null, mode = "create", onCreated = null) {
   const isEditMode = mode === "edit" && folderName;
   const folderInfo = isEditMode ? folderData[folderName] : null;
   const initialColour = isEditMode ? folderInfo.color : nextFolderColour();
@@ -188,72 +188,6 @@ function showUnifiedFolderManager(folderName = null, mode = "create") {
 
   document.body.appendChild(modal);
 
-  // Add proper event listeners
-  const saveBtn = modal.querySelector("#save-unified");
-  const cancelBtn = modal.querySelector("#cancel-unified");
-  const closeBtn = modal.querySelector("#close-unified-manager");
-
-  if (saveBtn) {
-    saveBtn.addEventListener("click", () => {
-      const newFolderName = nameInput.value.trim();
-      if (!newFolderName) {
-        showUserNotification("Please enter a folder name", "warn");
-        return;
-      }
-
-      if (isEditMode) {
-        if (newFolderName !== folderName) {
-          updateFolderName(
-            folderName,
-            newFolderName,
-            selectedColor,
-            selectedTextColor
-          );
-        } else {
-          updateFolderProperties(folderName, selectedColor, selectedTextColor);
-
-          // Remove existing dropdown completely
-          if (folderDropdown) {
-            folderDropdown.remove();
-            folderDropdown = null;
-          }
-
-          // Create new dropdown with updated data
-          createFolderDropdown();
-        }
-      } else {
-        // Create new folder
-        const newFolder = {
-          name: newFolderName,
-          color: selectedColor,
-          textColor: selectedTextColor,
-          subfolders: {},
-        };
-
-        // Add to folderData
-        folderData[newFolderName] = newFolder;
-
-        // Save to Chrome storage
-        chrome.storage.local.set({ folderData: folderData }, () => {});
-
-        refreshFolderDropdown();
-      }
-      modal.remove();
-    });
-  }
-
-  if (cancelBtn) {
-    cancelBtn.addEventListener("click", () => {
-      modal.remove();
-    });
-  }
-
-  if (closeBtn) {
-    closeBtn.addEventListener("click", () => {
-      modal.remove();
-    });
-  }
-
   // Make panel draggable
   setTimeout(() => {
     const header = modal.querySelector(".unified-header");
@@ -380,55 +314,6 @@ function showUnifiedFolderManager(folderName = null, mode = "create") {
       nameInput.value || (isEditMode ? folderName : "New Folder");
   }
 
-  // Add subfolder functionality (for both create and edit modes)
-  const addSubfolderBtn = modal.querySelector("#add-subfolder-btn");
-
-  // Disable button if limit reached (for edit mode)
-  if (isEditMode && Object.keys(folderInfo.subfolders || {}).length >= 2) {
-    addSubfolderBtn.style.background = "#6c757d";
-    addSubfolderBtn.style.cursor = "not-allowed";
-    addSubfolderBtn.innerHTML =
-      '<span style="font-size: 14px;">⚠️</span><span>Limit Reached</span>';
-    addSubfolderBtn.onmouseover = null;
-    addSubfolderBtn.onmouseout = null;
-  }
-
-  addSubfolderBtn.addEventListener("click", () => {
-    if (isEditMode) {
-      // Check limit before showing modal
-      if (Object.keys(folderInfo.subfolders || {}).length >= 2) {
-        showUserNotification(
-          "Maximum of 2 subfolders per parent folder reached. Upgrade to Premium for unlimited subfolders!",
-          "warn"
-        );
-        return;
-      }
-      modal.remove();
-      showCreateSubfolderModal(folderName);
-    } else {
-      // In create mode, we need to create the folder first, then add subfolders
-      const newFolderName = nameInput.value.trim();
-      if (!newFolderName) {
-        showUserNotification("Please enter a folder name first", "warn");
-        return;
-      }
-
-      // Create the folder temporarily
-      if (!folderData[newFolderName]) {
-        folderData[newFolderName] = {
-          subscriptions: [],
-          color: selectedColor,
-          textColor: selectedTextColor,
-          subfolders: {},
-          expanded: false,
-        };
-      }
-
-      modal.remove();
-      showCreateSubfolderModal(newFolderName);
-    }
-  });
-
   // Save/Create
   modal.querySelector("#save-unified").addEventListener("click", () => {
     const newFolderName = nameInput.value.trim();
@@ -450,30 +335,30 @@ function showUnifiedFolderManager(folderName = null, mode = "create") {
         // updateFolderProperties now handles the dropdown refresh
       }
     } else {
-      if (folderData[newFolderName] && !folderData[newFolderName].subfolders) {
+      if (Object.hasOwn(folderData, newFolderName)) {
         showUserNotification("A folder with this name already exists", "error");
         return;
       }
 
-      // Update folder properties if it was created temporarily for subfolder creation
-      if (folderData[newFolderName]) {
-        folderData[newFolderName].color = selectedColor;
-        folderData[newFolderName].textColor = selectedTextColor;
-      } else {
-        // Create folder with subfolders
-        folderData[newFolderName] = {
-          subscriptions: [],
-          color: selectedColor,
-          textColor: selectedTextColor,
-          subfolders: tempSubfolders,
-          expanded: false,
-        };
-      }
+      folderData[newFolderName] = {
+        subscriptions: [], color: selectedColor, textColor: selectedTextColor,
+        subfolders: tempSubfolders, expanded: false,
+      };
 
       // Save to Chrome storage
-      chrome.storage.local.set({ folderData: folderData }, () => {});
-
-      refreshFolderDropdown();
+      window.folderData = folderData;
+      chrome.storage.local.set({ folderData: folderData }, () => {
+        if (chrome.runtime.lastError) {
+          delete folderData[newFolderName];
+          window.folderData = folderData;
+          showUserNotification("Could not save the folder. Please try again.", "error");
+          return;
+        }
+        refreshFolderDropdown();
+        modal.remove();
+        if (typeof onCreated === "function") onCreated(newFolderName);
+      });
+      return;
     }
     modal.remove();
   });

@@ -14,6 +14,7 @@ let appInitialization = null;
 function syncSubscriptions(subscriptions) {
   userSubscriptions = subscriptions || [];
   window.userSubscriptions = userSubscriptions;
+  if (typeof window.refreshManageView === "function") window.refreshManageView();
 }
 
 function initialize() {
@@ -40,6 +41,10 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
     refreshFolderDropdown();
   }
   if (changes.userSubscriptions) syncSubscriptions(changes.userSubscriptions.newValue);
+  if (changes.subscriptionLoadStatus) {
+    window.subscriptionLoadStatus = changes.subscriptionLoadStatus.newValue || { state: 'idle' };
+    if (typeof window.refreshManageView === "function") window.refreshManageView();
+  }
   if (changes.accessToken) handleLoginState(changes.accessToken.newValue);
 });
 

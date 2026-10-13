@@ -7,11 +7,11 @@ function findSubscriptionLocation(channelId) {
   for (const [folderName, folderInfo] of Object.entries(folderData)) {
     if (folderInfo.subfolders) {
       for (const [subfolderName, subfolderInfo] of Object.entries(
-        folderInfo.subfolders
+        folderInfo.subfolders,
       )) {
         if (subfolderInfo.subscriptions) {
           const found = subfolderInfo.subscriptions.find(
-            (sub) => sub.snippet?.resourceId?.channelId === channelId
+            (sub) => sub.snippet?.resourceId?.channelId === channelId,
           );
           if (found) {
             return `${folderName} > ${subfolderName}`;
@@ -37,7 +37,7 @@ function showSubfolderSubscriptions(folderName, subfolderName) {
       subfolderName,
       folderInfo,
       subfolderInfo,
-      subscriptions
+      subscriptions,
     );
   });
 }
@@ -47,7 +47,7 @@ function createSubfolderModal(
   subfolderName,
   folderInfo,
   subfolderInfo,
-  subscriptions
+  subscriptions,
 ) {
   // Create a modal to show subfolder contents
   const modal = document.createElement("div");
@@ -70,8 +70,8 @@ function createSubfolderModal(
       <div id="modal-header" style="background: ${
         subfolderInfo?.color || "#6c757d"
       }; color: ${
-    subfolderInfo?.textColor || "#ffffff"
-  }; padding: 20px; border-radius: 12px 12px 0 0; position: relative;">
+        subfolderInfo?.textColor || "#ffffff"
+      }; padding: 20px; border-radius: 12px 12px 0 0; position: relative;">
         <button id="close-subfolder-modal" style="position: absolute; top: 15px; right: 15px; background: rgba(255,255,255,0.2); border: none; border-radius: 50%; width: 30px; height: 30px; color: white; cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center;">✕</button>
         <h2 style="margin: 0; font-size: 20px; font-weight: 600; display: flex; align-items: center; gap: 8px;">
           <span style="background: rgba(255,255,255,0.2); border-radius: 50%; width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center; font-size: 14px;">${
@@ -129,7 +129,7 @@ function createSubfolderModal(
                   </div>
                 </div>
               </div>
-            `
+            `,
                 )
                 .join("")
         }
@@ -225,7 +225,7 @@ function createSubfolderModal(
     } else {
       logStatus(
         "Could not find subfolder header or panel for dragging",
-        "warn"
+        "warn",
       );
     }
   }, 10);
@@ -259,7 +259,7 @@ function createSubfolderModal(
     if (e.target.classList.contains("toggle-description")) {
       const subscriptionItem = e.target.closest(".subscription-item");
       const description = subscriptionItem.querySelector(
-        ".channel-description"
+        ".channel-description",
       );
       const button = e.target;
 
@@ -423,7 +423,7 @@ function showAllSubscriptions_OLD() {
                             Object.keys(folderInfo.subfolders).forEach(
                               (subfolderName) => {
                                 options += `<option value="subfolder:${folderName}:${subfolderName}">📂 ${folderName} > ${subfolderName}</option>`;
-                              }
+                              },
                             );
                           }
                           return options;
@@ -523,7 +523,7 @@ function showAllSubscriptions_OLD() {
     } else {
       logStatus(
         "Could not find organize subscriptions header or panel for dragging",
-        "warn"
+        "warn",
       );
     }
   }, 10);

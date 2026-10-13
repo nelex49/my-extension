@@ -72,17 +72,15 @@ async function unsubscribeFromChannel(channelId, subscriptionItem, modal) {
 }
 
 async function loadUserData(token) {
-  try {
-    // Get subscriptions from storage (set by background.js)
-    chrome.storage.local.get(["userSubscriptions"], (result) => {
-      if (result.userSubscriptions && result.userSubscriptions.length > 0) {
-        userSubscriptions = result.userSubscriptions;
-        // Subscriptions loaded successfully
-      }
-    });
-  } catch (error) {
-    showUserNotification("Error loading subscription data", "error");
-  }
+  chrome.storage.local.get(['userSubscriptions', 'subscriptionLoadStatus'], result => {
+    window.subscriptionLoadStatus = result.subscriptionLoadStatus || { state: 'idle' };
+    syncSubscriptions(result.userSubscriptions || []);
+  });
+  // Reading subscriptions requires only the existing read-only permission.
+  chrome.runtime.sendMessage({ action: 'refreshSubscriptions' }).catch(() => {
+    window.subscriptionLoadStatus = { state: 'error', message: 'Reload the extension and YouTube to refresh subscriptions.' };
+    if (typeof window.refreshManageView === 'function') window.refreshManageView();
+  });
 }
 
 // Make them globally available
