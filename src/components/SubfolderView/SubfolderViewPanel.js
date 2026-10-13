@@ -35,11 +35,27 @@ function manageFolderIcon(className, solid = false) {
 function refreshManageView() { activeManageView?.refresh(); }
 window.refreshManageView = refreshManageView;
 
-// Keep the selected parent among the tabs that fit, without changing stored order.
-function manageVisibleParents(names, selected, capacity) {
-  const visible = names.slice(0, Math.max(0, capacity));
-  if (capacity > 0 && selected !== null && names.includes(selected) && !visible.includes(selected))
-    visible[visible.length - 1] = selected;
+// Preserve visible slots; only replace a tab for a hidden selection or reduced capacity.
+function manageVisibleParents(names, selected, capacity, previous = [], recency = new Map()) {
+  const limit = Math.max(0, capacity);
+  const visible = previous.filter(name => names.includes(name));
+  const leastUsedIndex = () => visible.reduce((best, name, index) => {
+    if (name === selected) return best;
+    if (best === -1 || (recency.get(name) || 0) < (recency.get(visible[best]) || 0)) return index;
+    return best;
+  }, -1);
+  while (visible.length > limit) {
+    const index = leastUsedIndex();
+    visible.splice(index === -1 ? visible.length - 1 : index, 1);
+  }
+  for (const name of names) {
+    if (visible.length >= limit) break;
+    if (!visible.includes(name)) visible.push(name);
+  }
+  if (limit > 0 && selected !== null && names.includes(selected) && !visible.includes(selected)) {
+    if (visible.length < limit) visible.push(selected);
+    else visible[leastUsedIndex()] = selected;
+  }
   return visible;
 }
 
@@ -65,14 +81,65 @@ function showSubfolderView() {
       <input class="ysm-channel-search" type="search" aria-label="Search channels" placeholder="Search channels...">
       <select class="ysm-sort" aria-label="Sort channels"><option value="az">Sort: A - Z</option><option value="za">Sort: Z - A</option></select></header>
       <div class="ysm-channel-list"></div></section></div>
+    <section class="ysm-move-picker" aria-label="Move channel to a folder" hidden></section>
   </section>`;
   document.body.append(modal);
   const dialog = modal.querySelector(".ysm-manage");
   let parent = null, child = null, query = "", folderQuery = "", sort = "az";
-  let moveChannel = null;
+  let moveChannel = null, moveParent = null, moveSearchOpen = false, moveQuery = "";
+  let visibleParentNames = [];
+  let parentListScroll = 0;
+  const parentTabRecency = new Map();
+  let parentTabClock = 0;
   const descriptionChannels = new Set();
 
+  function moveAnchor() {
+    return Array.from(modal.querySelectorAll('[data-action="move"]')).find(button =>
+      button.closest('[data-channel]')?.dataset.channel === moveChannel);
+  }
+  function closeMovePicker(restoreFocus = false) {
+    const anchor = moveAnchor();
+    moveChannel = null; moveParent = null; moveSearchOpen = false; moveQuery = "";
+    modal.querySelector('.ysm-move-picker').hidden = true;
+    anchor?.setAttribute('aria-expanded', 'false');
+    if (restoreFocus) anchor?.focus({ preventScroll: true });
+  }
+  function renderMovePicker() {
+    const picker = modal.querySelector('.ysm-move-picker');
+    const anchor = moveAnchor();
+    if (!moveChannel || !anchor) { closeMovePicker(); return; }
+    const data = window.folderData || {};
+    if (moveParent !== null && !Object.hasOwn(data, moveParent)) moveParent = null;
+    const names = moveParent === null ? Object.keys(data) : Object.keys(data[moveParent].subfolders || {});
+    const searchFocused = document.activeElement === picker.querySelector('.ysm-move-search');
+    const selection = searchFocused ? document.activeElement.selectionStart : null;
+    const filtered = names.filter(name => name.toLowerCase().includes(moveQuery.trim().toLowerCase()));
+    picker.hidden = false;
+    picker.innerHTML = `<header><strong>${moveParent === null ? 'Choose parent folder' : 'Choose subfolder'}</strong><button type="button" data-action="move-search" aria-label="Search folders" title="Search folders" aria-expanded="${moveSearchOpen}"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="10" cy="10" r="6"/><path d="m15 15 5 5"/></svg></button><button type="button" data-action="move-close" aria-label="Cancel move">✕</button></header>` +
+      (moveParent === null ? '' : '<button type="button" data-action="move-back" class="ysm-move-back">← Back to parent folders</button>') +
+      (moveSearchOpen ? `<input type="search" class="ysm-move-search" aria-label="${moveParent === null ? 'Search parent folders' : 'Search subfolders'}" placeholder="Search folders..." value="${manageEscape(moveQuery)}">` : '') +
+      `<div class="ysm-move-list">${filtered.map(name => {
+        const current = moveParent === parent && name === child;
+        return moveParent === null ?
+          `<button type="button" data-action="move-parent" data-move-parent="${manageEscape(name)}" title="${manageEscape(name)}">${manageFolderIcon('ysm-destination-icon')}<span>${manageEscape(name)}</span><small>›</small></button>` :
+          `<button type="button" data-action="destination" data-destination-parent="${manageEscape(moveParent)}" data-destination-child="${manageEscape(name)}" title="${manageEscape(name)}" ${current ? 'disabled' : ''}>${manageFolderIcon('ysm-destination-icon')}<span>${manageEscape(name)}</span>${current ? '<small>Current</small>' : ''}</button>`;
+      }).join('') || `<p class="ysm-empty">${names.length ? 'No matching folders.' : moveParent === null ? 'No parent folders yet.' : `No subfolders in ${manageEscape(moveParent)} yet. Close this picker and use + Subfolder to create one.`}</p>`}</div>`;
+    const search = picker.querySelector('.ysm-move-search');
+    if (search) {
+      search.addEventListener('input', event => { moveQuery = event.target.value; renderMovePicker(); });
+      if (searchFocused) {
+        search.focus({ preventScroll: true });
+        if (selection !== null && typeof search.setSelectionRange === 'function') search.setSelectionRange(selection, selection);
+      }
+    }
+    anchor.setAttribute('aria-expanded', 'true');
+    const rect = anchor.getBoundingClientRect(), bounds = picker.getBoundingClientRect();
+    picker.style.left = `${Math.max(12, Math.min(rect.right - bounds.width, window.innerWidth - bounds.width - 12))}px`;
+    const below = rect.bottom + 6;
+    picker.style.top = `${Math.max(12, Math.min(below + bounds.height <= window.innerHeight - 12 ? below : rect.top - bounds.height - 6, window.innerHeight - bounds.height - 12))}px`;
+  }
   function dismissMenus(event) {
+    if (moveChannel && !event.target.closest('.ysm-move-picker') && !event.target.closest('[data-action="move"]')) closeMovePicker();
     if (!event.target.closest('.ysm-main-menu') && !event.target.closest('[data-action="menu"]')) {
       modal.querySelector('.ysm-main-menu').hidden = true;
       modal.querySelector('[data-action="menu"]').setAttribute('aria-expanded', 'false');
@@ -134,7 +201,13 @@ function showSubfolderView() {
       `<details class="ysm-more-parents"><summary title="Search all parent folders">All Folders (${names.length}) ▾</summary><div class="ysm-menu"><input type="search" class="ysm-parent-search" aria-label="Find parent folder" placeholder="Find parent folder..."><div class="ysm-parent-results"></div></div></details>`;
     const parentSearch = modal.querySelector('.ysm-parent-search');
     if (parentSearch) {
-      parentSearch.addEventListener('input', renderParentOverflow);
+      parentSearch.addEventListener('input', () => { parentListScroll = 0; renderParentOverflow(); });
+      const parentResults = modal.querySelector('.ysm-parent-results');
+      parentResults.addEventListener('scroll', () => { parentListScroll = parentResults.scrollTop; });
+      const overflow = modal.querySelector('.ysm-more-parents');
+      overflow.addEventListener('toggle', () => {
+        if (overflow.open) parentResults.scrollTop = parentListScroll;
+      });
       renderParentOverflow();
     }
     const folderHeading = modal.querySelector(".ysm-nav-heading h3");
@@ -163,15 +236,13 @@ function showSubfolderView() {
     const all = manageFilteredSubscriptions(parent, child, "", sort);
     const visible = manageFilteredSubscriptions(parent, child, query, sort);
     modal.querySelector(".ysm-selected-count").textContent = query.trim() ? `${visible.length} of ${all.length} subscriptions` : `${all.length} subscriptions`;
-    const destinations = Object.entries(data).flatMap(([name, info]) => Object.keys(info.subfolders || {}).filter(sub => !(name === parent && sub === child)).map(sub => [name, sub]));
     modal.querySelector(".ysm-channel-list").innerHTML = visible.map(sub => {
       const id = manageChannelId(sub), title = manageChannelTitle(sub);
       const href = /^[A-Za-z0-9_-]+$/.test(id) ? `https://www.youtube.com/channel/${id}` : null;
       return `<article class="ysm-channel" data-channel="${manageEscape(id)}"><div class="ysm-avatar" aria-hidden="true"><span>${manageEscape(title.slice(0, 2).toUpperCase())}</span></div>
         <div class="ysm-channel-info">${href ? `<a href="${href}" target="_blank" rel="noopener noreferrer" title="${manageEscape(title)}">${manageEscape(title)}</a>` : `<strong>${manageEscape(title)}</strong>`}<p>Subscription</p></div>
-        <div class="ysm-row-actions"><button type="button" data-action="description" class="ysm-info" aria-label="Description for ${manageEscape(title)}" aria-expanded="${descriptionChannels.has(id)}" title="Show channel description">i</button><button type="button" data-action="move" class="ysm-move" ${destinations.length && id ? '' : 'disabled'} aria-expanded="${moveChannel === id}">Move ▾</button>
+        <div class="ysm-row-actions"><button type="button" data-action="description" class="ysm-info" aria-label="Description for ${manageEscape(title)}" aria-expanded="${descriptionChannels.has(id)}" title="Show channel description">i</button><button type="button" data-action="move" class="ysm-move" ${names.length && id ? '' : 'disabled'} aria-expanded="${moveChannel === id}">Move ▾</button>
         ${parent !== null ? `<button type="button" data-action="remove" ${id ? '' : 'disabled'} title="Remove from this folder; keep YouTube subscription">Remove</button>` : ''}</div>
-        ${moveChannel === id ? `<div class="ysm-move-options"><span>Move to</span>${destinations.map(([name, sub]) => `<button type="button" data-action="destination" data-destination-parent="${manageEscape(name)}" data-destination-child="${manageEscape(sub)}">${manageFolderIcon("ysm-destination-icon")}<span>${manageEscape(name)} / ${manageEscape(sub)}</span></button>`).join('')}</div>` : ''}
         ${descriptionChannels.has(id) ? `<div class="ysm-description">${manageEscape(sub.snippet?.description || 'No description available.')}</div>` : ''}</article>`;
     }).join("") || `<p class="ysm-empty">${query.trim() ? 'No matching channels.' : 'No subscriptions in this view.'}</p>`;
     // Load saved thumbnails; keep the initials underneath if a URL is absent or fails.
@@ -190,6 +261,7 @@ function showSubfolderView() {
         row.querySelector('.ysm-avatar').append(image);
       } catch { /* Invalid thumbnail: initials remain visible. */ }
     });
+    renderMovePicker();
     fitParentTabs();
     parentTabsResize.disconnect();
     parentTabsResize.observe(modal.querySelector('.ysm-visible-parents'));
@@ -205,14 +277,21 @@ function showSubfolderView() {
     }
   }
   function fitParentTabs() {
+    if (moveChannel) closeMovePicker();
     const strip = modal.querySelector('.ysm-visible-parents');
     if (!strip) return;
     const available = strip.clientWidth;
     const capacity = Math.max(0, Math.floor((available + 10) / 140));
-    const visible = new Set(manageVisibleParents(Object.keys(window.folderData || {}), parent, capacity));
-    strip.querySelectorAll('button').forEach(button => { button.hidden = !visible.has(button.dataset.parent); });
+    visibleParentNames = manageVisibleParents(Object.keys(window.folderData || {}), parent, capacity,
+      visibleParentNames, parentTabRecency);
+    const visible = new Set(visibleParentNames);
+    const buttons = Array.from(strip.querySelectorAll('button'));
+    buttons.forEach(button => { button.hidden = !visible.has(button.dataset.parent); });
+    const byName = new Map(buttons.map(button => [button.dataset.parent, button]));
+    visibleParentNames.forEach(name => strip.append(byName.get(name)));
   }
   function selectParent(name) {
+    if (name !== null) parentTabRecency.set(name, ++parentTabClock);
     parent = name; child = name === null ? null : Object.keys(window.folderData[name].subfolders || {})[0] ?? null;
     query = ""; folderQuery = ""; moveChannel = null;
     descriptionChannels.clear();
@@ -254,9 +333,25 @@ function showSubfolderView() {
       if (parent === null) showUnifiedFolderManager(); else showCreateSubfolderModal(parent);
     } else if (action === "move") {
       const id = button.closest("[data-channel]").dataset.channel;
-      moveChannel = moveChannel === id ? null : id; render();
+      if (moveChannel === id) closeMovePicker(true);
+      else {
+        closeMovePicker(); moveChannel = id; renderMovePicker();
+        modal.querySelector('.ysm-move-list button')?.focus();
+      }
+    } else if (action === "move-close") closeMovePicker(true);
+    else if (action === "move-search") {
+      moveSearchOpen = !moveSearchOpen; moveQuery = ""; renderMovePicker();
+      if (moveSearchOpen) modal.querySelector('.ysm-move-search').focus();
+      else modal.querySelector('[data-action="move-search"]').focus();
+    } else if (action === "move-parent") {
+      moveSearchOpen = false; moveQuery = "";
+      moveParent = button.dataset.moveParent; renderMovePicker();
+      modal.querySelector('[data-action="move-back"]').focus();
+    } else if (action === "move-back") {
+      const previous = moveParent; moveSearchOpen = false; moveQuery = ""; moveParent = null; renderMovePicker();
+      Array.from(modal.querySelectorAll('[data-action="move-parent"]')).find(item => item.dataset.moveParent === previous)?.focus();
     } else if (action === "destination") {
-      const id = button.closest("[data-channel]").dataset.channel;
+      const id = moveChannel;
       // Existing operation expects the app's lexical state to match window state.
       folderData = window.folderData; userSubscriptions = window.userSubscriptions;
       const destinationParent = button.dataset.destinationParent;
@@ -301,7 +396,7 @@ function showSubfolderView() {
       const menu = modal.querySelector(".ysm-main-menu");
       if (!menu.hidden) { menu.hidden = true; modal.querySelector('[data-action="menu"]').setAttribute("aria-expanded", "false"); }
       else if (modal.querySelector('.ysm-more-parents')?.open) modal.querySelector('.ysm-more-parents').open = false;
-      else if (moveChannel) { moveChannel = null; render(); }
+      else if (moveChannel) closeMovePicker(true);
       else close();
     }
     if (event.key === "Tab") {
@@ -312,6 +407,7 @@ function showSubfolderView() {
       else if (!event.shiftKey && (document.activeElement === last || document.activeElement === dialog)) { event.preventDefault(); first.focus(); }
     }
   }
+  modal.querySelector(".ysm-channel-list").addEventListener("scroll", () => closeMovePicker());
   chrome.storage.onChanged.addListener(storageChanged);
   document.addEventListener("keydown", keydown);
   document.addEventListener("pointerdown", dismissMenus);

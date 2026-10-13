@@ -54,10 +54,8 @@
 #subfolder-view-modal .ysm-channel-info p { margin-top: 4px; color: #b8c0cc; font-size: 12px; }
 #subfolder-view-modal .ysm-row-actions { display: flex; gap: 8px; flex-shrink: 0; }
 #subfolder-view-modal .ysm-move { background: #193a54; border-color: #3989c5; color: #88c9f5; }
-#subfolder-view-modal .ysm-move-options { flex: 1 0 100%; display: grid; gap: 4px; max-height: 180px; overflow-y: auto; padding-top: 8px; border-top: 1px solid #44505b; }
-#subfolder-view-modal .ysm-move-options button { text-align: left; }
 #subfolder-view-modal .ysm-empty { padding: 18px 8px; color: #b8c0cc; }
-#subfolder-view-modal .ysm-subfolders, #subfolder-view-modal .ysm-channel-list, #subfolder-view-modal .ysm-move-options, #subfolder-view-modal .ysm-menu { scrollbar-gutter: stable; scrollbar-color: auto !important; overscroll-behavior: contain; }
+#subfolder-view-modal .ysm-subfolders, #subfolder-view-modal .ysm-channel-list, #subfolder-view-modal .ysm-move-list, #subfolder-view-modal .ysm-menu { scrollbar-gutter: stable; scrollbar-color: auto !important; overscroll-behavior: contain; }
 #subfolder-view-modal ::-webkit-scrollbar { width: 6px; }
 #subfolder-view-modal ::-webkit-scrollbar-button { display: none; width: 0; height: 0; }
 #subfolder-view-modal ::-webkit-scrollbar-track { background: transparent; margin-block: 8px; }
@@ -87,8 +85,6 @@
 #subfolder-view-modal .ysm-description { flex: 1 0 100%; min-width: 0; padding: 12px; background: #192128; border-radius: 8px; color: #cbd3de; white-space: pre-wrap; overflow-wrap: anywhere; max-height: 160px; overflow-y: auto; scrollbar-gutter: stable; scrollbar-color: auto !important; }
 
 #subfolder-view-modal .ysm-subfolder:hover { background: var(--subfolder-active-fill, #415467); }
-#subfolder-view-modal .ysm-move-options button { display: flex; align-items: center; gap: 10px; }
-#subfolder-view-modal .ysm-move-options button > span:last-child { min-width: 0; overflow-wrap: anywhere; }
 
 @media (max-width: 950px) {
   #subfolder-view-modal .ysm-channel-info { flex-basis: 200px; }
@@ -132,3 +128,16 @@
 #subfolder-view-modal .ysm-info { border-color: #71889e; }
 #subfolder-view-modal .ysm-info:hover { background: #34485a; border-color: #a8c6e3; }
 #subfolder-view-modal .ysm-load-message { color: #e4ca97; padding: 8px 12px; border: 1px solid #756345; border-radius: 8px; background: #302a20; }
+
+#subfolder-view-modal .ysm-move-picker { position: fixed; z-index: 2; width: min(280px, calc(100vw - 24px)); padding: 10px; border: 1px solid #485867; border-radius: 10px; background: #202a34; box-shadow: 0 8px 24px #0008; }
+#subfolder-view-modal .ysm-move-picker[hidden] { display: none; }
+#subfolder-view-modal .ysm-move-picker header { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+#subfolder-view-modal .ysm-move-picker strong { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#subfolder-view-modal .ysm-move-list { max-height: min(220px, 40vh); overflow-y: auto; display: grid; gap: 4px; }
+#subfolder-view-modal .ysm-move-list button { display: flex; align-items: center; gap: 8px; text-align: left; width: 100%; }
+#subfolder-view-modal .ysm-move-list button span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#subfolder-view-modal .ysm-move-list small { color: #aebbc8; }
+#subfolder-view-modal .ysm-move-back { margin-bottom: 8px; }
+
+#subfolder-view-modal .ysm-move-search { width: 100%; min-width: 0; height: 34px; margin-bottom: 8px; box-sizing: border-box; }
+#subfolder-view-modal .ysm-move-picker header button { display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
