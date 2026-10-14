@@ -1,14 +1,21 @@
 // Folder mutations and persistence. UI code asks this service to mutate records; it does not edit storage directly.
 function cloneFolderData(data = window.folderData || {}) { return JSON.parse(JSON.stringify(data)); }
 function replaceFolderData(data) { folderData = data; window.folderData = data; }
+function prepareManageFolderRename(rename, reverse = false) {
+  if (!rename) return;
+  const oldName = reverse ? rename.newName : rename.oldName;
+  const newName = reverse ? rename.oldName : rename.newName;
+  if (rename.parentName !== undefined) window.prepareManageSubfolderRename?.(rename.parentName, oldName, newName);
+  else window.prepareManageParentRename?.(oldName, newName);
+}
 function persistFolderMutation(nextData, previousData, done, rename = null) {
   // Keep the Manage selection pointed at the new key before storage notifications render.
-  if (rename) window.prepareManageParentRename?.(rename.oldName, rename.newName);
+  prepareManageFolderRename(rename);
   replaceFolderData(nextData);
   chrome.storage.local.set({ folderData: nextData }, () => {
     if (chrome.runtime.lastError) {
       replaceFolderData(previousData);
-      if (rename) window.prepareManageParentRename?.(rename.newName, rename.oldName);
+      prepareManageFolderRename(rename, true);
       showUserNotification("Could not save folder changes. Your existing data was kept.", "error");
       done?.(false); return;
     }
@@ -55,7 +62,7 @@ function updateSubfolderRecord(parentName, oldName, newName, color, textColor, d
   const previous = cloneFolderData(current), next = cloneFolderData(current), nextChildren = next[parentName].subfolders;
   const record = nextChildren[oldName]; record.color = color; record.textColor = textColor;
   if (newName !== oldName) { nextChildren[newName] = record; delete nextChildren[oldName]; }
-  persistFolderMutation(next, previous, done);
+  persistFolderMutation(next, previous, done, oldName === newName ? null : { parentName, oldName, newName });
 }
 function deleteParentFolderRecord(name, done) {
   const current = window.folderData || {};

@@ -6,7 +6,7 @@ function sidebarElement(tag, className, text) {
   return element;
 }
 
-function sidebarFolderRow(name, count, expanded, subfolder, colour, textColour = "#ffffff") {
+function sidebarFolderRow(name, expanded, subfolder, colour, textColour = "#ffffff") {
   const row = sidebarElement("button", subfolder ? "ytsm-folder ytsm-subfolder" : "ytsm-folder");
   row.type = "button";
   row.style.setProperty("--folder-color", colour);
@@ -17,8 +17,7 @@ function sidebarFolderRow(name, count, expanded, subfolder, colour, textColour =
   arrow.setAttribute("aria-hidden", "true");
   const icon = sidebarElement("span", "ytsm-folder-icon");
   icon.setAttribute("aria-hidden", "true");
-  row.append(arrow, icon, sidebarElement("span", "ytsm-folder-name", name),
-    sidebarElement("span", "ytsm-count", String(count)));
+  row.append(arrow, icon, sidebarElement("span", "ytsm-folder-name", name));
   return row;
 }
 

@@ -40,6 +40,7 @@
         "src/components/FolderDialogs/SubfolderDialog.js",
         "src/components/SubscriptionManager.js",
         "src/components/SidebarRows.js",
+        "src/components/SidebarFolderMenu.js",
         "src/components/FolderDropdown.js",
         "src/components/SidebarButton.js",
         "src/components/SubfolderView/ManageViewHelpers.js",

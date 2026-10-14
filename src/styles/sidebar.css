@@ -278,3 +278,16 @@
 
 /* Keep saved muted folder colours unchanged on hover. */
 #yt-manage-guide-entry .ytsm-folder:hover { filter: none; }
+
+/* Navigation and quick actions are siblings, never nested buttons. */
+#yt-manage-guide-entry .ytsm-folder-wrap { display: flex; align-items: center; min-width: 0; border-radius: 9px; background: var(--folder-color); }
+#yt-manage-guide-entry .ytsm-folder-wrap .ytsm-folder { flex: 1; width: auto; min-width: 0; background: transparent; padding-right: 5px; }
+#yt-manage-guide-entry .ytsm-folder-more { flex: 0 0 28px; height: 28px; margin-right: 4px; padding: 0; border-radius: 6px; background: transparent; color: #d0d5df; display: flex; align-items: center; justify-content: center; letter-spacing: 1px; }
+#yt-manage-guide-entry .ytsm-folder-more:hover, #yt-manage-guide-entry .ytsm-folder-more:focus-visible { background: #303238; color: #fff; }
+#ytsm-sidebar-folder-menu { position: fixed; z-index: 9500; width: 158px; max-width: calc(100vw - 16px); padding: 5px; border: 1px solid #454950; border-radius: 9px; background: #25282d; box-shadow: 0 8px 24px #0008; }
+#ytsm-sidebar-folder-menu .ytsm-folder-menu-action { display: block; width: 100%; padding: 9px 10px; border-radius: 5px; color: #eef0f3; background: transparent; }
+#ytsm-sidebar-folder-menu .ytsm-folder-menu-action:hover { background: #373b42; }
+
+#ytsm-sidebar-folder-menu { box-sizing: border-box; margin: 0; font: 13px/1.4 Roboto, Arial, sans-serif; }
+#ytsm-sidebar-folder-menu .ytsm-folder-menu-action { box-sizing: border-box; margin: 0; border: 0; text-align: left; font: inherit; cursor: pointer; }
+#ytsm-sidebar-folder-menu .ytsm-folder-menu-action:focus-visible { outline: 2px solid #a8c7fa; outline-offset: -2px; }

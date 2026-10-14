@@ -12,11 +12,13 @@ function mountSidebarEntry(loggedIn = isLoggedIn) {
 
   let entry = document.getElementById("yt-manage-guide-entry");
   if (entry && entry.parentElement !== container) {
+    closeSidebarFolderMenu();
     entry.remove();
     folderDropdown = null;
     window.folderDropdown = null;
     entry = null;
   }
+  if (!loggedIn) closeSidebarFolderMenu();
   const state = loggedIn ? "ready" : "login";
   if (entry?.dataset.state === state) {
     sizeSidebarLauncher(entry, container);

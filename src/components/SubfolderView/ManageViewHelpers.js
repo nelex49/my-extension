@@ -53,3 +53,14 @@ function manageVisibleParents(names, selected, capacity, previous = [], recency 
   return visible;
 }
 
+
+// Count unique channels across direct assignments and all children.
+function manageParentCount(info) {
+  const ids = new Set();
+  [info?.subscriptions || [], ...Object.values(info?.subfolders || {}).map(folder => folder.subscriptions || [])]
+    .forEach(subscriptions => subscriptions.forEach(sub => { const id = manageChannelId(sub); if (id) ids.add(id); }));
+  return ids.size;
+}
+function manageParentLabel(name) {
+  return `<span class="ysm-parent-name">${manageEscape(name)}</span>`;
+}

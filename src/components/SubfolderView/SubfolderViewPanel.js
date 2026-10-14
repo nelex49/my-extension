@@ -19,9 +19,9 @@ function showSubfolderView() {
       <div class="ysm-menu ysm-main-menu" hidden><button type="button" data-action="refresh">Refresh subscriptions</button><button disabled>Export backup</button><button disabled>Restore backup</button><p>Backup and restore coming soon.</p></div></div></header>
     <p class="ysm-load-message" role="status" hidden></p>
     <section class="ysm-parents"><div class="ysm-parent-heading"><button type="button" data-action="uncategorised" class="ysm-tab ysm-uncategorised" aria-pressed="false" title="View unassigned subscriptions"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 4h16v12h-5l-2 3h-2l-2-3H4z"/></svg>Uncategorised <span></span></button><div class="ysm-parent-heading-actions"><div class="ysm-all-folders-slot"></div><button type="button" data-action="create-parent" class="ysm-create-parent"><span class="ysm-add-plus" aria-hidden="true">+</span> Add Folder</button></div></div><div class="ysm-tabs"><button type="button" class="ysm-parent-arrow" data-action="parent-prev" aria-label="Previous parent folder" disabled>‹</button><div class="ysm-visible-parents"></div><button type="button" class="ysm-parent-arrow" data-action="parent-next" aria-label="Next parent folder" disabled>›</button></div></section>
-    <div class="ysm-columns"><aside class="ysm-navigation"><div class="ysm-nav-heading"><div class="ysm-nav-title">${manageFolderIcon("ysm-heading-icon", true)}<h3></h3></div>
+    <div class="ysm-columns"><aside class="ysm-navigation"><div class="ysm-nav-heading"><div class="ysm-nav-title">${manageFolderIcon("ysm-heading-icon", true)}<h3></h3><span class="ysm-heading-count"></span></div>
       <div class="ysm-nav-actions"><button type="button" data-action="add" class="ysm-add"><span class="ysm-subfolder-plus" aria-hidden="true">+</span> Add Subfolder</button></div></div>
-      <input class="ysm-folder-search" type="search" aria-label="Find subfolder" placeholder="Find folder...">
+      <div class="ysm-folder-search-field"><input class="ysm-folder-search" type="search" aria-label="Search subfolders" placeholder="Search subfolders..."><button type="button" data-action="clear-subfolder-search" class="ysm-folder-search-clear" aria-label="Clear subfolder search" hidden>✕</button></div>
       <div class="ysm-subfolders"></div></aside>
     <section class="ysm-content"><header class="ysm-content-heading"><div><h3 class="ysm-selected"></h3><p class="ysm-selected-count"></p></div>
       <input class="ysm-channel-search" type="search" aria-label="Search channels" placeholder="Search channels...">
@@ -35,6 +35,10 @@ function showSubfolderView() {
   let parent = null, child = null, query = "", folderQuery = "", sort = "az";
   let moveChannel = null, moveParent = null, moveQuery = "", movePosition = null;
   let parentListScroll = 0;
+  const previousChildRenameHandler = window.prepareManageSubfolderRename;
+  window.prepareManageSubfolderRename = (parentName, oldName, newName) => {
+    if (parent === parentName && child === oldName) child = newName;
+  };
   const previousRenameHandler = window.prepareManageParentRename;
   window.prepareManageParentRename = (oldName, newName) => {
     if (parent === oldName) parent = newName;
@@ -153,7 +157,7 @@ function showSubfolderView() {
     const needle = search.value.trim().toLowerCase();
     const data = window.folderData || {};
     list.innerHTML = Object.keys(data).filter(name => name.toLowerCase().includes(needle)).map((name, index) =>
-      `<div class="ysm-parent-item ysm-parent-overflow-item"><button type="button" data-parent="${manageEscape(name)}" class="ysm-tab ${name === parent ? 'is-active' : ''}" title="${manageEscape(name)}" style="--tab-colour:${sidebarFolderColour(data[name].color, index)};color:${folderTextColour(data[name].color)}">${manageEscape(name)}</button><button type="button" class="ysm-folder-more" data-action="edit-parent" data-edit-parent="${manageEscape(name)}" aria-label="Edit ${manageEscape(name)}">•••</button></div>`).join('') ||
+      `<div class="ysm-parent-item ysm-parent-overflow-item"><button type="button" data-parent="${manageEscape(name)}" class="ysm-tab ${name === parent ? 'is-active' : ''}" title="${manageEscape(name)}" style="--tab-colour:${sidebarFolderColour(data[name].color, index)};color:${folderTextColour(data[name].color)}">${manageParentLabel(name, data[name])}</button><button type="button" class="ysm-folder-more" data-action="edit-parent" data-edit-parent="${manageEscape(name)}" aria-label="Edit ${manageEscape(name)}">•••</button></div>`).join('') ||
       '<p class="ysm-empty">No matching parent folders.</p>';
   }
 
@@ -165,6 +169,7 @@ function showSubfolderView() {
     document.removeEventListener("pointerup", stopArrowHold);
     parentTabsResize.disconnect();
     window.prepareManageParentRename = previousRenameHandler;
+    window.prepareManageSubfolderRename = previousChildRenameHandler;
     modal.remove();
     activeManageView = null;
     if (previousFocus?.isConnected) previousFocus.focus();
@@ -194,7 +199,7 @@ function showSubfolderView() {
     message.textContent = loadStatus.state === 'error' ? `${loadStatus.message} Use the menu to retry, or sign in again.` : '';
     modal.querySelector('[data-action="refresh"]').disabled = loadStatus.state === 'loading';
     const names = Object.keys(data);
-    const tab = name => `<div class="ysm-parent-item" data-parent-item="${manageEscape(name)}"><button type="button" data-parent="${manageEscape(name)}" class="ysm-tab ${name === parent ? 'is-active' : ''}" aria-pressed="${name === parent}" title="${manageEscape(name)}" style="--tab-colour:${sidebarFolderColour(data[name].color, names.indexOf(name))};color:${folderTextColour(data[name].color)}">${manageEscape(name)}</button><button type="button" class="ysm-folder-more" data-action="edit-parent" data-edit-parent="${manageEscape(name)}" aria-label="Edit ${manageEscape(name)}">•••</button></div>`;
+    const tab = name => `<div class="ysm-parent-item" data-parent-item="${manageEscape(name)}"><button type="button" data-parent="${manageEscape(name)}" class="ysm-tab ${name === parent ? 'is-active' : ''}" aria-pressed="${name === parent}" title="${manageEscape(name)}" style="--tab-colour:${sidebarFolderColour(data[name].color, names.indexOf(name))};color:${folderTextColour(data[name].color)}">${manageParentLabel(name, data[name])}</button><button type="button" class="ysm-folder-more" data-action="edit-parent" data-edit-parent="${manageEscape(name)}" aria-label="Edit ${manageEscape(name)}">•••</button></div>`;
     const uncategorisedButton = modal.querySelector(".ysm-uncategorised");
     uncategorisedButton.classList.toggle("is-active", parent === null);
     uncategorisedButton.setAttribute("aria-pressed", String(parent === null));
@@ -218,6 +223,9 @@ function showSubfolderView() {
     const folderHeading = modal.querySelector(".ysm-nav-heading h3");
     folderHeading.textContent = parent === null ? "Your folders" : `${parent} folders`;
     folderHeading.title = folderHeading.textContent;
+    const headingCount = modal.querySelector('.ysm-heading-count');
+    headingCount.hidden = parent === null;
+    headingCount.textContent = parent === null ? '' : `${manageParentCount(data[parent])} Subs`;
     const addSubfolder = modal.querySelector('.ysm-add');
     addSubfolder.hidden = parent === null;
     addSubfolder.title = parent === null ? '' : `Create a subfolder in ${parent}`;
@@ -229,9 +237,11 @@ function showSubfolderView() {
     modal.querySelector('.ysm-heading-icon').style.color = lightenColor(parentColour, 30);
     addSubfolder.style.setProperty('--add-fill', parentColour);
     addSubfolder.style.setProperty('--add-border', lightenColor(parentColour, 30));
+    modal.querySelector('.ysm-folder-search-field').hidden = parent === null;
+    modal.querySelector('.ysm-folder-search-clear').hidden = !folderQuery;
     const entries = parent === null ? [] : Object.entries(data[parent].subfolders || {});
     modal.querySelector(".ysm-subfolders").innerHTML = parent === null ?
-      `<p class="ysm-empty">Select a parent folder above to browse its subfolders.</p>` :
+      `<div class="ysm-uncategorised-help"><strong>Uncategorised channels</strong><p>These channels have no folder assignment. Use Move beside a channel to organise them.</p></div>` :
       ((data[parent].subscriptions?.length ? `<button type="button" class="ysm-subfolder ${child === null ? 'is-active' : ''}" data-action="direct"><span>Parent channels</span><small>${data[parent].subscriptions.length}</small></button>` : "") +
       entries.filter(([name]) => name.toLowerCase().includes(folderQuery.trim().toLowerCase())).map(([name, info], index) => {
         const colour = sidebarFolderColour(info.color, index), text = folderTextColour(colour);
@@ -374,6 +384,10 @@ function showSubfolderView() {
     const button = event.target.closest("button");
     if (!button || button.disabled) return;
     const action = button.dataset.action;
+    if (action === "clear-subfolder-search") {
+      folderQuery = ""; modal.querySelector('.ysm-folder-search').value = ""; render();
+      modal.querySelector('.ysm-folder-search').focus({ preventScroll: true }); return;
+    }
     if (action === "edit-parent") {
       event.stopPropagation?.();
       const oldName = button.dataset.editParent;

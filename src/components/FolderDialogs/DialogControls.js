@@ -4,7 +4,7 @@ function folderColourButtons() {
   return SIDEBAR_FOLDER_PALETTE.map((colour, index) => `<button type="button" class="ytsm-swatch" data-color="${colour}" aria-label="Muted colour ${index + 1}" title="Muted colour ${index + 1}" style="--swatch-colour:${colour}"></button>`).join('');
 }
 function showFolderForm(options) {
-  const { kind, mode, parentName = null, originalName = null, anchor = null, onSaved = null, onDeleted = null } = options;
+  const { kind, mode, parentName = null, originalName = null, anchor = null, onSaved = null, onDeleted = null, placement = 'beside' } = options;
   const editing = mode === 'edit';
   const record = kind === 'parent' ? (editing ? window.folderData?.[originalName] : null) : (editing ? window.folderData?.[parentName]?.subfolders?.[originalName] : null);
   if (editing && !record) return;
@@ -20,7 +20,7 @@ function showFolderForm(options) {
     <label>Colour</label><div class="ytsm-colour-controls"><div class="ytsm-colour-row">${folderColourButtons()}</div><button type="button" class="ytsm-custom-colour"><span class="ytsm-palette-icon" aria-hidden="true">◉</span> Custom colour</button><input class="ytsm-colour-input" type="color" value="${sidebarFolderColour(selectedColor)}" aria-label="Choose custom colour"></div>
     <p class="ytsm-form-error" role="alert" hidden></p>
     <div class="ytsm-delete-confirm" hidden><span>Delete this ${noun.toLowerCase()}${kind === 'parent' ? ' and its subfolders' : ''}?</span><button type="button" data-action="confirm-delete" class="is-danger">Delete</button><button type="button" data-action="cancel-delete">Keep</button></div>
-    <footer class="ytsm-dialog-actions">${editing ? '<button type="button" data-action="delete" class="ytsm-delete">Delete</button>' : ''}<span></span><button type="button" data-dialog-close>Cancel</button><button type="button" data-action="save" class="ytsm-primary">${editing ? 'Save changes' : 'Create'}</button></footer></div></div>`, anchor);
+    <footer class="ytsm-dialog-actions">${editing ? '<button type="button" data-action="delete" class="ytsm-delete">Delete</button>' : ''}<span></span><button type="button" data-dialog-close>Cancel</button><button type="button" data-action="save" class="ytsm-primary">${editing ? 'Save changes' : 'Create'}</button></footer></div></div>`, anchor, placement);
   const input = modal.querySelector('#ytsm-folder-name'), count = modal.querySelector('.ytsm-character-count span'), error = modal.querySelector('.ytsm-form-error');
   const save = modal.querySelector('[data-action="save"]'), picker = modal.querySelector('.ytsm-colour-input');
   function showError(message) { error.textContent = message; error.hidden = !message; }

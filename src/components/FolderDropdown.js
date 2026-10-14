@@ -7,6 +7,7 @@ const sidebarExpandedSubfolders = new Set();
 function toggleFolderDropdown() {
   if (!folderDropdown?.isConnected) createFolderDropdown();
   if (!folderDropdown) return;
+  closeSidebarFolderMenu();
   folderDropdown.hidden = !folderDropdown.hidden;
   document.querySelector("#yt-manage-guide-entry .ytsm-launcher")
     ?.setAttribute("aria-expanded", String(!folderDropdown.hidden));
@@ -33,6 +34,7 @@ function toggleSidebarSet(set, key) {
 
 function refreshFolderDropdown() {
   if (!folderDropdown?.isConnected) return;
+  closeSidebarFolderMenu();
   const scrollTop = folderDropdown.scrollTop;
   const channelScroll = new Map(Array.from(folderDropdown.querySelectorAll(".ytsm-channels"),
     list => [list.dataset.scrollKey, list.scrollTop]));
@@ -49,12 +51,11 @@ function refreshFolderDropdown() {
     const group = sidebarElement("div", "ytsm-parent-group");
     const subfolders = Object.entries(info.subfolders || {});
     const directSubscriptions = info.subscriptions || [];
-    const count = directSubscriptions.length + subfolders.reduce((sum, [,sub]) => sum + (sub.subscriptions?.length || 0), 0);
     const expanded = sidebarExpandedParents.has(name);
-    const row = sidebarFolderRow(name, count, expanded, false, colour, folderTextColour(colour));
+    const row = sidebarFolderRow(name, expanded, false, colour, folderTextColour(colour));
     row.dataset.focusKey = JSON.stringify([name]);
     row.addEventListener("click", () => toggleSidebarSet(sidebarExpandedParents, name));
-    group.append(row);
+    group.append(sidebarFolderActions(row, name));
     subfolders.forEach(([subName]) => validSubfolders.add(JSON.stringify([name, subName])));
     if (expanded) {
       const children = sidebarElement("div", "ytsm-subfolders");
@@ -67,10 +68,10 @@ function refreshFolderDropdown() {
         const open = sidebarExpandedSubfolders.has(key);
         const subGroup = sidebarElement("div", "ytsm-subfolder-group");
         const subColour = sidebarFolderColour(subInfo.color, index);
-        const subRow = sidebarFolderRow(subName, subInfo.subscriptions?.length || 0, open, true, subColour, folderTextColour(subColour));
+        const subRow = sidebarFolderRow(subName, open, true, subColour, folderTextColour(subColour));
         subRow.dataset.focusKey = key;
         subRow.addEventListener("click", () => toggleSidebarSet(sidebarExpandedSubfolders, key));
-        subGroup.append(subRow);
+        subGroup.append(sidebarFolderActions(subRow, name, subName));
         if (open) subGroup.append(sidebarChannelList(subInfo.subscriptions || [], key));
         children.append(subGroup);
       });
