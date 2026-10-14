@@ -2,7 +2,7 @@
 #yt-manage-guide-entry {
   width: 100%;
   font: 13px/1.4 Roboto, Arial, sans-serif;
-  color: #f1f1f1;
+  color: var(--folder-text, #f1f1f1);
 }
 #yt-manage-guide-entry *, #yt-manage-guide-entry *::before,
 #yt-manage-guide-entry *::after { box-sizing: border-box; }
@@ -166,7 +166,7 @@
   width: 14px;
   height: 11px;
   flex: 0 0 14px;
-  border: 1.5px solid #c2cbd5;
+  border: 1.5px solid currentColor;
   border-radius: 2px;
 }
 #yt-manage-guide-entry .ytsm-folder-icon::before {
@@ -176,7 +176,7 @@
   left: -1.5px;
   width: 7px;
   height: 4px;
-  border: 1.5px solid #c2cbd5;
+  border: 1.5px solid currentColor;
   border-bottom: 0;
   border-radius: 2px 2px 0 0;
 }
@@ -275,3 +275,6 @@
 #yt-manage-guide-entry .ytsm-channels {
   scrollbar-color: auto !important;
 }
+
+/* Keep saved muted folder colours unchanged on hover. */
+#yt-manage-guide-entry .ytsm-folder:hover { filter: none; }

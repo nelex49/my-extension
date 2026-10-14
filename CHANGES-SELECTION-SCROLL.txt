@@ -1,0 +1,14 @@
+Follow-up fixes (2026-10-14)
+- Preserve selected parent when renaming: update Manage selection before persistence emits a storage change; revert selection if save fails.
+- Preserve parent tab order when renaming by replacing the object key in its original position.
+- Keep parent strip horizontally scrollable but hide its visible scrollbar, aligning Uncategorised with the parent tabs.
+- The ten muted swatches remain the default choices. Custom colour remains available in the editor (not changed in this pass).
+
+Manual Chrome checks:
+1. Select a parent with subfolders, rename it, save; verify the renamed parent stays active, its subfolders and channels remain visible, and its tab position is unchanged.
+2. Rename a different parent via All Folders and verify selection remains where it was.
+3. Create many parents; check Uncategorised vertical alignment and access to off-screen tabs via horizontal trackpad/Shift+wheel or All Folders.
+4. Verify palette and saved colours are unchanged.
+5. Simulate a failed storage write where feasible and verify original data and selection remain.
+
+Tests: node tests/dialogs.cjs; node tests/manage.cjs; node tests/retrieval.cjs; node tests/startup.cjs

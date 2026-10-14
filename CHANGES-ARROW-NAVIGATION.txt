@@ -1,0 +1,12 @@
+Arrow navigation update (ui-redesign only)
+
+- Flat muted amber Uncategorised with icon and subscription count; subtle active shade.
+- All Folders fixed at upper right; Add Folder blue with prominent plus.
+- Parent folder strip alone occupies second row; arrow controls replace scrollbar.
+- Arrow clicks move toward the next obscured folder. Mouse/trackpad scrolling remains available.
+- Shared ten muted palette remains in src/utils/FolderColours.js. Saved folder colours are not overwritten.
+- No storage, deletion or YouTube subscription mutations changed.
+
+INSTALL: Back up your ui-redesign working folder. Extract this archive and copy the CONTENTS into that folder, replacing files. In chrome://extensions click Reload, then refresh YouTube. Do not overwrite main.
+
+LIVE CHROME CHECKS: test both arrows with many folders, narrow Manage window, trackpad/mouse wheel, All Folders selection jump, Uncategorised selected state, and the ten swatches in create/edit forms. Native browser layout and event behaviour cannot be fully verified by the Node mocks.

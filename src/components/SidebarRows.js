@@ -6,10 +6,11 @@ function sidebarElement(tag, className, text) {
   return element;
 }
 
-function sidebarFolderRow(name, count, expanded, subfolder, colour) {
+function sidebarFolderRow(name, count, expanded, subfolder, colour, textColour = "#ffffff") {
   const row = sidebarElement("button", subfolder ? "ytsm-folder ytsm-subfolder" : "ytsm-folder");
   row.type = "button";
   row.style.setProperty("--folder-color", colour);
+  row.style.setProperty("--folder-text", textColour);
   row.title = name;
   row.setAttribute("aria-expanded", String(expanded));
   const arrow = sidebarElement("span", "ytsm-arrow", expanded ? "▾" : "▸");
