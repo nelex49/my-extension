@@ -43,6 +43,7 @@ function refreshFolderDropdown() {
   const focused = folderDropdown.contains(document.activeElement) ?
     document.activeElement.dataset.focusKey : null;
   const heading = sidebarElement("h2", "ytsm-heading", "Your folders");
+  heading.title = window.folderOwner ? `Linked YouTube account: ${window.folderOwner.title}` : "Your folders";
   const list = sidebarElement("div", "ytsm-folders");
   const folders = Object.entries(window.folderData || {});
   if (!folders.length) list.append(sidebarElement("p", "ytsm-empty", "No folders yet."));

@@ -1,11 +1,11 @@
 /** @format */
 
 // Authentication keeps its existing data-loading path; mounting owns presentation.
-function handleLoginState(token) {
-  isLoggedIn = !!token;
+function handleLoginState(token, refresh = true) {
+  isLoggedIn = !!token && accountIsReady();
   window.isLoggedIn = isLoggedIn;
-  if (isLoggedIn) loadUserData(token);
-  else if (folderPanel?.parentNode) {
+  if (token && refresh) loadUserData(token);
+  if (!isLoggedIn && folderPanel?.parentNode) {
     folderPanel.remove();
     folderPanel = null;
     window.folderPanel = null;

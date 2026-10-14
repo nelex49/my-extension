@@ -16,10 +16,15 @@
         font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           sans-serif;
         width: 320px;
+        opacity: 1;
+        transition: opacity 300ms ease;
         background: white;
         margin: 0;
         padding: 0;
       }
+
+      body.is-closing { opacity: 0; }
+      @media (prefers-reduced-motion: reduce) { body { transition: none; } }
 
       .popup-container {
         border: 1px solid #e0e0e0;
@@ -72,6 +77,8 @@
         box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
       }
 
+      [hidden] { display: none !important; }
+      button + button { margin-top: 10px; }
       #logout {
         display: none;
       }
@@ -85,7 +92,8 @@
       <div class="popup-body">
         <div class="status" id="status">Not logged in.</div>
         <button id="login">Login with Google</button>
-        <button id="logout">Logout</button>
+        <button id="link-account" hidden>Link folders to this account</button>
+        <button id="logout">Sign out</button>
       </div>
     </div>
     <script src="popup.js"></script>

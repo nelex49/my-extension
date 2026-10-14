@@ -182,3 +182,27 @@ Expanded sidebar subfolders no longer have an inset outline. Expansion arrows, e
 Channel moves now build a complete copied assignment tree and save it once through FolderService. Parent-held legacy assignments are cleared in that same write. Removal from a parent or subfolder uses the same persistence path. State is committed after successful storage completion. Reported storage errors and thrown storage calls retain the previous data and show a notification. A per-content-script guard rejects overlapping folder/assignment writes with a retry message. It does not coordinate simultaneous writes from separate YouTube tabs; cross-tab concurrency remains a separate review item.
 
 Dialog regressions now exercise single-write moves, failed moves and both removal types, exceptions, repeated clicks, concurrent folder deletion rejection, guard release and unchanged YouTube subscriptions. All four suites pass.
+
+## Single-account ownership checkpoint
+
+The worker uses YouTube channels.list with mine=true to identify the authorised channel under the existing read-only scope. Exactly one channel must be returned; ambiguous or failed identification blocks access. Existing folder records are never silently claimed: the popup shows the channel title and ID and asks for explicit linking confirmation. It verifies identity again before binding folderOwner, leaving folderData unchanged. Owner metadata persists through sign-out. Mismatched channels cannot use the folder UI or save through the folder service. The popup displays the authorised channel and linked owner. Website account switching does not switch the extension authorisation.
+
+Account verification and subscription fetching use the same token, including after renewal. Session checks discard late verification/retrieval results. Cached subscriptions are cleared on sign-out, unlinked state, mismatch or failed verification. Popup sign-out clears cached Chrome authorisation and local login; it no longer makes a fire-and-forget server revocation request. Revoking the Google app grant remains separate from signing out locally.
+
+No multi-account setups or device sync are added. The account-linking workflow needs live Chrome/OAuth testing, especially whether Chrome offers selection of the second Google account. A channel-less or multi-channel API response produces a verification error rather than guessing.
+
+Manual check: link only the correct original account; confirm existing folders/assignments; sign out and return to it; try authorising another account and confirm blocking; return to the original and confirm unchanged data. Record the channel title/ID shown each time to distinguish website account changes from extension authorisation.
+
+## Sign-out restoration
+
+Supersedes the local-only sign-out described above. Sign-out now ends the local session, awaits Google's token revocation request, then clears Chrome's identity cache. The owner record and folderData remain intact. Revocation uses a form POST to the explicitly permitted oauth2.googleapis.com endpoint; tokens are not placed in the URL. If revocation fails, the popup reports that login may reuse the same account. This restores the previous consent-disconnection behaviour, but Chrome's getAuthToken does not guarantee an account chooser. Live account selection remains an outstanding check.
+
+Popup presentation: verified returning users see Signed in without channel identifiers. A successful user-initiated login waits three seconds, fades for 300ms and closes. Verification/linking/blocked/error states do not auto-close. Sign-out cancels a scheduled close. Initial linking retains identity details for confirmation.
+
+Signed-out popup refinement: Signed out. Sign in with Google to continue. replaces the normal owner reminder. Successful user-initiated sign-out waits seven seconds before fading and closing. Login cancels that timer; opening a signed-out popup does not start it. Failed sign-out/revocation remains visible. Google revocation behaviour is unchanged.
+
+## Account milestone: ordinary sign-out
+
+Supersedes revocation-on-sign-out above. Ordinary sign-out removes the extension session and cached subscription list, retaining Google's consent and identity token cache. Login requests a token without first clearing the cache. Account verification still applies on every new session. Google may request interaction when necessary; automatic login is not guaranteed. No dedicated account chooser or Disconnect action is introduced. The obsolete revocation host permission is removed. Popup sign-in (3s) and sign-out (7s) timers remain.
+
+Manual checks already completed before this last adjustment: second account blocked, original account returned with folders unchanged, browser restart preserved organisation, popup fade timers working. Repeat sign-out/sign-in needs final live confirmation. Multiple-tab save protection remains outstanding, followed by backup/restore. Multi-account premium, device sync and remembering expanded sidebar rows are deferred.

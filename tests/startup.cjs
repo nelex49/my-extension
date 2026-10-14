@@ -34,7 +34,7 @@ document.querySelector=sel=>body.querySelector(sel);
 context.MutationObserver=class{observe(){}disconnect(){}};
 context.requestAnimationFrame=fn=>fn();
 const section=new E('ytd-guide-section-renderer'),items=new E('div');items.id='items';section.append(items);body.append(section);
-let store={folderData:{Sports:{color:'#44345d',subfolders:{Ball:{subscriptions:[a,b]}}}},userSubscriptions:[a,b,c],accessToken:'token',subscriptionLoadStatus:{state:'ready'}};
+let store={folderData:{Sports:{color:'#44345d',subfolders:{Ball:{subscriptions:[a,b]}}}},userSubscriptions:[a,b,c],accessToken:'token',folderOwner:{id:'UC_OWNER',title:'Owner'},accountStatus:{state:'ready',session:'token',account:{id:'UC_OWNER',title:'Owner'}},subscriptionLoadStatus:{state:'ready'}};
 context.chrome.storage.local={get(keys,callback){callback(structuredClone(store))},set(data,callback){for(const [key,value] of Object.entries(data))store[key]=structuredClone(value);callback?.()}};
 context.chrome.runtime.onMessage={addListener(){}};
 vm.createContext(context);
@@ -69,5 +69,11 @@ manage.events.click({target:manage.querySelector('[data-action="add"]')});dialog
 manage.events.click({target:manage.querySelector('[data-action="close"]')});assert.equal(Object.values(document.events).reduce((n,set)=>n+set.size,0),1); // DOMContentLoaded listener only
 // Account state still remounts the correct launcher and removes the previous dropdown.
 for(const fn of [...listeners])fn({accessToken:{newValue:null}},'local');entry=document.getElementById('yt-manage-guide-entry');assert.equal(entry.dataset.state,'login');assert.equal(document.getElementById('yt-folder-dropdown'),null);
+// A mismatched authorised account closes Manage and prevents folder writes.
+const beforeBlocked=JSON.stringify(context.folderData), writesBeforeBlocked=writes;
+for(const listener of [...listeners])listener({accountStatus:{newValue:{state:'blocked',session:'token',account:{id:'UC_OTHER',title:'Other'},owner:store.folderOwner}}},'local');
+assert.equal(context.isLoggedIn,false);
+context.createParentFolderRecord('Blocked create','#123456','#ffffff',ok=>assert.equal(ok,false));
+assert.equal(JSON.stringify(context.folderData),beforeBlocked);assert.equal(writes,writesBeforeBlocked);
 console.log('PASS: full manifest load and startup; login launcher, sidebar parent/subfolder expansion, direct edit/create menus, Escape and outside-click cleanup, open Manage rename refresh, no sidebar counts, independent channel scroll; Manage creation selects parent; nested-dialog Escape; logout remount.');
 })().catch(error=>{console.error(error);process.exitCode=1});

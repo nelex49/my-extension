@@ -10,6 +10,10 @@ function prepareManageFolderRename(rename, reverse = false) {
 }
 let folderSavePending = false;
 function persistFolderMutation(nextData, previousData, done, rename = null) {
+  if (typeof window.accountIsReady === 'function' && !window.accountIsReady()) {
+    showUserNotification('Verify the linked account through the extension popup before saving.', 'error');
+    done?.(false); return false;
+  }
   if (folderSavePending) {
     showUserNotification("A folder change is still saving. Please try again when it finishes.", "warn");
     done?.(false); return false;

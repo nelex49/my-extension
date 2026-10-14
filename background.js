@@ -1,3 +1,4 @@
+importScripts('src/background/AccountProtection.js');
 /** @format */
 
 // Fetch private subscription data in the extension worker, not YouTube's page context.
@@ -9,9 +10,9 @@ let activeRefreshGeneration = null;
 function identityToken() {
   return new Promise((resolve, reject) => {
     chrome.identity.getAuthToken({ interactive: false }, result => {
-      if (chrome.runtime.lastError) { reject(new Error('Sign in again through the extension popup.')); return; }
+      if (chrome.runtime.lastError) { const error = new Error('Sign in again through the extension popup.'); error.accountVerification = true; reject(error); return; }
       const token = typeof result === 'string' ? result : result?.token;
-      if (!token) { reject(new Error('Sign in again through the extension popup.')); return; }
+      if (!token) { const error = new Error('Sign in again through the extension popup.'); error.accountVerification = true; reject(error); return; }
       resolve(token);
     });
   });
@@ -61,15 +62,19 @@ async function refreshSubscriptions() {
   const currentSession = async () => generation === refreshGeneration &&
     (await chrome.storage.local.get('accessToken')).accessToken === session;
   const run = (async () => {
-    await chrome.storage.local.set({ subscriptionLoadStatus: { state: 'loading' } });
+    await chrome.storage.local.set({ subscriptionLoadStatus: { state: 'loading' }, accountStatus: {state:'verifying',session} });
     try {
       let token = await identityToken();
       let subscriptions;
-      try { subscriptions = await fetchSubscriptionPages(token); }
+      try {
+        if (!await checkAccount(token, session, currentSession)) return { success: false, accountRequired: true };
+        subscriptions = await fetchSubscriptionPages(token);
+      }
       catch (error) {
         if (error.status !== 401) throw error;
         await forgetToken(token);
         token = await identityToken();
+        if (!await checkAccount(token, session, currentSession)) return { success: false, accountRequired: true };
         subscriptions = await fetchSubscriptionPages(token);
       }
       if (!await currentSession()) return { success: false, cancelled: true };
@@ -80,7 +85,7 @@ async function refreshSubscriptions() {
     } catch (error) {
       if (!await currentSession()) return { success: false, cancelled: true };
       const message = error.message || 'Could not load subscriptions. Please retry.';
-      await chrome.storage.local.set({ subscriptionLoadStatus: { state: 'error', message } });
+      await chrome.storage.local.set({ subscriptionLoadStatus: { state: 'error', message }, ...(error.accountVerification ? { accountStatus: {state:'error',message,session},userSubscriptions:[] } : {}) });
       return { success: false, error: message };
     }
   })();
@@ -90,6 +95,9 @@ async function refreshSubscriptions() {
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'linkFolderAccount') {
+    linkFolderAccount(request).then(sendResponse); return true;
+  }
   if (request.action === 'openPopup') {
     chrome.action.openPopup().then(() => sendResponse({ success: true }))
       .catch(() => sendResponse({ success: false, error: 'Open the extension toolbar popup to sign in.' }));
@@ -103,8 +111,8 @@ chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
 chrome.storage.onChanged.addListener((changes, area) => {
   if (area !== 'local' || !changes.accessToken) return;
   refreshGeneration++;
-  if (changes.accessToken.newValue) refreshSubscriptions().catch(() => {});
-  else chrome.storage.local.set({ userSubscriptions: [], subscriptionLoadStatus: { state: 'signedOut' } });
+  if (changes.accessToken.newValue) chrome.storage.local.set({accountStatus:{state:'verifying',session:changes.accessToken.newValue},userSubscriptions:[]}).then(() => refreshSubscriptions()).catch(() => {});
+  else chrome.storage.local.set({ accountStatus: {state:'signedOut'}, userSubscriptions: [], subscriptionLoadStatus: { state: 'signedOut' } });
 });
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.status === 'complete' && /^https:\/\/www\.youtube\.com\//.test(tab.url || ''))

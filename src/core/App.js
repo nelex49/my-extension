@@ -8,6 +8,10 @@ let folderDropdown = null;
 let userSubscriptions = [];
 let folderData = {};
 let appInitialization = null;
+let activeAccountSession = null;
+window.accountStatus = {state:'verifying'};
+function accountIsReady() { return !!activeAccountSession && window.accountStatus?.state === 'ready' && window.accountStatus.session === activeAccountSession && !!window.folderOwner?.id && window.folderOwner.id === window.accountStatus.account?.id; }
+window.accountIsReady = accountIsReady;
 
 function syncSubscriptions(subscriptions) {
   userSubscriptions = subscriptions || [];
@@ -18,7 +22,10 @@ function syncSubscriptions(subscriptions) {
 function initialize() {
   if (appInitialization) return appInitialization;
   appInitialization = new Promise((resolve) => {
-    chrome.storage.local.get(["folderData", "userSubscriptions", "accessToken"], (data) => {
+    chrome.storage.local.get(["folderData", "userSubscriptions", "accessToken", "accountStatus", "folderOwner"], (data) => {
+      activeAccountSession = data.accessToken || null;
+      window.accountStatus = data.accountStatus || {state:'verifying'};
+      window.folderOwner = data.folderOwner || null;
       folderData = data.folderData || {};
       window.folderData = folderData;
       syncSubscriptions(data.userSubscriptions);
@@ -43,7 +50,13 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
     window.subscriptionLoadStatus = changes.subscriptionLoadStatus.newValue || { state: 'idle' };
     if (typeof window.refreshManageView === "function") window.refreshManageView();
   }
-  if (changes.accessToken) handleLoginState(changes.accessToken.newValue);
+  if (changes.accountStatus) window.accountStatus = changes.accountStatus.newValue || {state:'signedOut'};
+  if (changes.folderOwner) window.folderOwner = changes.folderOwner.newValue || null;
+  if (changes.accessToken) activeAccountSession = changes.accessToken.newValue || null;
+  if (changes.accountStatus || changes.accessToken) {
+    if (!accountIsReady()) activeManageView?.close();
+    handleLoginState(activeAccountSession, !!changes.accessToken);
+  }
 });
 
 chrome.runtime.onMessage.addListener((message) => {
