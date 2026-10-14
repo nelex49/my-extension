@@ -11,6 +11,7 @@ function sidebarFolderRow(name, expanded, subfolder, colour, textColour = "#ffff
   row.type = "button";
   row.style.setProperty("--folder-color", colour);
   row.style.setProperty("--folder-text", textColour);
+  row.style.setProperty("--folder-icon-colour", folderIconColour(colour));
   row.title = name;
   row.setAttribute("aria-expanded", String(expanded));
   const arrow = sidebarElement("span", "ytsm-arrow", expanded ? "▾" : "▸");

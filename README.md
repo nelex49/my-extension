@@ -156,3 +156,23 @@ Folder records and persistence stay in the existing services. No ES-module loade
 Superseded CSS declarations and empty override rules were removed without moving active rules.
 The effective value for each selector/property/media context was checked against the working source.
 Browser visual verification is still required; the regression harness checks behaviour rather than rendering.
+
+## Sidebar scrolling and custom colour checkpoint
+
+The folder area scrolls independently of the heading and action footer. Height limits target roughly six collapsed parent rows, five collapsed subfolder rows and five channel rows, with smaller viewport limits. Expanded content shares the containing list height; six parents are not guaranteed visible while children are expanded. Scroll positions are preserved during sidebar refreshes.
+
+Create Folder uses a stronger blue fill and larger plus. Custom colour reveals a native colour input and requests the browser picker. Parent/subfolder Create and Edit use the same control. Valid saved colours remain exact; text contrast is calculated for custom colours. No folder count caps are introduced.
+
+All four regression suites pass, including custom picker activation and bright parent/subfolder colour persistence with assignments preserved. Real Chrome scrolling, picker appearance and small-screen layout still require manual verification. Unsubscribe is deferred as a possible future premium feature.
+
+## Single-scroll sidebar refinement
+
+Supersedes the nested scrolling trial above: only the main folder browsing area scrolls. Expanded subfolders and channel lists flow normally within it; the heading and action footer stay outside. Custom Colour toggles an inline panel containing the native colour control, editable six-digit hex value and Done button. Opening the panel does not automatically launch the browser popup. Invalid hex input does not overwrite the selected colour. Done closes the inline panel; the browser owns its native popup dismissal.
+
+Sidebar alignment refinement: the browsing area reserves an 8px gap before its 6px scrollbar and 14px on the left to balance that combined right-side space. Existing nested indentation and the single scrolling area are retained. Scrollbar thumb is subdued; hover remains brighter.
+
+Sidebar hierarchy refinement: parent folder icons are filled using the row text colour; subfolders retain the smaller outlined icon. Manage and Move picker icons are unchanged.
+
+Sidebar icon revision: supersedes the filled-icon trial. Both levels use outlines. Outline colour is derived from the folder fill, lighter on dark backgrounds and darker on light backgrounds. Subfolders retain their smaller size.
+
+Expanded sidebar subfolders no longer have an inset outline. Expansion arrows, ellipsis hover styling and keyboard focus outlines remain.

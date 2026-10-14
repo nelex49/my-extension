@@ -1,0 +1,72 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Test Extension",
+  "version": "1.0",
+  "description": "Minimal test extension for YouTube OAuth",
+  "permissions": [
+    "identity",
+    "tabs",
+    "scripting",
+    "storage"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "YouTube Test"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://www.youtube.com/*"
+      ],
+      "css": [
+        "src/styles/subfolder-view.css",
+        "src/styles/sidebar.css",
+        "src/styles/folder-dialogs.css"
+      ],
+      "js": [
+        "src/utils/constants.js",
+        "src/utils/helpers.js",
+        "src/utils/FolderColours.js",
+        "src/services/StorageService.js",
+        "src/services/YouTubeAPI.js",
+        "src/services/AuthService.js",
+        "src/services/FolderService.js",
+        "src/components/FolderDialogs/DialogLifecycle.js",
+        "src/components/FolderDialogs/DialogControls.js",
+        "src/components/FolderDialogs/ParentFolderDialog.js",
+        "src/components/FolderDialogs/SubfolderDialog.js",
+        "src/components/SubscriptionManager.js",
+        "src/components/SidebarRows.js",
+        "src/components/SidebarFolderMenu.js",
+        "src/components/FolderDropdown.js",
+        "src/components/SidebarButton.js",
+        "src/components/SubfolderView/ManageViewHelpers.js",
+        "src/components/SubfolderView/ManageState.js",
+        "src/components/SubfolderView/ManageLayout.js",
+        "src/components/SubfolderView/MovePicker.js",
+        "src/components/SubfolderView/ChannelOptionsMenu.js",
+        "src/components/SubfolderView/ParentFolderNavigation.js",
+        "src/components/SubfolderView/SubfolderNavigation.js",
+        "src/components/SubfolderView/ChannelList.js",
+        "src/components/SubfolderView/ManageActions.js",
+        "src/components/SubfolderView/SubfolderViewPanel.js",
+        "src/core/App.js",
+        "src/main.js"
+      ]
+    }
+  ],
+  "host_permissions": [
+    "https://accounts.google.com/*",
+    "https://www.googleapis.com/*",
+    "https://www.youtube.com/*"
+  ],
+  "oauth2": {
+    "client_id": "763119874945-ad7le2f2eldhslfppaflmuspedj1o4hi.apps.googleusercontent.com",
+    "scopes": [
+      "https://www.googleapis.com/auth/youtube.readonly"
+    ]
+  }
+}

@@ -37,7 +37,7 @@ function folderTextColour(background) {
   const rgb = [1, 3, 5].map(offset => parseInt(colour.slice(offset, offset + 2), 16) / 255)
     .map(value => value <= .04045 ? value / 12.92 : Math.pow((value + .055) / 1.055, 2.4));
   const luminance = .2126 * rgb[0] + .7152 * rgb[1] + .0722 * rgb[2];
-  return luminance > .42 ? "#111111" : "#ffffff";
+  return (luminance + .05) / (.0056 + .05) >= 1.05 / (luminance + .05) ? "#111111" : "#ffffff";
 }
 
 function lightenColor(color, percent) {
@@ -45,4 +45,13 @@ function lightenColor(color, percent) {
   const amt = Math.round(2.55 * percent);
   const R = (num >> 16) + amt, G = ((num >> 8) & 0x00ff) + amt, B = (num & 0x0000ff) + amt;
   return "#" + (0x1000000 + Math.max(0, Math.min(255, R)) * 0x10000 + Math.max(0, Math.min(255, G)) * 0x100 + Math.max(0, Math.min(255, B))).toString(16).slice(1);
+}
+
+// Keep the outline in the folder's colour family, contrasting against its fill.
+function folderIconColour(background) {
+  const colour = sidebarFolderColour(background);
+  const rgb = [1, 3, 5].map(offset => parseInt(colour.slice(offset, offset + 2), 16));
+  const lightBackground = folderTextColour(colour) === '#111111';
+  const outline = rgb.map(value => Math.round(lightBackground ? value * .38 : value + (255 - value) * .58));
+  return '#' + outline.map(value => value.toString(16).padStart(2, '0')).join('');
 }

@@ -7,6 +7,7 @@ function closeSidebarFolderMenu(restoreFocus = false) {
 function sidebarFolderActions(row, parentName, childName = null) {
   const wrap = sidebarElement('div', 'ytsm-folder-wrap');
   wrap.style.setProperty('--folder-color', row.style.getPropertyValue?.('--folder-color') || row.style['--folder-color']);
+  wrap.style.setProperty('--folder-text', row.style.getPropertyValue?.('--folder-text') || row.style['--folder-text']);
   const more = sidebarElement('button', 'ytsm-folder-more', '•••');
   more.type = 'button';
   more.dataset.focusKey = JSON.stringify(['actions', parentName, childName]);

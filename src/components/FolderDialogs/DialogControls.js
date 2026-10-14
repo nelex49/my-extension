@@ -17,18 +17,40 @@ function showFolderForm(options) {
   const { modal, close } = openFolderDialog(kind, `<div class="ytsm-dialog-panel">
     <header class="ytsm-dialog-header"><svg class="ytsm-dialog-folder-icon" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M3 7V5a2 2 0 0 1 2-2h5l2 3h7a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg><div><h2 id="ytsm-folder-dialog-title">${title}</h2>${parentLine}</div></header>
     <div class="ytsm-folder-form"><label for="ytsm-folder-name">${noun} name</label><div class="ytsm-name-line"><input type="text" id="ytsm-folder-name" maxlength="20" value="${folderDialogEscape(editing ? originalName : '')}" autocomplete="off"><span class="ytsm-character-count"><span>${editing ? originalName.length : 0}</span>/20</span></div>
-    <label>Colour</label><div class="ytsm-colour-controls"><div class="ytsm-colour-row">${folderColourButtons()}</div><button type="button" class="ytsm-custom-colour"><span class="ytsm-palette-icon" aria-hidden="true">◉</span> Custom colour</button><input class="ytsm-colour-input" type="color" value="${sidebarFolderColour(selectedColor)}" aria-label="Choose custom colour"></div>
+    <label>Colour</label><div class="ytsm-colour-controls"><div class="ytsm-colour-row">${folderColourButtons()}</div><button type="button" class="ytsm-custom-colour"><span class="ytsm-palette-icon" aria-hidden="true">◉</span> Custom colour</button><div class="ytsm-custom-panel" hidden><input class="ytsm-colour-input" type="color" value="${sidebarFolderColour(selectedColor)}" aria-label="Choose custom colour"><input class="ytsm-colour-hex" type="text" value="${sidebarFolderColour(selectedColor)}" maxlength="7" aria-label="Custom colour hex value" spellcheck="false"><button type="button" class="ytsm-colour-done">Done</button></div></div>
     <p class="ytsm-form-error" role="alert" hidden></p>
     <div class="ytsm-delete-confirm" hidden><span>Delete this ${noun.toLowerCase()}${kind === 'parent' ? ' and its subfolders' : ''}?</span><button type="button" data-action="confirm-delete" class="is-danger">Delete</button><button type="button" data-action="cancel-delete">Keep</button></div>
     <footer class="ytsm-dialog-actions">${editing ? '<button type="button" data-action="delete" class="ytsm-delete">Delete</button>' : ''}<span></span><button type="button" data-dialog-close>Cancel</button><button type="button" data-action="save" class="ytsm-primary">${editing ? 'Save changes' : 'Create'}</button></footer></div></div>`, anchor, placement);
   const input = modal.querySelector('#ytsm-folder-name'), count = modal.querySelector('.ytsm-character-count span'), error = modal.querySelector('.ytsm-form-error');
   const save = modal.querySelector('[data-action="save"]'), picker = modal.querySelector('.ytsm-colour-input');
   function showError(message) { error.textContent = message; error.hidden = !message; }
-  function syncSwatches() { modal.querySelectorAll('.ytsm-swatch').forEach(button => { const active = button.dataset.color === selectedColor?.toLowerCase(); button.classList.toggle('is-selected', active); button.setAttribute('aria-pressed', String(active)); }); }
+  function syncSwatches() { modal.querySelector('.ytsm-palette-icon').style.color = sidebarFolderColour(selectedColor); modal.querySelector('.ytsm-custom-colour').title = `Selected colour: ${sidebarFolderColour(selectedColor)}`; modal.querySelectorAll('.ytsm-swatch').forEach(button => { const active = button.dataset.color === selectedColor?.toLowerCase(); button.classList.toggle('is-selected', active); button.setAttribute('aria-pressed', String(active)); }); }
   input.addEventListener('input', () => { count.textContent = input.value.length; showError(''); });
-  modal.querySelectorAll('.ytsm-swatch').forEach(button => button.addEventListener('click', () => { selectedColor = button.dataset.color; selectedTextColor = '#ffffff'; colourChanged = true; picker.value = selectedColor; syncSwatches(); }));
-  modal.querySelector('.ytsm-custom-colour').addEventListener('click', () => picker.click());
-  picker.addEventListener('input', () => { selectedColor = picker.value.toLowerCase(); selectedTextColor = folderTextColour(selectedColor); colourChanged = true; syncSwatches(); });
+  modal.querySelectorAll('.ytsm-swatch').forEach(button => button.addEventListener('click', () => { selectedColor = button.dataset.color; selectedTextColor = '#ffffff'; colourChanged = true; picker.value = selectedColor; hexInput.value = selectedColor; hexInput.setAttribute('aria-invalid', 'false'); syncSwatches(); }));
+  const customButton = modal.querySelector('.ytsm-custom-colour');
+  const customPanel = modal.querySelector('.ytsm-custom-panel');
+  const hexInput = modal.querySelector('.ytsm-colour-hex');
+  customButton.setAttribute('aria-expanded', 'false');
+  function toggleCustom(open) {
+    customPanel.hidden = !open;
+    customButton.setAttribute('aria-expanded', String(open));
+    if (!open) { hexInput.value = sidebarFolderColour(selectedColor); hexInput.setAttribute('aria-invalid', 'false'); customButton.focus(); }
+  }
+  customButton.addEventListener('click', () => toggleCustom(customPanel.hidden));
+  modal.querySelector('.ytsm-colour-done').addEventListener('click', () => toggleCustom(false));
+  function chooseCustom(value) {
+    selectedColor = value.toLowerCase(); selectedTextColor = folderTextColour(selectedColor);
+    colourChanged = true; picker.value = selectedColor; hexInput.value = selectedColor;
+    hexInput.setAttribute('aria-invalid', 'false'); syncSwatches();
+  }
+  picker.addEventListener('input', () => chooseCustom(picker.value));
+  hexInput.addEventListener('input', () => {
+    if (isFolderHexColour(hexInput.value)) chooseCustom(hexInput.value);
+    else hexInput.setAttribute('aria-invalid', 'true');
+  });
+  hexInput.addEventListener('keydown', event => {
+    if (event.key === 'Enter') { event.preventDefault(); if (isFolderHexColour(hexInput.value)) toggleCustom(false); }
+  });
   function validate(name) {
     if (!name) return `${noun} name cannot be empty.`;
     if (kind === 'parent' && name !== originalName && Object.hasOwn(window.folderData || {}, name)) return 'A folder with this name already exists.';

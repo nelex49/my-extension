@@ -1,0 +1,43 @@
+/* Shared folder-form theme tokens. Dark is the default; a future light theme can override only these variables. */
+:root {
+  --ytsm-form-bg: #20272e; --ytsm-form-surface: #272f38; --ytsm-form-border: #46525e;
+  --ytsm-form-text: #eef0f3; --ytsm-form-muted: #aeb8c3; --ytsm-form-accent: #315f83;
+  --ytsm-form-accent-border: #76a6cb; --ytsm-form-danger: #7a3035; --ytsm-form-danger-border: #c56a70;
+  --ytsm-form-shadow: 0 14px 40px rgba(0,0,0,.55);
+}
+.ytsm-folder-dialog { position: fixed; inset: 0; z-index: 10000; display: flex; align-items: center; justify-content: center; background: rgba(0,0,0,.5); color: var(--ytsm-form-text); font: 14px/1.4 Roboto,Arial,sans-serif; }
+.ytsm-folder-dialog.is-anchored { display: block; background: transparent; }
+.ytsm-folder-dialog * { box-sizing: border-box; }
+.ytsm-folder-dialog .ytsm-dialog-panel { width: min(328px,calc(100vw - 24px)); padding: 0; overflow: hidden; border: 1px solid var(--ytsm-form-border); border-radius: 11px; background: var(--ytsm-form-bg); box-shadow: var(--ytsm-form-shadow); }
+.ytsm-folder-dialog.is-anchored .ytsm-dialog-panel { position: fixed; }
+.ytsm-folder-dialog .ytsm-dialog-header { display: flex; align-items: center; gap: 10px; padding: 13px 14px 10px; border-bottom: 1px solid var(--ytsm-form-border); }
+.ytsm-folder-dialog .ytsm-dialog-folder-icon { width: 22px; height: 22px; color: #a8c6e3; flex: 0 0 22px; }
+.ytsm-folder-dialog h2,.ytsm-folder-dialog p { margin: 0; }
+.ytsm-folder-dialog h2 { font-size: 16px; font-weight: 600; }
+.ytsm-folder-dialog .ytsm-parent-context { margin-top: 2px; color: var(--ytsm-form-muted); font-size: 12px; }
+.ytsm-folder-dialog .ytsm-folder-form { padding: 13px 14px 14px; }
+.ytsm-folder-dialog label { display: block; margin: 0 0 5px; color: #d9dee4; font-size: 12px; font-weight: 600; }
+.ytsm-folder-dialog .ytsm-name-line { position: relative; margin-bottom: 13px; }
+.ytsm-folder-dialog input[type="text"] { width: 100%; height: 36px; padding: 7px 54px 7px 9px; border: 1px solid var(--ytsm-form-border); border-radius: 7px; background: var(--ytsm-form-surface); color: var(--ytsm-form-text); font: inherit; }
+.ytsm-folder-dialog .ytsm-character-count { position: absolute; right: 9px; top: 9px; color: var(--ytsm-form-muted); font-size: 11px; }
+.ytsm-folder-dialog .ytsm-colour-controls { display: flex; flex-direction: column; }
+.ytsm-folder-dialog .ytsm-colour-row { display: flex; align-items: center; justify-content: space-between; gap: 5px; flex-wrap: nowrap; }
+.ytsm-folder-dialog button { min-height: 32px; padding: 6px 10px; border: 1px solid var(--ytsm-form-border); border-radius: 7px; background: var(--ytsm-form-surface); color: var(--ytsm-form-text); font: inherit; cursor: pointer; }
+.ytsm-folder-dialog button:hover { filter: brightness(1.12); }
+.ytsm-folder-dialog button:disabled { opacity: .55; cursor: default; }
+.ytsm-folder-dialog .ytsm-swatch { width: 27px; min-height: 27px; height: 27px; padding: 0; border-radius: 50%; background: var(--swatch-colour); }
+.ytsm-folder-dialog .ytsm-swatch.is-selected { border-color: #fff; box-shadow: 0 0 0 2px var(--ytsm-form-accent-border); }
+.ytsm-folder-dialog .ytsm-custom-colour { width: 100%; margin: 12px 0 0; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; background: #303b4b; border-color: #303b4b; }
+.ytsm-folder-dialog .ytsm-palette-icon { font-size: 16px; line-height: 1; color: #c7d4e5; }
+.ytsm-folder-dialog .ytsm-colour-input { width: 100%; height: 36px; margin-top: 8px; padding: 3px; border: 1px solid var(--ytsm-form-border); border-radius: 7px; background: var(--ytsm-form-surface); cursor: pointer; }
+.ytsm-folder-dialog .ytsm-form-error { margin-top: 10px; padding: 7px 9px; border: 1px solid #8b4a4f; border-radius: 7px; background: #382326; color: #f2c7ca; font-size: 12px; }
+.ytsm-folder-dialog [hidden] { display: none !important; }
+.ytsm-folder-dialog .ytsm-delete-confirm { display: flex; align-items: center; gap: 6px; margin-top: 12px; padding: 8px; border: 1px solid #684247; border-radius: 8px; background: #302326; font-size: 12px; }
+.ytsm-folder-dialog .ytsm-delete-confirm span { flex: 1; }
+.ytsm-folder-dialog .is-danger,.ytsm-folder-dialog .ytsm-delete { border-color: var(--ytsm-form-danger-border); background: var(--ytsm-form-danger); }
+.ytsm-folder-dialog .ytsm-dialog-actions { display: grid; grid-template-columns: auto 1fr auto auto; gap: 7px; align-items: center; margin-top: 14px; padding-top: 11px; border-top: 1px solid var(--ytsm-form-border); }
+.ytsm-folder-dialog .ytsm-primary { border-color: var(--ytsm-form-accent-border); background: var(--ytsm-form-accent); font-weight: 600; }
+.ytsm-folder-dialog button:focus-visible,.ytsm-folder-dialog input:focus-visible { outline: 2px solid #9ec9f3; outline-offset: 2px; }
+
+/* Swatch hover must not alter the chosen muted colour. */
+.ytsm-folder-dialog .ytsm-swatch:hover { filter: none; background: var(--swatch-colour); }

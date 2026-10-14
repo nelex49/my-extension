@@ -59,6 +59,28 @@ context.showCreateSubfolderModal('Sports');modal=body.children.at(-1);for(const 
 const anchor=new E('button');body.append(anchor);context.showUnifiedFolderManager('Sports','edit',null,anchor);modal=body.children.at(-1);assert.equal(modal.classList.contains('is-anchored'),true);assert.ok(modal.firstElementChild.style.left);click(modal,modal.querySelector('[data-dialog-close]'));anchor.remove();assert.equal(listenerCount(),0);
 // Custom colours display exactly as saved; muted colours use white and custom colours auto-select readable text.
 assert.equal(context.sidebarFolderColour('#12abef',0),'#12abef');assert.equal(context.folderTextColour('#44345d'),'#ffffff');assert.equal(context.folderTextColour('#f5f5f5'),'#111111');
+// Both shared forms activate the picker and persist arbitrary bright colours unchanged.
+for (const kind of ['parent', 'subfolder']) {
+  if (kind === 'parent') context.showUnifiedFolderManager('Sports', 'edit');
+  else context.showCreateSubfolderModal('Sports', 'Ball');
+  modal=body.children.at(-1);
+  const picker=modal.querySelector('.ytsm-colour-input');
+  let opened=0; picker.showPicker=()=>opened++;
+  click(modal,modal.querySelector('.ytsm-custom-colour'));
+  assert.equal(opened,0); assert.equal(modal.querySelector('.ytsm-custom-panel').hidden,false);
+  const hex=modal.querySelector('.ytsm-colour-hex'); hex.value='#00ff00'; hex.events.input(); assert.equal(picker.value,'#00ff00');
+  hex.value='invalid'; hex.events.input(); assert.equal(picker.value,'#00ff00');
+  click(modal,modal.querySelector('.ytsm-colour-done')); assert.equal(modal.querySelector('.ytsm-custom-panel').hidden,true);
+  click(modal,modal.querySelector('.ytsm-custom-colour')); assert.equal(modal.querySelector('.ytsm-custom-panel').hidden,false);
+  click(modal,modal.querySelector('.ytsm-custom-colour')); assert.equal(modal.querySelector('.ytsm-custom-panel').hidden,true);
+  picker.value='#ffff00'; picker.events.input();
+  click(modal,modal.querySelector('[data-action="save"]'));
+  const record=kind==='parent'?context.folderData.Sports:context.folderData.Sports.subfolders.Ball;
+  assert.equal(record.color,'#ffff00'); assert.equal(record.textColor,'#111111');
+  assert.deepEqual(context.folderData.Sports.subfolders.Ball.subscriptions[0],a);
+  assert.equal(listenerCount(),0);
+}
+assert.equal(context.folderTextColour('#12abef'),'#111111');
 // Editing preserves assignments and subfolders while renaming.
 const sportsChannels=JSON.stringify(context.folderData.Sports.subfolders.Ball.subscriptions);context.updateParentFolderRecord('Sports','Sport renamed','#12abef','#ffffff',ok=>assert.equal(ok,true));assert.equal(JSON.stringify(context.folderData['Sport renamed'].subfolders.Ball.subscriptions),sportsChannels);
 // Same subfolder name is allowed under different parents, but duplicate within one parent is rejected.

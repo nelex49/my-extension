@@ -29,7 +29,7 @@
 .ytsm-folder-dialog .ytsm-swatch.is-selected { border-color: #fff; box-shadow: 0 0 0 2px var(--ytsm-form-accent-border); }
 .ytsm-folder-dialog .ytsm-custom-colour { width: 100%; margin: 12px 0 0; display: flex; align-items: center; justify-content: center; gap: 8px; font-size: 12px; background: #303b4b; border-color: #303b4b; }
 .ytsm-folder-dialog .ytsm-palette-icon { font-size: 16px; line-height: 1; color: #c7d4e5; }
-.ytsm-folder-dialog .ytsm-colour-input { position: absolute; width: 1px; height: 1px; opacity: 0; pointer-events: none; }
+.ytsm-folder-dialog .ytsm-colour-input { width: 100%; height: 36px; margin-top: 8px; padding: 3px; border: 1px solid var(--ytsm-form-border); border-radius: 7px; background: var(--ytsm-form-surface); cursor: pointer; }
 .ytsm-folder-dialog .ytsm-form-error { margin-top: 10px; padding: 7px 9px; border: 1px solid #8b4a4f; border-radius: 7px; background: #382326; color: #f2c7ca; font-size: 12px; }
 .ytsm-folder-dialog [hidden] { display: none !important; }
 .ytsm-folder-dialog .ytsm-delete-confirm { display: flex; align-items: center; gap: 6px; margin-top: 12px; padding: 8px; border: 1px solid #684247; border-radius: 8px; background: #302326; font-size: 12px; }
@@ -41,3 +41,9 @@
 
 /* Swatch hover must not alter the chosen muted colour. */
 .ytsm-folder-dialog .ytsm-swatch:hover { filter: none; background: var(--swatch-colour); }
+
+.ytsm-folder-dialog .ytsm-custom-panel { display: flex; align-items: center; gap: 7px; margin-top: 8px; }
+.ytsm-folder-dialog .ytsm-custom-panel .ytsm-colour-input { flex: 0 0 44px; width: 44px; height: 34px; margin: 0; }
+.ytsm-folder-dialog .ytsm-custom-panel .ytsm-colour-hex { flex: 1; min-width: 0; height: 34px; padding: 6px 8px; font-family: monospace; }
+.ytsm-folder-dialog .ytsm-colour-hex[aria-invalid="true"] { border-color: var(--ytsm-form-danger-border); }
+.ytsm-folder-dialog .ytsm-colour-done { flex: 0 0 auto; }

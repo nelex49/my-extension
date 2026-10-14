@@ -76,8 +76,10 @@
   border: 1px solid #383838;
   border-radius: 12px;
   background: #181818;
+  display: flex;
+  flex-direction: column;
   max-height: 65vh;
-  overflow-y: auto;
+  overflow: hidden;
   scrollbar-width: auto;
   scrollbar-gutter: stable;
 }
@@ -88,7 +90,7 @@
   color: #b9b9b9;
   font: 600 12px/1.4 Roboto, Arial, sans-serif;
 }
-#yt-manage-guide-entry .ytsm-folders { display: grid; gap: 8px; }
+#yt-manage-guide-entry .ytsm-folders { display: grid; gap: 8px; padding: 0 8px 0 14px; min-height: 0; max-height: min(256px, max(80px, calc(65vh - 136px))); overflow-y: auto; overscroll-behavior: contain; scrollbar-gutter: stable; }
 #yt-manage-guide-entry .ytsm-folder {
   display: flex;
   align-items: center;
@@ -98,7 +100,7 @@
   padding: 8px 10px;
   border-radius: 9px;
   background: var(--folder-color, #365b86);
-  color: #f1f1f1;
+  color: var(--folder-text, #f1f1f1);
 }
 #yt-manage-guide-entry .ytsm-folder-name {
   flex: 1;
@@ -129,9 +131,9 @@
   text-align: center;
 }
 #yt-manage-guide-entry .ytsm-create {
-  background: #22262a;
-  color: #d4d9df;
-  box-shadow: inset 0 0 0 1px #505861;
+  background: #315f83;
+  color: #ffffff;
+  box-shadow: inset 0 0 0 1px #76a6cb;
 }
 #yt-manage-guide-entry .ytsm-manage {
   box-shadow: inset 0 0 0 1px #779abb;
@@ -140,7 +142,8 @@
   background: #2d4b68;
   box-shadow: inset 0 0 0 1px #a0bed9;
 }
-#yt-manage-guide-entry .ytsm-create:hover { background: #30363d; }
+#yt-manage-guide-entry .ytsm-create:hover { background: #3c719a; }
+#yt-manage-guide-entry .ytsm-create .ytsm-action-icon { font-size: 22px; font-weight: 700; line-height: 18px; }
 #yt-manage-guide-entry .ytsm-action-icon { flex: 0 0 auto; }
 #yt-manage-guide-entry .ytsm-action-label { min-width: 0; }
 
@@ -150,16 +153,14 @@
   display: grid;
   gap: 6px;
   margin: 6px 0 0 12px;
+  overflow: visible;
 }
 #yt-manage-guide-entry .ytsm-subfolder {
   min-height: 32px;
   padding: 6px 9px;
-  background: linear-gradient(rgba(0,0,0,.18), rgba(0,0,0,.18)), var(--folder-color);
+  background: var(--folder-color);
 }
-#yt-manage-guide-entry .ytsm-subfolder[aria-expanded="true"] {
-  box-shadow: inset 0 0 0 1px #8493a3;
-}
-#yt-manage-guide-entry .ytsm-arrow { width: 10px; flex: 0 0 10px; color: #c8d0d8; }
+#yt-manage-guide-entry .ytsm-arrow { width: 10px; flex: 0 0 10px; color: inherit; }
 #yt-manage-guide-entry .ytsm-folder-icon {
   position: relative;
   width: 14px;
@@ -183,11 +184,7 @@
   transform: scale(.9);
 }
 #yt-manage-guide-entry .ytsm-channels {
-  max-height: 180px;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  scrollbar-width: auto;
-  scrollbar-gutter: stable;
+  overflow: visible;
   margin-top: 5px;
   padding: 4px 0;
   border-radius: 8px;
@@ -231,14 +228,14 @@
 }
 
 /* Rounded Chrome scrollbars without end-arrow buttons. */
-#yt-manage-guide-entry .ytsm-sidebar::-webkit-scrollbar,
+#yt-manage-guide-entry .ytsm-folders::-webkit-scrollbar,
 #yt-manage-guide-entry .ytsm-channels::-webkit-scrollbar {
   width: 6px;
 }
-#yt-manage-guide-entry .ytsm-sidebar::-webkit-scrollbar-button,
+#yt-manage-guide-entry .ytsm-folders::-webkit-scrollbar-button,
 #yt-manage-guide-entry .ytsm-channels::-webkit-scrollbar-button,
-#yt-manage-guide-entry .ytsm-sidebar::-webkit-scrollbar-button:vertical:start,
-#yt-manage-guide-entry .ytsm-sidebar::-webkit-scrollbar-button:vertical:end,
+#yt-manage-guide-entry .ytsm-folders::-webkit-scrollbar-button:vertical:start,
+#yt-manage-guide-entry .ytsm-folders::-webkit-scrollbar-button:vertical:end,
 #yt-manage-guide-entry .ytsm-channels::-webkit-scrollbar-button:vertical:start,
 #yt-manage-guide-entry .ytsm-channels::-webkit-scrollbar-button:vertical:end {
   -webkit-appearance: none;
@@ -254,23 +251,24 @@
   border: 0;
   background: transparent;
 }
-#yt-manage-guide-entry .ytsm-sidebar::-webkit-scrollbar-track,
+#yt-manage-guide-entry .ytsm-folders::-webkit-scrollbar-track,
 #yt-manage-guide-entry .ytsm-channels::-webkit-scrollbar-track {
   background: transparent;
   margin-block: 12px;
 }
-#yt-manage-guide-entry .ytsm-sidebar::-webkit-scrollbar-thumb,
+#yt-manage-guide-entry .ytsm-folders::-webkit-scrollbar-thumb,
 #yt-manage-guide-entry .ytsm-channels::-webkit-scrollbar-thumb {
-  background: #62666b;
+  background: #50545a;
   border-radius: 8px;
 }
-#yt-manage-guide-entry .ytsm-sidebar::-webkit-scrollbar-thumb:hover,
+#yt-manage-guide-entry .ytsm-folders::-webkit-scrollbar-thumb:hover,
 #yt-manage-guide-entry .ytsm-channels::-webkit-scrollbar-thumb:hover {
   background: #858a90;
 }
 
 /* Host-page colour rules suppress Chrome's custom scrollbar pseudo-elements. */
-#yt-manage-guide-entry .ytsm-sidebar,
+#yt-manage-guide-entry .ytsm-folders,
+#yt-manage-guide-entry .ytsm-subfolders,
 #yt-manage-guide-entry .ytsm-channels {
   scrollbar-color: auto !important;
 }
@@ -279,9 +277,9 @@
 #yt-manage-guide-entry .ytsm-folder:hover { filter: none; }
 
 /* Navigation and quick actions are siblings, never nested buttons. */
-#yt-manage-guide-entry .ytsm-folder-wrap { display: flex; align-items: center; min-width: 0; border-radius: 9px; background: var(--folder-color); }
+#yt-manage-guide-entry .ytsm-folder-wrap { display: flex; align-items: center; min-width: 0; border-radius: 9px; background: var(--folder-color); color: var(--folder-text, #fff); }
 #yt-manage-guide-entry .ytsm-folder-wrap .ytsm-folder { flex: 1; width: auto; min-width: 0; background: transparent; padding-right: 5px; }
-#yt-manage-guide-entry .ytsm-folder-more { flex: 0 0 28px; height: 28px; margin-right: 4px; padding: 0; border-radius: 6px; background: transparent; color: #d0d5df; display: flex; align-items: center; justify-content: center; letter-spacing: 1px; }
+#yt-manage-guide-entry .ytsm-folder-more { flex: 0 0 28px; height: 28px; margin-right: 4px; padding: 0; border-radius: 6px; background: transparent; color: inherit; display: flex; align-items: center; justify-content: center; letter-spacing: 1px; }
 #yt-manage-guide-entry .ytsm-folder-more:hover, #yt-manage-guide-entry .ytsm-folder-more:focus-visible { background: #303238; color: #fff; }
 #ytsm-sidebar-folder-menu { position: fixed; z-index: 9500; width: 158px; max-width: calc(100vw - 16px); padding: 5px; border: 1px solid #454950; border-radius: 9px; background: #25282d; box-shadow: 0 8px 24px #0008; }
 #ytsm-sidebar-folder-menu .ytsm-folder-menu-action { display: block; width: 100%; padding: 9px 10px; border-radius: 5px; color: #eef0f3; background: transparent; }
@@ -290,3 +288,8 @@
 #ytsm-sidebar-folder-menu { box-sizing: border-box; margin: 0; font: 13px/1.4 Roboto, Arial, sans-serif; }
 #ytsm-sidebar-folder-menu .ytsm-folder-menu-action { box-sizing: border-box; margin: 0; border: 0; text-align: left; font: inherit; cursor: pointer; }
 #ytsm-sidebar-folder-menu .ytsm-folder-menu-action:focus-visible { outline: 2px solid #a8c7fa; outline-offset: -2px; }
+
+#yt-manage-guide-entry .ytsm-heading, #yt-manage-guide-entry .ytsm-footer { flex-shrink: 0; }
+
+/* Tonal outlines remain visible without the weight of a filled icon. */
+#yt-manage-guide-entry .ytsm-folder .ytsm-folder-icon { color: var(--folder-icon-colour, currentColor); }

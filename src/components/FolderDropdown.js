@@ -35,7 +35,9 @@ function toggleSidebarSet(set, key) {
 function refreshFolderDropdown() {
   if (!folderDropdown?.isConnected) return;
   closeSidebarFolderMenu();
-  const scrollTop = folderDropdown.scrollTop;
+  const scrollTop = folderDropdown.querySelector('.ytsm-folders')?.scrollTop || 0;
+  const subfolderScroll = new Map(Array.from(folderDropdown.querySelectorAll('.ytsm-subfolders'),
+    list => [list.dataset.scrollKey, list.scrollTop]));
   const channelScroll = new Map(Array.from(folderDropdown.querySelectorAll(".ytsm-channels"),
     list => [list.dataset.scrollKey, list.scrollTop]));
   const focused = folderDropdown.contains(document.activeElement) ?
@@ -59,6 +61,7 @@ function refreshFolderDropdown() {
     subfolders.forEach(([subName]) => validSubfolders.add(JSON.stringify([name, subName])));
     if (expanded) {
       const children = sidebarElement("div", "ytsm-subfolders");
+      children.dataset.scrollKey = name;
       // Retain access to any older records that held channels directly on parents.
       if (directSubscriptions.length) children.append(sidebarChannelList(directSubscriptions, JSON.stringify([name])));
       if (!subfolders.length && !directSubscriptions.length)
@@ -97,7 +100,10 @@ function refreshFolderDropdown() {
   create.addEventListener("click", () => showUnifiedFolderManager());
   footer.append(manage, create);
   folderDropdown.replaceChildren(heading, list, footer);
-  folderDropdown.scrollTop = scrollTop;
+  list.scrollTop = scrollTop;
+  folderDropdown.querySelectorAll('.ytsm-subfolders').forEach(children => {
+    children.scrollTop = subfolderScroll.get(children.dataset.scrollKey) || 0;
+  });
   folderDropdown.querySelectorAll(".ytsm-channels").forEach(channelList => {
     channelList.scrollTop = channelScroll.get(channelList.dataset.scrollKey) || 0;
   });
