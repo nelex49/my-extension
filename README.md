@@ -176,3 +176,9 @@ Sidebar hierarchy refinement: parent folder icons are filled using the row text 
 Sidebar icon revision: supersedes the filled-icon trial. Both levels use outlines. Outline colour is derived from the folder fill, lighter on dark backgrounds and darker on light backgrounds. Subfolders retain their smaller size.
 
 Expanded sidebar subfolders no longer have an inset outline. Expansion arrows, ellipsis hover styling and keyboard focus outlines remain.
+
+## Save reliability checkpoint
+
+Channel moves now build a complete copied assignment tree and save it once through FolderService. Parent-held legacy assignments are cleared in that same write. Removal from a parent or subfolder uses the same persistence path. State is committed after successful storage completion. Reported storage errors and thrown storage calls retain the previous data and show a notification. A per-content-script guard rejects overlapping folder/assignment writes with a retry message. It does not coordinate simultaneous writes from separate YouTube tabs; cross-tab concurrency remains a separate review item.
+
+Dialog regressions now exercise single-write moves, failed moves and both removal types, exceptions, repeated clicks, concurrent folder deletion rejection, guard release and unchanged YouTube subscriptions. All four suites pass.

@@ -85,21 +85,17 @@ function createManageActions({ modal, state, render, close, dismissMenus, select
         showUserNotification("Channel data is unavailable. Refresh subscriptions and try again.", "warn");
         return;
       }
-      // Existing move logic clears subfolders, but older parent-held records need clearing too.
-      Object.values(folderData).forEach(info => {
-        if (info.subscriptions) info.subscriptions = info.subscriptions.filter(sub => manageChannelId(sub) !== id);
+      addToSubfolder(id, destinationParent, destinationChild, success => {
+        if (!modal.isConnected) return;
+        if (success) closeMovePicker();
+        render();
       });
-      addToSubfolder(id, destinationParent, destinationChild);
-      state.moveChannel = null; render();
     } else if (action === "remove") {
       const id = button.closest("[data-channel]").dataset.channel;
       if (!confirm("Remove this channel from the folder? Your YouTube subscription will remain.")) return;
-      folderData = window.folderData;
-      if (state.child === null) {
-        folderData[state.parent].subscriptions = (folderData[state.parent].subscriptions || []).filter(sub => manageChannelId(sub) !== id);
-        safeSaveFolderData(folderData); refreshFolderDropdown();
-      } else removeFromSubfolder(id, state.parent, state.child);
-      render();
+      removeFromSubfolder(id, state.parent, state.child, () => {
+        if (modal.isConnected) render();
+      });
     }
   };
 }

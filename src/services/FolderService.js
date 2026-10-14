@@ -8,21 +8,32 @@ function prepareManageFolderRename(rename, reverse = false) {
   if (rename.parentName !== undefined) window.prepareManageSubfolderRename?.(rename.parentName, oldName, newName);
   else window.prepareManageParentRename?.(oldName, newName);
 }
+let folderSavePending = false;
 function persistFolderMutation(nextData, previousData, done, rename = null) {
-  // Keep the Manage selection pointed at the new key before storage notifications render.
+  if (folderSavePending) {
+    showUserNotification("A folder change is still saving. Please try again when it finishes.", "warn");
+    done?.(false); return false;
+  }
+  folderSavePending = true;
+  // Selection must follow renamed keys before Chrome emits storage notifications.
   prepareManageFolderRename(rename);
-  replaceFolderData(nextData);
-  chrome.storage.local.set({ folderData: nextData }, () => {
-    if (chrome.runtime.lastError) {
-      replaceFolderData(previousData);
-      prepareManageFolderRename(rename, true);
+  let completed = false;
+  function finish(success) {
+    if (completed) return;
+    completed = true; folderSavePending = false;
+    if (success) replaceFolderData(nextData);
+    else {
+      replaceFolderData(previousData); prepareManageFolderRename(rename, true);
       showUserNotification("Could not save folder changes. Your existing data was kept.", "error");
-      done?.(false); return;
     }
     if (typeof window.refreshFolderDropdown === "function") window.refreshFolderDropdown();
     if (typeof window.refreshManageView === "function") window.refreshManageView();
-    done?.(true);
-  });
+    done?.(success);
+  }
+  try {
+    chrome.storage.local.set({ folderData: nextData }, () => finish(!chrome.runtime.lastError));
+  } catch (error) { finish(false); }
+  return true;
 }
 function createParentFolderRecord(name, color, textColor, done) {
   const current = window.folderData || {};

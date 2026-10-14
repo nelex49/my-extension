@@ -1,104 +1,40 @@
-// Subscription assignment operations; folder mutations live in FolderService.js.
-function removeSubscriptionFromAllFolders(channelId) {
+// Assignment changes use the same single-write protection as folder edits.
+function assignmentChannelId(sub) { return sub.snippet?.resourceId?.channelId; }
+function clearChannelAssignments(data, channelId) {
   let removed = false;
-
-  // Remove from all subfolders only (parent folders don't hold subscriptions directly)
-  const currentFolderData = window.folderData || {};
-  Object.keys(currentFolderData).forEach((folderName) => {
-    if (currentFolderData[folderName].subfolders) {
-      Object.keys(currentFolderData[folderName].subfolders).forEach(
-        (subfolderName) => {
-          const subfolder =
-            currentFolderData[folderName].subfolders[subfolderName];
-          if (subfolder && subfolder.subscriptions) {
-            const index = subfolder.subscriptions.findIndex(
-              (sub) => sub.snippet?.resourceId?.channelId === channelId
-            );
-            if (index !== -1) {
-              subfolder.subscriptions.splice(index, 1);
-              removed = true;
-              logStatus(
-                `Removed subscription from ${folderName}/${subfolderName}`,
-                "info"
-              );
-            }
-          }
-        }
-      );
-    }
+  const clear = record => {
+    const before = record.subscriptions || [];
+    const after = before.filter(sub => assignmentChannelId(sub) !== channelId);
+    if (after.length !== before.length) { record.subscriptions = after; removed = true; }
+  };
+  Object.values(data).forEach(parent => {
+    clear(parent); Object.values(parent.subfolders || {}).forEach(clear);
   });
-
-  if (removed) {
-    // Save updated data
-    safeSaveFolderData(currentFolderData);
-
-    // Update the global variable to keep it in sync
-    window.folderData = currentFolderData;
-
-    // Refresh the dropdown to show updated counters
-    setTimeout(() => {
-      if (typeof window.refreshFolderDropdown === "function") {
-        window.refreshFolderDropdown();
-      }
-    }, 100);
-  }
-
   return removed;
 }
-
-// Additional functions needed for subscription management
-
-function removeFromSubfolder(channelId, folderName, subfolderName) {
-  if (folderData[folderName]?.subfolders?.[subfolderName]) {
-    folderData[folderName].subfolders[subfolderName].subscriptions = folderData[
-      folderName
-    ].subfolders[subfolderName].subscriptions.filter(
-      (sub) => sub.snippet?.resourceId?.channelId !== channelId
-    );
-
-    // Save to storage
-    safeSaveFolderData(folderData);
-
-    // Update the global variable to keep it in sync
-    window.folderData = folderData;
-
-    // Refresh the dropdown to show updated counters
-    setTimeout(() => {
-      if (typeof window.refreshFolderDropdown === "function") {
-        window.refreshFolderDropdown();
-      }
-    }, 100);
-  }
+function removeSubscriptionFromAllFolders(channelId, done) {
+  const previous = cloneFolderData(), next = cloneFolderData(previous);
+  if (!clearChannelAssignments(next, channelId)) { done?.(false); return false; }
+  return persistFolderMutation(next, previous, done);
 }
-
-function addToSubfolder(channelId, folderName, subfolderName) {
-  const subscription = userSubscriptions.find(
-    (sub) => sub.snippet?.resourceId?.channelId === channelId
-  );
-
-  if (subscription && folderData[folderName]?.subfolders?.[subfolderName]) {
-    // Remove from all other folders first
-    removeSubscriptionFromAllFolders(channelId);
-
-    // Add to the specified subfolder
-    folderData[folderName].subfolders[subfolderName].subscriptions.push(
-      subscription
-    );
-
-    // Save to storage
-    safeSaveFolderData(folderData);
-
-    // Update the global variable to keep it in sync
-    window.folderData = folderData;
-
-    // Refresh the dropdown to show updated counters
-    setTimeout(() => {
-      if (typeof window.refreshFolderDropdown === "function") {
-        window.refreshFolderDropdown();
-      }
-    }, 100);
-  }
+function removeFromSubfolder(channelId, parentName, childName, done) {
+  const previous = cloneFolderData(), next = cloneFolderData(previous);
+  const record = childName === null ? next[parentName] : next[parentName]?.subfolders?.[childName];
+  if (!record) { done?.(false); return false; }
+  record.subscriptions = (record.subscriptions || []).filter(sub => assignmentChannelId(sub) !== channelId);
+  return persistFolderMutation(next, previous, done);
 }
-
-
+function addToSubfolder(channelId, parentName, childName, done) {
+  const subscription = (window.userSubscriptions || []).find(sub => assignmentChannelId(sub) === channelId);
+  const previous = cloneFolderData(), next = cloneFolderData(previous);
+  const destination = next[parentName]?.subfolders?.[childName];
+  if (!subscription || !destination) {
+    showUserNotification("Channel or folder data is unavailable. Refresh subscriptions and try again.", "warn");
+    done?.(false); return false;
+  }
+  clearChannelAssignments(next, channelId);
+  destination.subscriptions ||= [];
+  destination.subscriptions.push(subscription);
+  return persistFolderMutation(next, previous, done);
+}
 Object.assign(window, { removeSubscriptionFromAllFolders, removeFromSubfolder, addToSubfolder });

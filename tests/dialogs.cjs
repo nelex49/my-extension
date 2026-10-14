@@ -90,4 +90,34 @@ const youtubeBefore=JSON.stringify(context.userSubscriptions);context.deletePare
 // No entitlement caps remain in the extracted folder service.
 for(let i=0;i<8;i++)context.createParentFolderRecord('Extra '+i,'#44345d','#ffffff',()=>{});assert.ok(context.folderData['Extra 7']);
 const checkedManifest=JSON.parse(fs.readFileSync(root+'manifest.json'));assert.ok(!checkedManifest.content_scripts[0].js.some(f=>/SubscriptionDisplay|FolderModals|ModalManager/.test(f)));
-console.log('PASS: dialog save once, cancel, duplicate names, storage failure rollback, escaped names, unlimited parents and subfolders, preserved assignments, outside click, Escape and anchored-editor listener cleanup across repeated openings.');
+// Real assignment service: one write, rollback, exceptions and overlapping edits.
+vm.runInContext(fs.readFileSync(root+'src/components/SubscriptionManager.js','utf8'),context);
+context.folderData={Source:{subscriptions:[a],subfolders:{Old:{subscriptions:[a,a]}}},Target:{subfolders:{New:{subscriptions:[]}}}};
+const assignmentBefore=JSON.stringify(context.folderData);
+failure=true;let outcome=null;let writeStart=writes;
+context.addToSubfolder('UC_A','Target','New',ok=>outcome=ok);
+assert.equal(writes,writeStart+1);assert.equal(outcome,false);assert.equal(JSON.stringify(context.folderData),assignmentBefore);
+context.removeFromSubfolder('UC_A','Source','Old',ok=>outcome=ok);
+assert.equal(outcome,false);assert.equal(JSON.stringify(context.folderData),assignmentBefore);
+context.removeFromSubfolder('UC_A','Source',null,ok=>outcome=ok);
+assert.equal(outcome,false);assert.equal(JSON.stringify(context.folderData),assignmentBefore);
+failure=false;
+const normalSet=context.chrome.storage.local.set;
+context.chrome.storage.local.set=()=>{throw Error('storage unavailable')};
+context.addToSubfolder('UC_A','Target','New',ok=>outcome=ok);
+assert.equal(outcome,false);assert.equal(JSON.stringify(context.folderData),assignmentBefore);
+context.chrome.storage.local.set=normalSet;
+holdSave=true;writeStart=writes;
+context.addToSubfolder('UC_A','Target','New',ok=>outcome=ok);
+assert.equal(JSON.stringify(context.folderData),assignmentBefore);
+context.addToSubfolder('UC_A','Target','New',ok=>assert.equal(ok,false));
+context.deleteParentFolderRecord('Source',ok=>assert.equal(ok,false));
+assert.equal(writes,writeStart+1);
+pendingSave();holdSave=false;assert.equal(outcome,true);
+assert.equal(context.folderData.Source.subscriptions.length,0);
+assert.equal(context.folderData.Source.subfolders.Old.subscriptions.length,0);
+assert.equal(context.folderData.Target.subfolders.New.subscriptions.length,1);
+context.removeFromSubfolder('UC_A','Target','New',ok=>assert.equal(ok,true));
+assert.equal(context.folderData.Target.subfolders.New.subscriptions.length,0);
+assert.equal(JSON.stringify(context.userSubscriptions),youtubeBefore);
+console.log('PASS: atomic assignment saves, failed move/removal rollback, thrown writes, overlapping change guard, preserved YouTube cache; dialog save once, cancel, duplicate names, storage failure rollback, escaped names, unlimited parents and subfolders, preserved assignments, outside click, Escape and anchored-editor listener cleanup across repeated openings.');
