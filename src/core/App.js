@@ -7,8 +7,6 @@ let sidebarButtonCreated = false;
 let folderDropdown = null;
 let userSubscriptions = [];
 let folderData = {};
-let folderLimit = 3;
-let isPremium = false;
 let appInitialization = null;
 
 function syncSubscriptions(subscriptions) {
@@ -56,4 +54,4 @@ chrome.runtime.onMessage.addListener((message) => {
 });
 
 Object.assign(window, { folderPanel, isLoggedIn, sidebarButtonCreated,
-  folderDropdown, userSubscriptions, folderData, folderLimit, isPremium, initialize });
+  folderDropdown, userSubscriptions, folderData, initialize });

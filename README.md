@@ -6,7 +6,7 @@ A Chrome Manifest V3 extension for organising YouTube subscriptions into parent 
 
 The `ui-redesign` branch contains the new sidebar and the working dark Manage Subscriptions interface. Keep `main` unchanged until the complete redesign has passed regression testing.
 
-The current checkpoint includes complete paginated subscription retrieval and channel images. Unsubscribe, complete folder editing, compact dark dialogs and backup/restore are still pending.
+The current checkpoint includes complete paginated subscription retrieval, channel images, two-step destination selection, and the first folder-code refactor. Unsubscribe, complete folder editing, compact dark dialogs and backup/restore are still pending.
 
 ## Sidebar
 
@@ -26,14 +26,14 @@ Expansion is temporary browsing state and resets on a full page refresh. Existin
 - Dark window with aligned outer panels and consistent padding.
 - One row of parent tabs, with long names truncated and full names on hover.
 - Visible tabs adapt to available width; the selected parent remains visible when space allows.
-- **All Folders (N)** opens a searchable list of all parent folders.
+- **All Folders (N)** opens a searchable list of all parent folders and remembers its scroll position while Manage remains open. Folder order is unchanged. Visible parent tabs keep stable positions while you switch between them.
 - **+ Parent Folder** sits in the parent-section heading row.
 - A newly saved parent becomes active, ready for subfolder creation.
 - The left panel shows parent-related subfolder colours, a fixed-height heading, centred **+ Subfolder**, and folder search.
 - Channel search and A-Z/Z-A sorting work on the selected view.
 - Channel profile images use existing thumbnail URLs, with initials as fallback.
 - The info button expands the cached channel description. Channel names link to YouTube.
-- **Move** assigns a channel to a destination subfolder.
+- **Move** opens a two-step picker: choose a parent, then a subfolder. Each list scrolls when needed. The search icon reveals optional search for the current step; search resets when switching steps. Back, outside click and Escape dismiss or navigate the picker.
 - **Remove** removes a folder assignment, preserving the YouTube subscription.
 - **Refresh subscriptions** is available in the top-right menu.
 - Outside clicks and Escape dismiss menus. Closing Manage removes its listeners.
@@ -57,28 +57,34 @@ OAuth remains **read-only**. Working unsubscribe requires a separate write-permi
 
 ## Architecture
 
+The manifest loads classic content scripts in dependency order. There is no bundler or framework requirement.
+
 | Path | Responsibility |
 | --- | --- |
-| `manifest.json` | MV3 configuration, permissions, OAuth settings and content-script order |
-| `background.js` | Paginated API retrieval, token renewal, refresh status and cache updates |
-| `popup.html`, `popup.js` | Existing Google login/logout interface |
+| `background.js` | Paginated retrieval, token renewal, refresh status and account cache |
 | `src/main.js` | Single startup entry point |
 | `src/core/App.js` | Shared state and storage/message synchronization |
-| `src/components/SidebarButton.js` | Launcher and guide mounting |
-| `src/components/FolderDropdown.js` | Sidebar rendering and muted palette helpers |
-| `src/components/SubfolderView/SubfolderViewPanel.js` | New Manage view, navigation and row actions |
-| `src/components/SubscriptionManager.js` | Existing folder and assignment operations |
-| `src/components/FolderModals.js` | Shared existing folder creation/editing dialogs |
-| `src/components/SubscriptionDisplay.js` | Legacy views pending further caller review and cleanup |
-| `src/components/ModalManager.js` | Existing modal helpers |
-| `src/services/` | Authentication, cached-data loading, storage and legacy API helpers |
-| `src/utils/` | Configuration and shared utilities |
-| `src/styles/sidebar.css` | Scoped browsing-sidebar styles |
-| `src/styles/subfolder-view.css` | Scoped Manage styles |
+| `src/components/SidebarButton.js` | Guide mounting and launcher |
+| `src/components/FolderDropdown.js` | Sidebar browsing state and rendering |
+| `src/components/SidebarRows.js` | Sidebar row and channel DOM builders |
+| `src/components/FolderDialogs/ParentFolderDialog.js` | Parent form and preview controller |
+| `src/components/FolderDialogs/SubfolderDialog.js` | Subfolder form and preview controller |
+| `src/components/FolderDialogs/DialogControls.js` | Shared swatches, input counters and escaping |
+| `src/components/FolderDialogs/DialogLifecycle.js` | Open/close, focus, dragging and listener cleanup |
+| `src/services/FolderService.js` | Parent/subfolder mutations and persistence |
+| `src/components/SubscriptionManager.js` | Channel assignment operations |
+| `src/components/SubfolderView/ManageViewHelpers.js` | Read-only channel selectors, icons and stable tab ordering |
+| `src/components/SubfolderView/SubfolderViewPanel.js` | Manage view lifecycle, navigation and actions |
+| `src/utils/FolderColours.js` | Shared muted palette and colour calculations |
+| `src/styles/folder-dialogs.css` | Folder form layout and presentation |
+| `src/styles/sidebar.css` | Browsing sidebar styles |
+| `src/styles/subfolder-view.css` | Manage styles |
 
-Only `SubfolderViewPanel.js` from the old SubfolderView module group is loaded by the manifest. Six superseded scripts remain on disk for now but do not run alongside the replacement.
+Folder form CSS is separate from JS. Runtime colours and drag coordinates remain in JS. Parent creation and subfolder mutations live in the folder service rather than the form controllers. Both dialogs share one lifecycle helper that removes document listeners on every normal close path.
 
-Scripts currently share content-script globals and `window` properties. No framework has been added. Reduce coupling as relevant components are replaced; avoid unrelated refactors during staged testing.
+The retired `FolderModals.js`, `SubscriptionDisplay.js`, `ModalManager.js` and seven superseded SubfolderView scripts are removed from this source tree. Their active responsibilities have been moved or were no longer called. Folder limits are disabled during development; premium enforcement is deferred.
+
+Shared application state still uses content-script globals and existing window bridges. This pass does not replace the state model with ES modules or promise that all coupling is eliminated. The extracted files have narrower responsibilities and retain existing callable entry points needed by active components.
 
 Scoped `scrollbar-color: auto !important` resets are used where host-page styling suppresses Chrome custom scrollbar rules. Keep these exceptions limited to extension-owned scroll areas.
 
@@ -94,6 +100,18 @@ The Google OAuth client must be valid for the installed extension ID, and the Go
 
 ## Verification
 
+Node.js tests require no additional packages. Run from the project root:
+
+```bash
+node tests/startup.cjs
+node tests/dialogs.cjs
+node tests/manage.cjs
+node tests/retrieval.cjs
+```
+
+These are simulated DOM/Chrome/API regressions, not a real Chrome rendering or OAuth session test. They cover full manifest startup, sidebar counts and expansion, creation callback focus, optional picker search, scroll memory, duplicate protection, parent save rollback, and listener cleanup across repeated dialog openings. Rendering and live login/logout need manual verification after reloading.
+
+
 Local simulated DOM/Chrome/API checks covered navigation, search/sorting, menu dismissal, responsive tab selection, creation callback/cancellation, duplicate-name preservation, Move/Remove, image failure fallback and state synchronization.
 
 Retrieval tests covered 150 mocked subscriptions across three pages, concurrent refreshes, cache preservation on partial failure, visible API errors, token renewal, repeated-page-token protection, empty accounts and logout cancellation.
@@ -104,13 +122,13 @@ Recheck login/logout, long names, scrolling, images, descriptions, creation, Mov
 
 ## Remaining stages
 
-1. Add **Unsubscribe from YouTube** inside a channel overflow menu, with appropriate OAuth write permission, renewed consent and a channel-specific confirmation.
-2. Reconnect parent/subfolder rename, recolour and delete operations through small shared dark dialogs.
+1. Reconnect parent/subfolder rename, recolour and delete operations through small shared dark dialogs. Review deletion effects and persistence failures before exposing these actions.
+2. Add **Unsubscribe from YouTube** inside a channel overflow menu, with appropriate OAuth write permission, renewed consent and a channel-specific confirmation.
 3. Implement and validate backup/restore.
 4. Review premium limits, upgrade controls and entitlement handling separately.
-5. Remove superseded files after verifying remaining callers and regression tests.
+5. Verify account isolation, stale channel handling, storage failure paths and accessibility before beta release.
 
-Keep working checkpoints on `ui-redesign`; merge into `main` after the complete redesign is ready.
+Use `folder-refactor` for this reviewable refactor checkpoint if desired. Merge it into `ui-redesign` only after live testing; keep `main` unchanged until the redesign is ready.
 
 ## API references
 

@@ -23,20 +23,26 @@
       ],
       "css": [
         "src/styles/subfolder-view.css",
-        "src/styles/sidebar.css"
+        "src/styles/sidebar.css",
+        "src/styles/folder-dialogs.css"
       ],
       "js": [
         "src/utils/constants.js",
         "src/utils/helpers.js",
+        "src/utils/FolderColours.js",
         "src/services/StorageService.js",
         "src/services/YouTubeAPI.js",
         "src/services/AuthService.js",
-        "src/components/ModalManager.js",
+        "src/services/FolderService.js",
+        "src/components/FolderDialogs/DialogLifecycle.js",
+        "src/components/FolderDialogs/DialogControls.js",
+        "src/components/FolderDialogs/ParentFolderDialog.js",
+        "src/components/FolderDialogs/SubfolderDialog.js",
         "src/components/SubscriptionManager.js",
-        "src/components/SubscriptionDisplay.js",
-        "src/components/FolderModals.js",
+        "src/components/SidebarRows.js",
         "src/components/FolderDropdown.js",
         "src/components/SidebarButton.js",
+        "src/components/SubfolderView/ManageViewHelpers.js",
         "src/components/SubfolderView/SubfolderViewPanel.js",
         "src/core/App.js",
         "src/main.js"
