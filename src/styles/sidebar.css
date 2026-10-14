@@ -100,7 +100,6 @@
   background: var(--folder-color, #365b86);
   color: #f1f1f1;
 }
-#yt-manage-guide-entry .ytsm-folder:hover { filter: brightness(1.12); }
 #yt-manage-guide-entry .ytsm-folder-name {
   flex: 1;
   min-width: 0;

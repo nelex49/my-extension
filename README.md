@@ -67,6 +67,7 @@ The manifest loads classic content scripts in dependency order. There is no bund
 | `src/components/SidebarButton.js` | Guide mounting and launcher |
 | `src/components/FolderDropdown.js` | Sidebar browsing state and rendering |
 | `src/components/SidebarRows.js` | Sidebar row and channel DOM builders |
+| `src/components/SidebarFolderMenu.js` | Sidebar shortcut menus using existing dialogs |
 | `src/components/FolderDialogs/ParentFolderDialog.js` | Parent form and preview controller |
 | `src/components/FolderDialogs/SubfolderDialog.js` | Subfolder form and preview controller |
 | `src/components/FolderDialogs/DialogControls.js` | Shared swatches, input counters and escaping |
@@ -74,7 +75,15 @@ The manifest loads classic content scripts in dependency order. There is no bund
 | `src/services/FolderService.js` | Parent/subfolder mutations and persistence |
 | `src/components/SubscriptionManager.js` | Channel assignment operations |
 | `src/components/SubfolderView/ManageViewHelpers.js` | Read-only channel selectors, icons and stable tab ordering |
-| `src/components/SubfolderView/SubfolderViewPanel.js` | Manage view lifecycle, navigation and actions |
+| `src/components/SubfolderView/SubfolderViewPanel.js` | Manage coordinator: lifecycle, storage updates, focus and component rendering |
+| `src/components/SubfolderView/ManageState.js` | Explicit per-window view state |
+| `src/components/SubfolderView/ManageLayout.js` | Static window markup |
+| `src/components/SubfolderView/ParentFolderNavigation.js` | Parent tabs, overflow search, arrow scrolling, timers and observer cleanup |
+| `src/components/SubfolderView/SubfolderNavigation.js` | Parent heading/count and filtered subfolder rows |
+| `src/components/SubfolderView/ChannelList.js` | Channel rows, search/sort counts, descriptions and avatars |
+| `src/components/SubfolderView/ChannelOptionsMenu.js` | Channel options popup |
+| `src/components/SubfolderView/MovePicker.js` | Destination picker, search, folder icons and stable positioning |
+| `src/components/SubfolderView/ManageActions.js` | Delegated control actions and calls to existing services |
 | `src/utils/FolderColours.js` | Shared muted palette and colour calculations |
 | `src/styles/folder-dialogs.css` | Folder form layout and presentation |
 | `src/styles/sidebar.css` | Browsing sidebar styles |
@@ -135,3 +144,15 @@ Use `folder-refactor` for this reviewable refactor checkpoint if desired. Merge 
 - [YouTube subscriptions.list](https://developers.google.com/youtube/v3/docs/subscriptions/list)
 - [YouTube subscription resource](https://developers.google.com/youtube/v3/docs/subscriptions)
 - [Chrome identity API](https://developer.chrome.com/docs/extensions/reference/api/identity)
+
+## Manage component refactor
+
+Components receive an explicit `modal` and `state` plus the callbacks they need.
+The coordinator creates one state record per window and renders the components in the existing order.
+The parent navigation component owns its timers and ResizeObserver; the coordinator calls its cleanup on close.
+Folder records and persistence stay in the existing services. No ES-module loader or build step is required:
+`manifest.json` loads the component factories before `SubfolderViewPanel.js`.
+
+Superseded CSS declarations and empty override rules were removed without moving active rules.
+The effective value for each selector/property/media context was checked against the working source.
+Browser visual verification is still required; the regression harness checks behaviour rather than rendering.
