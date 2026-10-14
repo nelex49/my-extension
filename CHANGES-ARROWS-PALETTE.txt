@@ -1,7 +1,0 @@
-Arrow and palette corrective pass (ui-redesign only)
-- Replaced the 10 default swatches with 7 dark muted colours sampled from the supplied screenshot and 3 complementary dark muted additions. Existing saved colours remain unchanged.
-- Fixed left/right navigation calculations by using each tab's position relative to the scrolling strip, not offsetParent offsets.
-- Increased arrow visual size and click targets.
-- Replaced brown/amber Uncategorised with restrained blue-grey and a lighter selected fill; no permanent border/shadow.
-- Kept existing form and folder persistence behaviour.
-Test in live Chrome: arrows both ways at different widths, selecting via All Folders, palette in both create/edit dialogs, and existing saved folder colours.

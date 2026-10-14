@@ -1,1 +1,0 @@
-Eight distinct dark muted default swatches, circular and single-row. Full-width centred charcoal Custom colour button with spacing. Parent arrows centred and bolder; click to step or press and hold for continuous acceleration. Saved colours remain untouched. Chrome live testing required.
