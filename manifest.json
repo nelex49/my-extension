@@ -30,6 +30,8 @@
       "js": [
         "src/shared/BackupFormat.js",
         "src/utils/constants.js",
+        "src/plans/FolderPlan.js",
+        "src/plans/FolderCreationGate.js",
         "src/utils/helpers.js",
         "src/utils/FolderColours.js",
         "src/services/StorageService.js",
@@ -37,6 +39,7 @@
         "src/services/AuthService.js",
         "src/services/FolderService.js",
         "src/components/FolderDialogs/DialogLifecycle.js",
+        "src/components/PlanDialogs/FolderLimitDialog.js",
         "src/services/BackupService.js",
         "src/components/FolderDialogs/DialogControls.js",
         "src/components/FolderDialogs/ParentFolderDialog.js",
@@ -63,6 +66,10 @@
       ]
     }
   ],
+  "options_ui": {
+    "page": "development/plan-testing.html",
+    "open_in_tab": true
+  },
   "host_permissions": [
     "https://accounts.google.com/*",
     "https://www.googleapis.com/*",

@@ -1,71 +1,43 @@
-# Refresh correction - current follow-up
+# Current cleanup checkpoint
 
-Based on the last tools/feedback replacement, including its accepted move-notice position and four-entry tools menu. Refresh no longer closes Manage during the current session's temporary verification status. Selection and cached subscriptions remain visible, Updating is shown, and saves remain blocked by accountIsReady until verification succeeds. Account mismatch, sign-out, changed-session verification and failed verification still close/protect the view. Fetch errors remain visible; the tools dropdown closes when Refresh is selected.
+The user confirmed Free/Pro/expired manual testing works in Chrome. The tests directory is now cleaned: old copied application files, tests/src and tests/tests were removed. It contains the eight current suite entry points, popup-auth.cjs (used by retrieval), and a test-specific README. Application files are unchanged from premium-folders-stage1.zip.
 
-All six automated suites must pass for this follow-up. Startup now covers the menu refresh/storage-event sequence and the security/failure paths. Original development identity/OAuth preserved. No branch operation, commit or push.
+Apply this complete replacement on premium-folders. Delete the existing local tests directory before copying the replacement tests directory; an ordinary overwrite does not remove files omitted from a ZIP. Preserve the project's actual src and Git metadata. No branch operation, commit or push performed.
 
----
-
-# Current follow-up - 15 October 2026
-
-Authoritative baseline: extension-current(1).zip. Continue on ui-redesign. No Git branch operation, commit or push performed. Original development identity, permissions and OAuth configuration preserved. Manifest only adds the ManageTools.js content script.
-
-Move feedback uses a permanent slot between Uncategorised and All Folders, above the parent tabs, with no layout shift on show/hide: `Moved to Parent / Subfolder`, two seconds followed by a 300ms fade, only after successful saving. Source selection stays in place. Backup notice timing remains four seconds. Channel menu is unchanged. Tools menu now has four icon/description entries: Refresh subscriptions, Backup folders, Restore backup and About. About uses the shared dark dialog, traps Tab on its Close button, supports Escape/outside-click dismissal and returns focus to the tools trigger. Decisions are recorded in PROJECT-BACKLOG.md; premium work is discussion only.
-
-The user confirms backup/restore, safety copies, account linking and portable beta second-computer testing passed. Historical pending-check statements below are superseded by this checkpoint. Automated verification for this follow-up: dialogs, manage, retrieval, startup, backup and backup-notice suites. Live visual checking of the notice and menu remains for the user. Automated browser rendering could not run because this environment has no installed Chromium executable; DOM/Chrome simulation suites passed.
+All eight suites must pass after cleanup. See tests/README.md for commands. Folder-plan testing instructions remain in development/README.md. The earlier "manual testing required" statements below are superseded by the user's acceptance of Free/Pro/expired checks; existing tests remain simulations of Chrome/DOM APIs.
 
 ---
 
-# YouTube Subscription Manager handover
+# Folder plans handover - premium-folders
 
-Work on ui-redesign. This complete replacement is based only on extension-latest(3).zip. No commit, push or merge has been performed. Preserve accepted UI; keep changes modular and run dialogs/manage/retrieval/startup after application changes.
+Current implementation builds on the accepted and user-tested Refresh fix, preserving the move-notice placement, four-item tools menu, account protection, original development OAuth configuration, backup/restore and safety-copy rules.
 
-## Current addition: manual backup and restore
+## Current section
 
-Manage -> three-dot menu -> Backup folders / Restore backup. The previous disabled placeholders are now active.
+- Free: provisionally four parents and three children per parent; no subscription-count limit.
+- Pro: unlimited folder counts.
+- Expired: Free creation rules. All existing content remains usable, editable, movable and deletable. Block all new creation while any count exceeds Free; resume where there is room once counts fit Free.
+- Full oversized restore is allowed and does not restore an entitlement or test plan. Current owner checks and confirmed safety download stay in place.
+- Shared creation forms and creation services both use the central policy, including a recheck before saving an already-open form.
+- A themed upgrade/renew prompt explains the limit and offers Pro details. It explicitly says purchases are not available yet. No billing/licensing has been implemented.
 
-- Manual backup downloads a version-1 JSON file containing owner, folder structure, colours and channel assignments. No credentials or live subscription cache.
-- Restore validates the file and account, then opens a shared dark confirmation dialog. It replaces the complete folder setup; it does not change YouTube subscriptions.
-- After confirmation, a dated before-restore safety copy downloads. The worker waits for Chrome to report completion before saving the imported folders.
-- Download failure/cancellation/timeout stops restore. Changed account or folder data detected during download also stops it. Storage failures preserve the previous setup.
-- Chrome downloads permission was added for completion monitoring. Reload the extension and YouTube after replacing source.
-- The current verified owner must match the backup. Following reinstall, sign in and link the empty setup to that same YouTube channel first.
-- General cross-tab save protection remains deferred. This addition is not a general concurrency solution.
+## Organisation
 
-## Modules
+`src/plans/FolderPlan.js`: limits, policy and explicitly development-only test-state resolution.
+`src/plans/FolderCreationGate.js`: bridges policy results to UI.
+`src/components/PlanDialogs/FolderLimitDialog.js`: limit dialog and read-only Pro details.
+`development/plan-testing.*`: standalone Extension options page for Free/Pro/expired simulation.
 
-src/shared/BackupFormat.js: versioned schema, validation and credential-free serialization.
-src/background/BackupService.js: account checks, downloads, safety copy and restore write.
-src/services/BackupService.js: file selection, menu entry points and themed confirmation.
-Shared DialogLifecycle accepts an optional close guard; restore cannot dismiss while an operation is pending. Other dialogs retain their behaviour.
+Existing FolderService, form controls and App receive small integration changes. Payment, other premium features and cross-tab save protection remain outside scope.
 
-## Validation
+## Testing and next action
 
-All four required suites pass. tests/backup.cjs additionally checks round trip, format/version/account/prototype rejection, completed safety download before replacement, cancellation, failed saves, changed account/folders and repeated operation protection. Startup tests exercise backup menu routing and confirmation cancel, pending state, error/retry and success.
-Tests simulate DOM and Chrome APIs. The user confirmed live backup, deletion and restore recovered the deleted folder. The latest header message placement still needs a live visual check.
+See `development/README.md` for the manual test checklist and commands. Reload the existing development extension, then YouTube. In Chrome extension Details -> Extension options, choose Test Free, Test Pro or Test expired Pro. The state persists and open YouTube tabs update immediately. It does not alter folders and is excluded from backups.
 
-## Manual checks next
+All eight automated suites must pass before delivery: dialogs, manage, retrieval, startup, backup, backup-notice, folder-plans and plan-testing. They simulate DOM and Chrome APIs; live Chrome visual/installation testing is still required.
 
-1. Reload extension, then reload YouTube. Sign in to the verified owner.
-2. Manage -> three-dot menu -> Backup folders. Confirm the JSON file downloads.
-3. Add a temporary folder. Restore the earlier backup; cancel confirmation once to check nothing changes.
-4. Restore again and confirm. Check the safety file downloads and the temporary folder disappears. Original assignments and colours should return.
-5. Restore the safety copy to recover the temporary folder.
-6. Check malformed JSON and another account's backup are rejected. If Chrome prompts for a save location, cancel that download and check no restore occurs.
-7. Refresh and restart Chrome to confirm restored assignments persist.
+This is a development build. `CONFIG.DEVELOPMENT_PLAN_TESTING` is true so the user can simulate plan states; default is Free. It is not a production entitlement system. Before release, replace simulated resolution with the agreed licensing flow, disable the flag, and remove the development options entry/page. With the flag off, stored test Pro is ignored.
 
-Next: complete manual checks, then small friends beta for 1-2 weeks, fix feedback, plan premium scope. See PROJECT-BACKLOG.md for deferred features and premium candidates.
+Target branch: `premium-folders`, created by the user from their pushed/tested `ui-redesign` checkpoint `6c35020`. This workspace contains source archives, not the user's Git repository; no branch switch, commit, push or merge has been performed here. No changes to main or ui-redesign are authorised. Deliver a complete replacement archive for local testing, then wait for acceptance before commit/push or multi-account work.
 
-Existing account protection, popup timings and accepted Manage/sidebar appearance remain in place. The user already confirmed repeat sign-in and popup behaviour at the prior checkpoint.
-
-## Backup feedback refinement
-
-Short backup/restore messages now appear inside the Manage header to the left of the menu, below the header on narrow windows. Success remains for five seconds followed by a 300ms fade; errors remain until dismissed. BackupNotice.js owns display and timer cleanup. All four suites plus backup and backup-notice tests pass. No commit or push.
-
-Latest feedback adjustment: backup/restore notices are now centred below the Manage header and above folder navigation, rather than beside the menu. Success displays for four seconds then fades over 300ms. Errors remain dismissible. User confirmed the previous build worked; this placement awaits visual review.
-
-## Original project popup fix
-
-Applied the tested beta 1.0.2 popup fix to the original project. No native browser confirmation during account linking; fresh installs show Use this account, while existing unowned folders show an ownership warning before the explicit link button. Raw channel ID removed from this step. Original manifest, OAuth client and absence of a public key are preserved. Replace files in the original development folder and reload that existing extension. Do not substitute the beta manifest.
-
-User confirmed beta sign-in, empty initial setup, parent/subfolder creation and channel move on a second computer. Persistence and backup/restore testing there remains pending.
+`PROJECT-BACKLOG.md` is the authoritative current decision record, including provisional allowance/price and deferred features.

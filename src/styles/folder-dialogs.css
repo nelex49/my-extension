@@ -55,3 +55,7 @@
 .ytsm-about-dialog .ytsm-dialog-panel { width: min(400px,calc(100vw - 24px)); }
 .ytsm-about-dialog .ytsm-about-version { margin-top: 4px; color: var(--ytsm-form-muted); font-size: 12px; }
 .ytsm-about-dialog .ytsm-about-copy { margin-top: 12px; }
+
+.ytsm-plan-dialog .ytsm-dialog-panel { width: min(420px,calc(100vw - 24px)); }
+.ytsm-plan-dialog .ytsm-plan-copy { margin-top: 12px; color: var(--ytsm-form-muted); }
+.ytsm-plan-dialog .ytsm-pro-details { margin-top: 14px; padding: 12px; border: 1px solid var(--ytsm-form-border); border-radius: 8px; background: var(--ytsm-form-surface); }

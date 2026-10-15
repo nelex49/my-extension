@@ -2,123 +2,95 @@
 
 Updated: 15 October 2026
 
-This is the running record of deferred work and future ideas. Update statuses and decisions as work progresses. An idea appearing here is not approval to build it or a promise that it will be premium.
+This is the current decision record. Proposals are not approval to implement them. The folder section below is the only premium implementation currently authorised.
 
-## Current checkpoint
+## Checkpoint and working rules
 
-- Working branch: `ui-redesign`.
-- Authoritative source: `extension-current(1).zip`. Do not use older ZIPs.
-- User confirms the current checkpoint is committed and pushed.
-- Dark Manage interface, modular components, shared dialogs, custom colours and sidebar refinements are accepted.
-- Moves use one complete save. Failed moves/removals preserve previous assignments and show an error. Overlapping saves within one tab are guarded.
-- One verified YouTube channel owns the folder setup. Other authorised channels are blocked. Sign-out preserves folders and ownership.
-- Repeat sign-in and popup timing were manually confirmed by the user. The supplied HANDOVER.md still says confirmation is needed; that statement is superseded by the current checkpoint.
-- Backup/restore, safety copies and account linking are working. The portable beta passed second-computer testing, as confirmed by the user.
-- This follow-up changes move feedback and project records only; no commit or push has been performed.
+- Tested interface checkpoint: `ui-redesign`, user-confirmed pushed to commit `6c35020`.
+- Folder work target: `premium-folders`, based on that checkpoint. User creates/switches the branch in the original local repository. This replacement archive has no Git metadata; no branch operation, commit, push or merge was performed by the assistant.
+- Current source derives from `extension-current(1).zip` plus the accepted move-feedback/tools changes and tested Refresh correction. The older separately supplied `extension-source.zip` is not the baseline.
+- Original development extension identity, OAuth client, permissions and account protection are retained. Never substitute the separate portable beta configuration.
+- Keep code modular, preserve accepted appearance and behaviour, work one section at a time, and test before moving to the next section.
+- Do not touch `main` or `ui-redesign`, commit or push without explicit instructions.
+- Run dialogs, manage, retrieval and startup suites after application changes, plus relevant additional suites. Deliver one complete replacement ZIP.
 
-## Agreed next steps
+## Accepted interface and reliability work
 
-| Order | Work | Status / decision needed |
-| --- | --- | --- |
-| 1 | Backup and restore | Implemented: manual versioned JSON backup, full replacement restore for the same verified owner, explicit confirmation and completed safety-copy download before restore. User confirmed backup/deletion/restore recovery in Chrome. Header feedback refinement implemented; visual check pending. No merge or selective recovery. |
-| 2 | Small friends beta | Run for 1-2 weeks after backup/restore work is agreed and completed. |
-| 3 | Beta feedback | Fix reported problems and review usability before adding premium scope. |
-| 4 | Premium planning | Decide the paid feature set after feedback. No final free/premium split is agreed. |
+- Parent/subfolder creation/editing uses shared themed dialogs and accepted colours, custom colours and anchored sidebar editing.
+- Channel three-dot menu and its current contents are preserved.
+- Successful moves display `Moved to Parent / Subfolder` for two seconds, then fade over 300ms. They appear in the fixed navigation-row slot between Uncategorised and All Folders without pushing the interface down. Stay in the source subfolder; show success only after saving succeeds.
+- Tools menu has Refresh subscriptions, Backup folders, Restore backup and About, each with a line icon and short description. Backup is a download arrow; restore is an upload arrow. About shows the installed version and local-storage/backup information in the shared dark style.
+- Backup/restore notices use the same fixed slot with a four-second success duration. Errors remain dismissible. Narrow layouts reserve a notification row permanently.
+- Refresh keeps Manage/sidebar mounted during verification of the same session, displays Updating, and refreshes Uncategorised. Saving remains blocked until account verification completes. Sign-out, changed-session verification, mismatch or verification errors retain access protection. Fetch errors retain the complete cached list and appear in Manage.
+- User confirmed all current interface changes, backup/restore, safety copies and account linking work. Portable beta passed second-computer testing.
+- Folder mutations use one complete save; failed saves retain previous assignments. Per-tab overlapping writes are guarded. Cross-tab save conflict protection remains deferred.
 
-## Deferred reliability work
+## Folder plans - current authorised section
 
-| Item | Current position | When to revisit |
-| --- | --- | --- |
-| Protection against saves from separate YouTube tabs | Deferred in this discussion. Each tab can still save an older complete copy over a newer change. Storage notifications normally update the other tabs, but do not guarantee conflict prevention. No such failure has been observed in this thread; frequency is unconfirmed. | Consider before wider release, or sooner if testing reveals lost changes. |
-
-The reviewed proposal is a shared background save coordinator with a stored version check. A stale save would be rejected, the tab would receive the latest folders, and the user would retry. A queue alone would not prevent stale copies overwriting changes. This proposal has not been approved for implementation. Automatic merging is also not agreed.
-
-## Possible premium features
-
-| Idea | Status | Open question |
-| --- | --- | --- |
-| Separate folder setups for multiple YouTube accounts/channels | Explicit premium candidate; deferred. Current behaviour remains one owner with other channels blocked. | How should switching, ownership and separate setups work? |
-| Selective restore | Possible premium feature; deferred. | Recover individual folders without replacing the whole setup; duplicate names and assignments need rules. |
-| Scheduled automatic backups | Possible premium feature; deferred. | Scheduling, destination and retention are undecided. Manual weekly backups are currently the user's choice. |
-| Backup history | Possible premium feature; deferred. | Storage, retention and recovery experience are undecided. |
-| Cross-device sync | Deferred; possible premium candidate, not an agreed paid feature. Current folders use local Chrome storage. | Which sync approach, data format and conflict rules are appropriate? |
-
-Source note: the supplied handover records that a possible Chrome sync design would use compact account/folder/channel-ID records instead of the current full subscription objects. This is a design note to evaluate, not a completed sync plan. No hosted database is currently planned.
-
-## Other deferred features and ideas
-
-| Item | Status / scope |
+| Decision | Current position |
 | --- | --- |
-| Unsubscribe | Deferred. Behaviour, permissions and safeguards require discussion before building. Free/premium placement undecided. |
-| Remember sidebar state | Deferred. Remembering sidebar open state, expanded folders/subfolders and scroll position was recorded as optional later work. |
-| Light theme toggle | Earlier design idea: dark remains the default, with an optional light theme. Not approved for implementation in the current scope. |
-| Drag-and-drop | Earlier future idea: move channels into folders and rearrange folders while keeping the existing click-based Move controls. Deferred; free/premium placement undecided. |
-| Final branding and custom toolbar icon | Deferred. Earlier discussion included convenient toolbar access to the sign-in/sign-out popup. Final name, icon and presentation remain to be decided. |
+| Free allowance | Provisionally four parent folders and three subfolders per parent. Defined centrally so feedback can change the numbers. |
+| Subscription counts | Unlimited subscriptions under both plans; no new channel limit. |
+| Pro allowance | Unlimited parent folders and subfolders. |
+| Reaching a limit | Check when creating, explain the applicable limit and offer Pro. Declining preserves the complete setup. |
+| Expiry | Return to Free creation rules. Preserve access to all existing folders and assignments. Allow renaming, colours, deletion and channel moves/removal. |
+| Existing oversized setup | Block all new folder creation while any count exceeds the Free allowance. No automatic deletion or locked-away content. |
+| Reduced setup | Once all counts fit Free, creation is available wherever there is room within the limits. It never grants a fresh allocation on top of existing folders. At four parents, a fifth is blocked; a parent with two children can receive a third. |
+| Oversized backup | Allow full restore, including all ten parents in the discussed example, then use the same Free/expiry creation rules. Existing owner validation and completed safety-copy download still apply. |
+| Restore trade-off | Full recovery is prioritised; a user could manually edit a backup to introduce extra folders. No signature or anti-tamper restrictions introduced. |
+| Current upgrade action | Themed prompt and Pro details only. It clearly says purchases are unavailable in this development build. No checkout or charge. |
+| Testing states | Separate development Extension options page simulates Free, Pro and expired states. State persists locally and updates open tabs; it is excluded from backups. Disable/remove these controls before public release. |
 
-## Working rules
+The earlier proposal to disable all creation forever after expiry was explicitly superseded: former subscribers can use the same Free allowance once their setup fits it.
 
-- Preserve accepted appearance and behaviour.
-- Keep code modular and reuse existing services and dialogs.
-- Discuss new features before implementing them.
-- Do not touch `main`, commit or push without explicit instructions.
-- Run dialogs, manage, retrieval and startup regression suites after application changes.
-- Deliver one complete replacement ZIP after implementation work.
-- Keep this backlog with the project and include its current version in the next replacement ZIP.
+Current modules: `src/plans/FolderPlan.js`, `src/plans/FolderCreationGate.js`, `src/components/PlanDialogs/FolderLimitDialog.js`, and separate `development/plan-testing.*` controls. Shared forms check before opening and saving; FolderService checks again before creating. No count checks are added to editing, moving, deletion or restore.
 
-## Record basis
+## Premium work after the folder section
 
-Compiled from the user's current checkpoint and this thread, the supplied latest source's HANDOVER.md, and earlier project ideas visible in the conversation context. Older source archives were not used. Items from earlier discussions are identified as ideas rather than confirmed commitments.
+Build and test one section at a time. Do not implement the following yet.
 
-## Backup/restore decisions - 15 October 2026
-
-- Basic manual backup and full restore are the agreed initial scope. No automatic weekly schedule.
-- Backup contains folders, subfolders, colours, assigned channel records and owner identity; excludes login tokens and Google permissions.
-- Restore replaces the complete setup, so changes since the selected backup are removed. It does not alter actual YouTube subscriptions.
-- Confirm before downloading a safety copy and replacing the setup. Cancelled/failed safety download stops restore.
-- Require the same signed-in, verified owner. After a reinstall, sign in and link the empty installation to that same channel before restoring.
-- Downloads permission is used to confirm completion. Files have dated backup/before-restore names.
-- Invalid format/version, account mismatch or failed storage write does not replace existing folders.
-- A detected account/folder change during the safety download aborts restore. General cross-tab concurrency remains deferred.
-
-- Backup feedback refinement: short success notices inside Manage, five-second display and 300ms fade; persistent dismissible errors. Automated suites pass; final message placement awaits user review.
-
-Latest feedback adjustment: backup/restore notices are now centred below the Manage header and above folder navigation, rather than beside the menu. Success displays for four seconds then fades over 300ms. Errors remain dismissible. User confirmed the previous build worked; this placement awaits visual review.
-
-- Portable beta: user confirmed sign-in, fresh setup, folder/subfolder creation and a channel move on the second computer. Restart/persistence and backup/restore checks remain.
-- Popup fix now included in original project: single in-popup account confirmation, fresh/existing folder wording, no native confirm dialog. Original development identity/configuration preserved.
-
-## Current interface decisions - 15 October 2026
-
-- Successful channel moves show `Moved to Parent / Subfolder` in the permanent notification slot between Uncategorised and All Folders, above the parent-folder tabs. Display for two seconds, then fade over 300ms. Show only after persistence succeeds; keep the source parent/subfolder selected. Failed saves retain the existing error behaviour and never show move success.
-- Preserve the channel three-dot menu and its current contents.
-- Tools menu: user approved implementation. Four entries: Refresh subscriptions, Backup folders, Restore backup and About. Each has a line icon and short description. Backup uses a download arrow; restore uses an upload arrow. About uses the shared dark dialog and displays the installed manifest version, a short description and local-storage/backup information.
-- Backup/restore notices share this fixed slot and retain their existing four-second success duration. The slot does not grow when a message appears. Long messages are truncated visually with their full text available on hover and to screen readers. At narrow widths the slot has a permanently reserved row below the controls.
-
-## Premium planning decisions - current, supersedes earlier candidates
-
-Discussion only until agreed. Do not implement entitlements, restrictions, billing or premium UI, or create a premium branch without instructions.
-
-| Item | Current position |
+| Item | Position |
 | --- | --- |
-| Unlimited parent folders and subfolders | Planned premium scope for discussion; not implemented. |
-| Free folder allowance | Undecided. Three parents with three subfolders each was proposed, not agreed. |
-| Multiple YouTube accounts | Separate local setups proposed for premium. Existing single-owner protection stays in place. |
-| Multi-channel moves | Premium proposal: checkboxes; Ctrl/Shift selection is possible, not agreed. |
-| Optional folder icon library | Premium proposal. |
-| Scheduled backups and bulk unsubscribe | Candidates; not agreed. |
-| Cross-device sync | Later work. |
+| Separate local setups for multiple YouTube accounts | Likely next section after folder limits are manually accepted. Current single-owner protection remains. Account switching/ownership and expiry details still need design. |
+| Multi-channel moves | Proposed paid feature with checkboxes; Ctrl/Shift selection remains possible, not agreed. |
+| Folder icons | Proposed small built-in selection free, with extra icon packs and custom uploads paid. No icon change implemented. Upload type/size limits and backup handling need design. Existing colours remain free. |
+| Scheduled backups | Candidate; schedule, destination and retention undecided. |
+| Bulk unsubscribe | Candidate. Permissions, confirmation and safeguards require discussion. |
+| Cross-device sync | Later work; no hosted storage/sync implemented. A compact account/folder/channel-ID Chrome-sync design was only a previous idea. |
 | Selective restore and backup history | Deferred. |
-| Sidebar-state persistence and light theme | Should be free; implementation remains deferred. |
-| Billing | Yearly preferred. Price, payment service, upgrade placement and expiry rules undecided. |
-| Oversized-backup restore rules | Undecided; no new restore limits implemented. |
-| Cross-tab save protection | Remains deferred. |
+| Sidebar-state persistence and light theme | Should be free; implementation deferred. |
+| Drag-and-drop | Future idea for channel moves/folder ordering; existing click-based controls remain. Paid/free placement undecided. |
 
-Working baseline is the original development identity and OAuth configuration, not the separate portable beta configuration. Continue on `ui-redesign`; do not touch `main`, commit or push without explicit instructions.
+## Commercial and branding decisions
 
-## Refresh correction - 15 October 2026
+- Currency: pounds sterling.
+- Price: £9.99/year is provisional. £4.99/year was an earlier idea; price is not final and is not displayed or charged by this implementation.
+- Yearly billing preferred. Payment service, entitlement validation, upgrade placement beyond creation prompts and renewal flow remain undecided.
+- Lifetime purchase is an idea only; no price or promise agreed.
+- Seven-day Pro trial is deferred for future consideration.
+- Product name and final toolbar icon/branding remain undecided. Names mentioned were brainstorming suggestions without availability checks.
+- No need to settle every future paid feature before testing the current folder section.
 
-- User confirmed the move notice placement and tools-menu appearance. Backup, restore and About work in live Chrome.
-- Refresh was closing Manage because the worker's temporary same-session `verifying` status was treated as lost access. Keep the existing Manage/sidebar mounted during that recheck; retain selection and show Updating. Folder mutations still require accountIsReady and are blocked until verification completes.
-- Sign-out, changed-session verification, account mismatch and verification errors retain the closing/access-protection behaviour. A subscription-fetch error keeps saved subscriptions and displays an error in Manage.
-- Refresh closes the tools dropdown, not Manage. Rejected worker responses also produce a visible error rather than silently failing.
-- Startup regression now exercises Refresh through the menu, verifying/loading, blocked pending saves, newly retrieved Uncategorised channels, retained subfolder selection, fetch errors, and verification-failure closure.
+## Backup/restore rules retained
+
+- Manual versioned JSON export and full replacement restore, not merging/selective recovery.
+- Export folders, subfolders, colours, channel assignments and owner identity; exclude credentials, Google permissions, subscription cache and development plan state.
+- Require the same signed-in verified owner. After reinstall, link the empty installation to the original channel before restoring.
+- Explicit confirmation and completed dated safety-copy download precede replacement. Cancelled/failed downloads stop restore.
+- Invalid format/version, account mismatch, failed writes, or a changed account/folder setup during the safety download do not replace existing data.
+- Restoring changes the local organisation, not actual YouTube subscriptions.
+
+## Current validation and next action
+
+Automated coverage includes the four required suites, backup, backup-notice, folder-plans and plan-testing. New cases cover exact boundaries, Pro creation, expiry and reduction, stale open-form checks, unlimited channel moves, oversized restores with safety copies, release-disabled test states, and test controls without folder changes.
+
+Next: user tests this complete replacement in Chrome on `premium-folders`, following `development/README.md`. Do not commit/push or start multi-account implementation until that section is accepted. Browser-rendered appearance was not verified in this environment because Chromium is not installed.
+
+## Folder stage accepted and test-folder cleanup
+
+- User confirmed Free, Pro and expired-state manual checks work in Chrome.
+- Removed the old duplicate application tree (`tests/src`), nested old tests (`tests/tests`), and copied manifest, popup, background and project notes from `tests`.
+- Keep the eight active suite entry points and `popup-auth.cjs`, which is called by retrieval. New `tests/README.md` documents the actual tests.
+- No application code or plan behaviour changed during cleanup. Rerun all eight suites before delivery.
+- When applying the cleanup ZIP, remove the existing local `tests` folder before copying the replacement. Extracting over it alone will not delete stale files. Preserve the real project `src` and Git directory.
+- Next: accept cleanup and then commit/push on premium-folders when explicitly instructed. Multi-account implementation has not started.

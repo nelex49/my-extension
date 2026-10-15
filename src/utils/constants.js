@@ -3,6 +3,7 @@ const CONFIG = {
   OAUTH_CLIENT_ID:
     "763119874945-ad7le2f2eldhslfppaflmuspedj1o4hi.apps.googleusercontent.com",
   API_BASE_URL: "https://www.googleapis.com/youtube/v3",
+  DEVELOPMENT_PLAN_TESTING: true, // Development build only; disable before release.
   DEBUG: false, // Set to false for production
   VERSION: "1.0.0",
   STORAGE_KEYS: {

@@ -40,7 +40,7 @@ context.chrome.runtime.onMessage={addListener(){}};
 vm.createContext(context);
 for(const file of manifest.content_scripts[0].js)vm.runInContext(fs.readFileSync(root+file,'utf8'),context,{filename:file});
 (async()=>{
-await context.initialize();assert.equal(context.appInitialized,true);assert.equal(context.userSubscriptions.length,3);
+await context.initialize();assert.equal(context.FolderPlan.state,'free');assert.equal(context.appInitialized,true);assert.equal(context.userSubscriptions.length,3);
 let entry=document.getElementById('yt-manage-guide-entry');assert.equal(entry.dataset.state,'ready');entry.querySelector('button').events.click();
 let sidebar=document.getElementById('yt-folder-dropdown');assert.equal(sidebar.hidden,false);assert.equal(sidebar.querySelector('.ytsm-count'),null);assert.ok(sidebar.querySelector('.ytsm-folder-more'));
 sidebar.querySelector('.ytsm-folder').events.click();sidebar=document.getElementById('yt-folder-dropdown');assert.ok(sidebar.querySelector('.ytsm-subfolder'));sidebar.querySelector('.ytsm-subfolder').events.click();assert.equal(sidebar.querySelectorAll('.ytsm-channel').length,2);
@@ -83,6 +83,10 @@ assert.ok(manage.isConnected);assert.equal(manage.querySelector('.ysm-selected')
 assert.ok(manage.querySelector('.ysm-load-message').textContent.includes('YouTube unavailable'));assert.equal(context.userSubscriptions.length,4);
 emitChanges({userSubscriptions:[a,b,c],subscriptionLoadStatus:{state:'ready'}});
 manage.events.click({target:manage.querySelector('[data-action="uncategorised"]')});
+// The separate development page writes only this key; open tabs apply it immediately.
+emitChanges({developmentFolderPlan:'pro'});assert.equal(context.FolderPlan.state,'pro');
+emitChanges({developmentFolderPlan:'expired'});assert.equal(context.FolderPlan.state,'expired');assert.ok(manage.isConnected);
+emitChanges({developmentFolderPlan:'free'});assert.equal(context.FolderPlan.state,'free');assert.ok(manage.isConnected);
 // Backup menu routing and themed confirmation use real manifest-loaded modules.
 context.TextEncoder=TextEncoder;context.clearTimeout=()=>{};
 context.setTimeout=()=>1;

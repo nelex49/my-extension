@@ -6,6 +6,7 @@ function folderColourButtons() {
 function showFolderForm(options) {
   const { kind, mode, parentName = null, originalName = null, anchor = null, onSaved = null, onDeleted = null, placement = 'beside' } = options;
   const editing = mode === 'edit';
+  if (!editing && !requireFolderCreation(kind, parentName)) return;
   const record = kind === 'parent' ? (editing ? window.folderData?.[originalName] : null) : (editing ? window.folderData?.[parentName]?.subfolders?.[originalName] : null);
   if (editing && !record) return;
   let selectedColor = editing ? record.color : nextFolderColour();
@@ -60,6 +61,7 @@ function showFolderForm(options) {
   }
   save.addEventListener('click', () => {
     const name = input.value.trim(), problem = validate(name); if (problem) { showError(problem); return; }
+    if (!editing && !requireFolderCreation(kind, parentName)) return;
     save.disabled = true; showError('');
     const textColor = editing && !colourChanged ? (record.textColor || selectedTextColor) : selectedTextColor;
     const done = success => { if (!success) { save.disabled = false; showError('Could not save changes. Existing data was kept.'); return; } close(); onSaved?.(name); };

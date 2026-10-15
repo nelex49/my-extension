@@ -42,6 +42,7 @@ function persistFolderMutation(nextData, previousData, done, rename = null) {
 function createParentFolderRecord(name, color, textColor, done) {
   const current = window.folderData || {};
   if (Object.hasOwn(current, name)) { showUserNotification("A folder with this name already exists", "error"); done?.(false); return; }
+  if (!requireFolderCreation('parent')) { done?.(false); return; }
   const previous = cloneFolderData(current), next = cloneFolderData(current);
   next[name] = { subscriptions: [], color, textColor, subfolders: {}, expanded: false };
   persistFolderMutation(next, previous, done);
@@ -65,6 +66,7 @@ function createSubfolderRecord(parentName, name, color, textColor, done) {
   const current = window.folderData || {}, parent = current[parentName];
   if (!parent) { showUserNotification("That parent folder no longer exists", "error"); done?.(false); return; }
   if (Object.hasOwn(parent.subfolders || {}, name)) { showUserNotification("A subfolder with this name already exists", "error"); done?.(false); return; }
+  if (!requireFolderCreation('subfolder', parentName)) { done?.(false); return; }
   const previous = cloneFolderData(current), next = cloneFolderData(current);
   next[parentName].subfolders ||= {};
   next[parentName].subfolders[name] = { subscriptions: [], color, textColor };

@@ -22,7 +22,8 @@ function syncSubscriptions(subscriptions) {
 function initialize() {
   if (appInitialization) return appInitialization;
   appInitialization = new Promise((resolve) => {
-    chrome.storage.local.get(["folderData", "userSubscriptions", "accessToken", "accountStatus", "folderOwner"], (data) => {
+    chrome.storage.local.get(["folderData", "userSubscriptions", "accessToken", "accountStatus", "folderOwner", FolderPlan.developmentKey], (data) => {
+      FolderPlan.applyStorage(data);
       activeAccountSession = data.accessToken || null;
       window.accountStatus = data.accountStatus || {state:'verifying'};
       window.folderOwner = data.folderOwner || null;
@@ -40,6 +41,7 @@ function initialize() {
 
 chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace !== "local") return;
+  if (changes[FolderPlan.developmentKey]) FolderPlan.applyStorage({ [FolderPlan.developmentKey]: changes[FolderPlan.developmentKey].newValue });
   if (changes.folderData) {
     folderData = changes.folderData.newValue || {};
     window.folderData = folderData;

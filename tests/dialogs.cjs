@@ -27,15 +27,16 @@ const sub=(id,title)=>({snippet:{title,resourceId:{channelId:id}}});
 const a=sub('UC_A','Zulu <safe>'),b=sub('UC_B','Alpha'),c=sub('UC_C','Beta');b.snippet.description='A <script> & description';b.snippet.thumbnails={default:{url:'https://yt3.ggpht.com/mock.jpg'}};
 const context={console,document,URL,innerWidth:1200,innerHeight:900,ResizeObserver:class{constructor(callback){this.callback=callback;context.tabsObserver=this}observe(){}disconnect(){}},isLoggedIn:true,confirm:()=>true,sidebarFolderColour:colour=>colour||'#243f59',lightenColor:(colour,amount)=>{const rgb=[1,3,5].map(i=>Math.min(255,parseInt(colour.slice(i,i+2),16)+Math.round(amount*2.55)));return '#'+rgb.map(v=>v.toString(16).padStart(2,'0')).join('')},chrome:{storage:{onChanged:{addListener:f=>listeners.push(f),removeListener:f=>listeners=listeners.filter(x=>x!==f)}},runtime:{sendMessage(){return Promise.resolve({success:true})}}},showUnifiedFolderManager(name,mode,onCreated){adds++;context.pendingCreated=onCreated},showCreateSubfolderModal(){adds++},safeSaveFolderData(){writes++},refreshFolderDropdown(){},setTimeout:f=>f(),clearTimeout(){},logStatus(){},showUserNotification(){},folderLimit:3,isPremium:false,folderDropdown:null};
 
-context.window=context;
+context.window=context;document.querySelector=selector=>body.querySelector(selector);
 context.setTimeout=fn=>fn();
 context.folderData={Sports:{color:'#44345d',subfolders:{Ball:{subscriptions:[a]}}}};
 context.userSubscriptions=[a,b,c];
 let failure=false,pendingSave=null,holdSave=false;
 context.chrome.storage.local={set(data,callback){writes++;if(holdSave){pendingSave=callback;return}context.chrome.runtime.lastError=failure?{message:'test error'}:null;callback?.();context.chrome.runtime.lastError=null}};
 vm.createContext(context);
-for(const file of ['src/utils/FolderColours.js','src/services/FolderService.js','src/components/FolderDialogs/DialogLifecycle.js','src/components/FolderDialogs/DialogControls.js','src/components/FolderDialogs/ParentFolderDialog.js','src/components/FolderDialogs/SubfolderDialog.js'])vm.runInContext(fs.readFileSync(root+file,'utf8'),context,{filename:file});
-function click(modal,button){button?.events.click?.({target:button});if(modal.isConnected)modal.events.click?.({target:button})}
+for(const file of ['src/utils/FolderColours.js','src/plans/FolderPlan.js','src/plans/FolderCreationGate.js','src/components/PlanDialogs/FolderLimitDialog.js','src/services/FolderService.js','src/components/FolderDialogs/DialogLifecycle.js','src/components/FolderDialogs/DialogControls.js','src/components/FolderDialogs/ParentFolderDialog.js','src/components/FolderDialogs/SubfolderDialog.js'])vm.runInContext(fs.readFileSync(root+file,'utf8'),context,{filename:file});
+context.CONFIG={DEVELOPMENT_PLAN_TESTING:true};context.FolderPlan.applyStorage({developmentFolderPlan:'pro'});
+function click(modal,button){button?.events.click?.({target:button,currentTarget:button});if(modal.isConnected)modal.events.click?.({target:button})}
 function listenerCount(){return Object.values(document.events).reduce((n,set)=>n+set.size,0)}
 let created=[];
 context.showUnifiedFolderManager(null,'create',name=>created.push(name));let modal=body.children.at(-1);
@@ -49,7 +50,7 @@ failure=true;context.showUnifiedFolderManager();modal=body.children.at(-1);modal
 context.showUnifiedFolderManager();modal=body.children.at(-1);modal.querySelector('#ytsm-folder-name').value='Only once';holdSave=true;const before=writes;click(modal,modal.querySelector('[data-action="save"]'));click(modal,modal.querySelector('[data-action="save"]'));assert.equal(writes,before+1);pendingSave();holdSave=false;assert.equal(listenerCount(),0);
 // Quoted names remain text rather than becoming markup.
 context.folderData['Name "<script>"']={color:'#44345d',subfolders:{}};context.showUnifiedFolderManager('Name "<script>"','edit');modal=body.children.at(-1);assert.equal(modal.querySelector('#ytsm-folder-name').value,'Name "<script>"');assert.equal(modal.querySelectorAll('script').length,0);click(modal,modal.querySelector('[data-dialog-close]'));
-// Subfolder creation is unlimited during development and keeps channel records intact.
+// Pro subfolder creation is unlimited and keeps channel records intact.
 for(let i=0;i<5;i++){context.showCreateSubfolderModal('Sports');modal=body.children.at(-1);modal.querySelector('#ytsm-folder-name').value='Team '+i;click(modal,modal.querySelector('[data-action="save"]'));assert.equal(listenerCount(),0)}
 assert.equal(Object.keys(context.folderData.Sports.subfolders).length,6);assert.deepEqual(context.folderData.Sports.subfolders.Ball.subscriptions[0],a);
 const saved=JSON.stringify(context.folderData.Sports.subfolders.Ball);context.showCreateSubfolderModal('Sports');modal=body.children.at(-1);modal.querySelector('#ytsm-folder-name').value='Ball';click(modal,modal.querySelector('[data-action="save"]'));assert.ok(modal.isConnected);assert.equal(JSON.stringify(context.folderData.Sports.subfolders.Ball),saved);click(modal,modal.querySelector('[data-dialog-close]'));
@@ -120,4 +121,26 @@ assert.equal(context.folderData.Target.subfolders.New.subscriptions.length,1);
 context.removeFromSubfolder('UC_A','Target','New',ok=>assert.equal(ok,true));
 assert.equal(context.folderData.Target.subfolders.New.subscriptions.length,0);
 assert.equal(JSON.stringify(context.userSubscriptions),youtubeBefore);
-console.log('PASS: atomic assignment saves, failed move/removal rollback, thrown writes, overlapping change guard, preserved YouTube cache; dialog save once, cancel, duplicate names, storage failure rollback, escaped names, unlimited parents and subfolders, preserved assignments, outside click, Escape and anchored-editor listener cleanup across repeated openings.');
+// Free gates both creation forms; editing/deletion stay available above the limits.
+context.FolderPlan.applyStorage({developmentFolderPlan:'free'});
+context.folderData=Object.fromEntries(['One','Two','Three','Four'].map(name=>[name,{subscriptions:[],color:'#44345d',subfolders:{A:{subscriptions:[]},B:{subscriptions:[]},C:{subscriptions:[]}}}]));
+const unchanged=JSON.stringify(context.folderData),beforeLimitWrites=writes;
+context.showUnifiedFolderManager();modal=body.children.at(-1);assert.ok(modal.classList.contains('ytsm-plan-dialog'));
+assert.ok(modal.textContent.includes('4 parent folders'));assert.equal(modal.querySelector('#ytsm-folder-name'),null);
+const proButton=modal.querySelector('[data-action="pro-details"]');
+let trapped=false;modal.firstElementChild.events.keydown({key:'Tab',shiftKey:true,preventDefault(){trapped=true}});assert.ok(trapped);assert.equal(document.activeElement,proButton);
+click(modal,proButton);assert.ok(!modal.querySelector('.ytsm-pro-details').hidden);
+assert.ok(modal.textContent.includes('not available yet'));assert.equal(JSON.stringify(context.folderData),unchanged);assert.equal(writes,beforeLimitWrites);
+click(modal,modal.querySelector('[data-dialog-close]'));assert.equal(listenerCount(),0);
+context.showCreateSubfolderModal('One');modal=body.children.at(-1);assert.ok(modal.textContent.includes('3 subfolders per parent'));
+for(const fn of [...document.events.keydown])fn({key:'Escape',preventDefault(){},stopImmediatePropagation(){}});assert.equal(listenerCount(),0);
+// A create form opened under Pro is checked again if the plan changes before Save.
+context.FolderPlan.applyStorage({developmentFolderPlan:'pro'});context.showUnifiedFolderManager();const staleForm=body.children.at(-1);
+staleForm.querySelector('#ytsm-folder-name').value='Cannot sneak in';context.FolderPlan.applyStorage({developmentFolderPlan:'expired'});
+click(staleForm,staleForm.querySelector('[data-action="save"]'));modal=body.children.at(-1);assert.ok(modal.classList.contains('ytsm-plan-dialog'));assert.ok(modal.textContent.includes('subscription has expired'));
+assert.equal(context.folderData['Cannot sneak in'],undefined);click(modal,modal.querySelector('[data-dialog-close]'));click(staleForm,staleForm.querySelector('[data-dialog-close]'));assert.equal(listenerCount(),0);
+context.folderData.Extra={color:'#44345d',subfolders:{},subscriptions:[]};
+context.showUnifiedFolderManager('Extra','edit');modal=body.children.at(-1);assert.ok(modal.querySelector('#ytsm-folder-name'));
+modal.querySelector('#ytsm-folder-name').value='Renamed extra';click(modal,modal.querySelector('[data-action="save"]'));assert.ok(context.folderData['Renamed extra']);assert.equal(listenerCount(),0);
+context.showUnifiedFolderManager('Renamed extra','edit');modal=body.children.at(-1);click(modal,modal.querySelector('[data-action="delete"]'));click(modal,modal.querySelector('[data-action="confirm-delete"]'));assert.equal(context.folderData['Renamed extra'],undefined);assert.equal(listenerCount(),0);
+console.log('PASS: Free/expired limit dialogs, Pro details, unchanged data on decline, shared lifecycle cleanup, live plan recheck before Save, editing/deletion above limits; atomic assignment saves, failed move/removal rollback, thrown writes, overlapping change guard, preserved YouTube cache; dialog save once, cancel, duplicate names, storage failure rollback, escaped names, unlimited Pro parents and subfolders, preserved assignments, outside click, Escape and anchored-editor listener cleanup across repeated openings.');
