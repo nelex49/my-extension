@@ -1,0 +1,14 @@
+const fs=require('fs'),vm=require('vm'),assert=require('assert');
+let next=0;const timers=new Map(),classes=new Set();
+const text={},button={addEventListener(_,fn){this.click=fn}};
+const notice={hidden:true,dataset:{},classList:{add:c=>classes.add(c),remove:c=>classes.delete(c)},querySelector:s=>s==='button'?button:text};
+const c={setTimeout(fn,ms){timers.set(++next,{fn,ms});return next},clearTimeout(id){timers.delete(id)}};
+c.window=c;vm.createContext(c);vm.runInContext(fs.readFileSync(require('path').resolve(__dirname,'../src/components/SubfolderView/BackupNotice.js'),'utf8'),c);
+const controller=c.createManageBackupNotice({querySelector:()=>notice});
+controller.show('Backup downloaded','success');assert.equal(notice.hidden,false);assert.equal(text.textContent,'Backup downloaded');assert.equal([...timers.values()][0].ms,4000);
+const first=[...timers.values()][0];timers.clear();first.fn();assert.ok(classes.has('is-fading'));assert.equal([...timers.values()][0].ms,300);
+controller.show('Try again','error');assert.equal(timers.size,0);assert.ok(!classes.has('is-fading'));assert.equal(notice.hidden,false);assert.equal(notice.dataset.type,'error');
+button.click();assert.equal(notice.hidden,true);
+controller.show('Restored','success');controller.show('New message','success');assert.equal(timers.size,1);controller.destroy();assert.equal(timers.size,0);assert.equal(notice.hidden,true);
+controller.show('Done','success');const timer=[...timers.values()][0];timers.clear();timer.fn();const fade=[...timers.values()][0];timers.clear();fade.fn();assert.equal(notice.hidden,true);
+console.log('PASS: four-second display, 300ms fade, persistent errors, dismissal, timer replacement and close cleanup.');

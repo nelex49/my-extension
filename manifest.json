@@ -7,7 +7,8 @@
     "identity",
     "tabs",
     "scripting",
-    "storage"
+    "storage",
+    "downloads"
   ],
   "background": {
     "service_worker": "background.js"
@@ -27,6 +28,7 @@
         "src/styles/folder-dialogs.css"
       ],
       "js": [
+        "src/shared/BackupFormat.js",
         "src/utils/constants.js",
         "src/utils/helpers.js",
         "src/utils/FolderColours.js",
@@ -35,6 +37,7 @@
         "src/services/AuthService.js",
         "src/services/FolderService.js",
         "src/components/FolderDialogs/DialogLifecycle.js",
+        "src/services/BackupService.js",
         "src/components/FolderDialogs/DialogControls.js",
         "src/components/FolderDialogs/ParentFolderDialog.js",
         "src/components/FolderDialogs/SubfolderDialog.js",
@@ -52,6 +55,7 @@
         "src/components/SubfolderView/SubfolderNavigation.js",
         "src/components/SubfolderView/ChannelList.js",
         "src/components/SubfolderView/ManageActions.js",
+        "src/components/SubfolderView/BackupNotice.js",
         "src/components/SubfolderView/SubfolderViewPanel.js",
         "src/core/App.js",
         "src/main.js"

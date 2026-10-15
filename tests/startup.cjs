@@ -46,6 +46,31 @@ let sidebar=document.getElementById('yt-folder-dropdown');assert.equal(sidebar.h
 sidebar.querySelector('.ytsm-folder').events.click();sidebar=document.getElementById('yt-folder-dropdown');assert.ok(sidebar.querySelector('.ytsm-subfolder'));sidebar.querySelector('.ytsm-subfolder').events.click();assert.equal(sidebar.querySelectorAll('.ytsm-channel').length,2);
 const channels=sidebar.querySelector('.ytsm-channels');channels.scrollTop=45;context.refreshFolderDropdown();assert.equal(sidebar.querySelector('.ytsm-channels').scrollTop,45);
 sidebar.querySelector('.ytsm-manage').events.click();let manage=document.getElementById('subfolder-view-modal');assert.ok(manage);assert.equal(manage.querySelector('.ysm-total').textContent,'3 subscriptions');
+// Backup menu routing and themed confirmation use real manifest-loaded modules.
+context.TextEncoder=TextEncoder;context.clearTimeout=()=>{};
+context.setTimeout=()=>1;
+const notifications=[];context.showUserNotification=(message,type)=>notifications.push({message,type});
+const backupText=JSON.stringify(context.BackupFormat.create(store.folderData,store.folderOwner));
+let messages=[],releaseBackup;
+context.chrome.runtime.sendMessage=request=>{messages.push(request);return new Promise(resolve=>releaseBackup=resolve)};
+manage.events.click({target:manage.querySelector('[data-action="backup"]')});
+assert.equal(messages[0].action,'exportFolderBackup');releaseBackup({success:true});await new Promise(resolve=>setImmediate(resolve));
+assert.equal(manage.querySelector('.ysm-backup-notice-text').textContent,'Backup downloaded');
+const restorePayload=context.BackupFormat.parse(backupText);
+context.showFolderRestoreDialog(backupText,restorePayload);
+let restoreDialog=body.children.at(-1);
+assert.ok(restoreDialog.classList.contains('ytsm-restore-dialog'));
+assert.ok(restoreDialog.textContent.includes('replace all current folders'));
+restoreDialog.querySelector('[data-dialog-close]').events; // shared close is delegated
+restoreDialog.events.click({target:restoreDialog.querySelector('[data-dialog-close]')});
+assert.ok(!restoreDialog.isConnected);assert.equal(messages.length,1);
+context.showFolderRestoreDialog(backupText,restorePayload);restoreDialog=body.children.at(-1);
+const restoreButton=restoreDialog.querySelector('[data-action="restore-confirm"]');
+const restoring=restoreButton.events.click();assert.equal(messages.at(-1).action,'restoreFolderBackup');assert.equal(restoreButton.disabled,true);
+restoreDialog.events.click({target:restoreDialog.querySelector('[data-dialog-close]')});assert.ok(restoreDialog.isConnected);
+releaseBackup({success:false,error:'Download cancelled'});await restoring;assert.ok(restoreDialog.isConnected);assert.equal(restoreButton.disabled,false);assert.equal(restoreDialog.querySelector('.ytsm-backup-status').textContent,'Download cancelled');
+const retrying=restoreButton.events.click();releaseBackup({success:true});await retrying;assert.ok(!restoreDialog.isConnected);assert.equal(manage.querySelector('.ysm-backup-notice-text').textContent,'Folders restored. Safety copy downloaded.');
+context.chrome.runtime.sendMessage=()=>Promise.resolve({success:true});
 // Sidebar menus open shared dialogs directly and keep Manage current.
 assert.equal(manage.querySelector('.ysm-folder-search-field').hidden,true);
 assert.ok(manage.querySelector('.ysm-uncategorised-help'));

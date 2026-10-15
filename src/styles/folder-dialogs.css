@@ -47,3 +47,7 @@
 .ytsm-folder-dialog .ytsm-custom-panel .ytsm-colour-hex { flex: 1; min-width: 0; height: 34px; padding: 6px 8px; font-family: monospace; }
 .ytsm-folder-dialog .ytsm-colour-hex[aria-invalid="true"] { border-color: var(--ytsm-form-danger-border); }
 .ytsm-folder-dialog .ytsm-colour-done { flex: 0 0 auto; }
+
+.ytsm-restore-dialog .ytsm-dialog-panel { width: min(420px,calc(100vw - 24px)); }
+.ytsm-restore-dialog .ytsm-backup-date { margin-bottom: 12px; color: var(--ytsm-form-muted); }
+.ytsm-restore-dialog .ytsm-backup-note,.ytsm-restore-dialog .ytsm-backup-status { margin-top: 12px; }

@@ -1,4 +1,4 @@
-importScripts('src/background/AccountProtection.js');
+importScripts('src/background/AccountProtection.js', 'src/shared/BackupFormat.js', 'src/background/BackupService.js');
 /** @format */
 
 // Fetch private subscription data in the extension worker, not YouTube's page context.
@@ -95,6 +95,9 @@ async function refreshSubscriptions() {
 }
 
 chrome.runtime.onMessage.addListener((request, sender, sendResponse) => {
+  if (request.action === 'exportFolderBackup' || request.action === 'restoreFolderBackup') {
+    runFolderBackup(request).then(sendResponse); return true;
+  }
   if (request.action === 'linkFolderAccount') {
     linkFolderAccount(request).then(sendResponse); return true;
   }

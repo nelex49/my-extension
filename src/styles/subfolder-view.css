@@ -371,3 +371,11 @@
 
 /* The controls already reserve a 6px inset on the right. */
 #subfolder-view-modal .ysm-navigation { padding-right: 10px; }
+
+/* Backup feedback is centred below the header, above folder navigation. */
+#subfolder-view-modal .ysm-backup-notice { align-self: center; flex-shrink: 0; min-width: 0; max-width: 100%; display: flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid #466780; border-radius: 8px; background: #243a4b; color: #e4eff8; font-size: 13px; opacity: 1; transition: opacity .3s ease; }
+#subfolder-view-modal .ysm-backup-notice[data-type="success"] { background: #234332; border-color: #4b8b66; color: #e0f4e7; }
+#subfolder-view-modal .ysm-backup-notice[data-type="error"] { background: #45282d; border-color: #a45d66; color: #ffe2e6; }
+#subfolder-view-modal .ysm-backup-notice.is-fading { opacity: 0; }
+#subfolder-view-modal .ysm-backup-notice button { flex-shrink: 0; padding: 2px 5px; min-height: 24px; border-color: transparent; background: transparent; }
+#subfolder-view-modal .ysm-backup-notice[hidden] { display: none; }

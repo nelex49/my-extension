@@ -15,6 +15,7 @@ function showSubfolderView() {
   document.body.append(modal);
   const dialog = modal.querySelector(".ysm-manage");
   const state = createManageState();
+  const backupNotice = createManageBackupNotice(modal);
   const previousChildRenameHandler = window.prepareManageSubfolderRename;
   window.prepareManageSubfolderRename = (parentName, oldName, newName) => {
     if (state.parent === parentName && state.child === oldName) state.child = newName;
@@ -47,6 +48,7 @@ function showSubfolderView() {
     document.removeEventListener("keydown", keydown);
     document.removeEventListener("pointerdown", dismissMenus);
     parents.destroy();
+    backupNotice.destroy();
     window.prepareManageParentRename = previousRenameHandler;
     window.prepareManageSubfolderRename = previousChildRenameHandler;
     modal.remove();
@@ -139,7 +141,7 @@ function showSubfolderView() {
   chrome.storage.onChanged.addListener(storageChanged);
   document.addEventListener("keydown", keydown);
   document.addEventListener("pointerdown", dismissMenus);
-  activeManageView = { focus: () => dialog.focus(), refresh: render, close };
+  activeManageView = { backupNotice, focus: () => dialog.focus(), refresh: render, close };
   render(); dialog.focus();
 }
 window.showSubfolderView = showSubfolderView;

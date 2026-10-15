@@ -1,20 +1,47 @@
 # YouTube Subscription Manager handover
 
-Continue on ui-redesign. Use the latest supplied ZIP as the authoritative baseline; do not use the older extension-source.zip. No commit/push/merge by the assistant without explicit instruction. Preserve accepted design, keep components modular, reuse dialogs/services, run dialogs/manage/retrieval/startup suites after changes, deliver one complete replacement ZIP.
+Work on ui-redesign. This complete replacement is based only on extension-latest(3).zip. No commit, push or merge has been performed. Preserve accepted UI; keep changes modular and run dialogs/manage/retrieval/startup after application changes.
 
-Completed: modular Manage view, sidebar shortcut menus, unique parent totals, searches and stable two-level Move picker; single sidebar browsing scrollbar with balanced spacing and fixed action footer; smaller subfolder outline icons and colour-related outlines on both levels; custom colour panel with hex input and Done; readable custom-colour text; protected single-write channel moves/removals, reported error/exception handling and per-tab save guard.
+## Current addition: manual backup and restore
 
-Account setup: one verified YouTube channel owns folderData. Background AccountProtection.js identifies it with channels.list mine=true. Legacy folders require explicit linking in the popup. Different channel blocked; sign-out preserves folders/owner and clears session/subscription cache. Multiple account setups and sync are deferred.
+Manage -> three-dot menu -> Backup folders / Restore backup. The previous disabled placeholders are now active.
 
-Manual checks passed: sidebar/Manage refinements, moves survive refresh, navigation, full Chrome restart, Ray Lenson blocked from G knowone's folders, original account return with assignments intact, sign-in/sign-out fades.
+- Manual backup downloads a version-1 JSON file containing owner, folder structure, colours and channel assignments. No credentials or live subscription cache.
+- Restore validates the file and account, then opens a shared dark confirmation dialog. It replaces the complete folder setup; it does not change YouTube subscriptions.
+- After confirmation, a dated before-restore safety copy downloads. The worker waits for Chrome to report completion before saving the imported folders.
+- Download failure/cancellation/timeout stops restore. Changed account or folder data detected during download also stops it. Storage failures preserve the previous setup.
+- Chrome downloads permission was added for completion monitoring. Reload the extension and YouTube after replacing source.
+- The current verified owner must match the backup. Following reinstall, sign in and link the empty setup to that same YouTube channel first.
+- General cross-tab save protection remains deferred. This addition is not a general concurrency solution.
 
-Last adjustment: ordinary sign-out no longer revokes Google consent or clears Chrome identity cache; login no longer clears that cache. Popup shows simple Signed in/Signed out messages; successful login closes after 3s, sign-out after 7s, both with 300ms fade. Clicking Login cancels the sign-out timer. Errors/linking/blocked states stay open. All four automated suites pass. This final simpler repeat-login adjustment still requires live confirmation. Existing getAuthToken flow does not guarantee an account chooser; Google may request consent/sign-in when needed.
+## Modules
 
-Remaining work, in order:
-1. User confirms final repeat sign-out/sign-in and saves account milestone to Git.
-2. Cross-tab save protection: per-tab guard does not prevent simultaneous edits in different YouTube tabs overwriting each other. Review/design before implementing.
-3. Backup/restore: agree format and replacement semantics; validate input and preserve previous data on failure.
-4. Friends beta for 1-2 weeks; fix reported problems.
-5. Premium planning/build/testing. Multiple account setups and possible sync are candidates, not agreed implementation. Unsubscribe is deferred.
+src/shared/BackupFormat.js: versioned schema, validation and credential-free serialization.
+src/background/BackupService.js: account checks, downloads, safety copy and restore write.
+src/services/BackupService.js: file selection, menu entry points and themed confirmation.
+Shared DialogLifecycle accepts an optional close guard; restore cannot dismiss while an operation is pending. Other dialogs retain their behaviour.
 
-Optional later: remember sidebar open state, expanded folders and scroll position. No hosted database planned now; local storage remains chrome.storage.local. Chrome sync requires compact account/folder/channel-ID records rather than current full subscription objects; evaluate separately.
+## Validation
+
+All four required suites pass. tests/backup.cjs additionally checks round trip, format/version/account/prototype rejection, completed safety download before replacement, cancellation, failed saves, changed account/folders and repeated operation protection. Startup tests exercise backup menu routing and confirmation cancel, pending state, error/retry and success.
+Tests simulate DOM and Chrome APIs. The user confirmed live backup, deletion and restore recovered the deleted folder. The latest header message placement still needs a live visual check.
+
+## Manual checks next
+
+1. Reload extension, then reload YouTube. Sign in to the verified owner.
+2. Manage -> three-dot menu -> Backup folders. Confirm the JSON file downloads.
+3. Add a temporary folder. Restore the earlier backup; cancel confirmation once to check nothing changes.
+4. Restore again and confirm. Check the safety file downloads and the temporary folder disappears. Original assignments and colours should return.
+5. Restore the safety copy to recover the temporary folder.
+6. Check malformed JSON and another account's backup are rejected. If Chrome prompts for a save location, cancel that download and check no restore occurs.
+7. Refresh and restart Chrome to confirm restored assignments persist.
+
+Next: complete manual checks, then small friends beta for 1-2 weeks, fix feedback, plan premium scope. See PROJECT-BACKLOG.md for deferred features and premium candidates.
+
+Existing account protection, popup timings and accepted Manage/sidebar appearance remain in place. The user already confirmed repeat sign-in and popup behaviour at the prior checkpoint.
+
+## Backup feedback refinement
+
+Short backup/restore messages now appear inside the Manage header to the left of the menu, below the header on narrow windows. Success remains for five seconds followed by a 300ms fade; errors remain until dismissed. BackupNotice.js owns display and timer cleanup. All four suites plus backup and backup-notice tests pass. No commit or push.
+
+Latest feedback adjustment: backup/restore notices are now centred below the Manage header and above folder navigation, rather than beside the menu. Success displays for four seconds then fades over 300ms. Errors remain dismissible. User confirmed the previous build worked; this placement awaits visual review.

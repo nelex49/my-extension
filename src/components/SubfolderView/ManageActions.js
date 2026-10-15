@@ -25,6 +25,12 @@ function createManageActions({ modal, state, render, close, dismissMenus, select
     }
     if (button.hasAttribute("data-parent")) { selectParent(button.dataset.parent); return; }
     if (button.hasAttribute("data-child")) { state.child = button.dataset.child; state.moveChannel = null; render(); return; }
+    if (action === "backup" || action === "restore") {
+      modal.querySelector(".ysm-main-menu").hidden = true;
+      modal.querySelector('[data-action="menu"]').setAttribute("aria-expanded", "false");
+      if (action === "backup") window.exportFolderBackup(); else window.chooseFolderBackup();
+      return;
+    }
     if (action === "refresh") {
       chrome.runtime.sendMessage({ action: 'refreshSubscriptions' }).catch(() => {
         window.subscriptionLoadStatus = { state: 'error', message: 'Reload the extension and YouTube to refresh subscriptions.' };
