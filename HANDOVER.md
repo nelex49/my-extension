@@ -45,3 +45,9 @@ Existing account protection, popup timings and accepted Manage/sidebar appearanc
 Short backup/restore messages now appear inside the Manage header to the left of the menu, below the header on narrow windows. Success remains for five seconds followed by a 300ms fade; errors remain until dismissed. BackupNotice.js owns display and timer cleanup. All four suites plus backup and backup-notice tests pass. No commit or push.
 
 Latest feedback adjustment: backup/restore notices are now centred below the Manage header and above folder navigation, rather than beside the menu. Success displays for four seconds then fades over 300ms. Errors remain dismissible. User confirmed the previous build worked; this placement awaits visual review.
+
+## Original project popup fix
+
+Applied the tested beta 1.0.2 popup fix to the original project. No native browser confirmation during account linking; fresh installs show Use this account, while existing unowned folders show an ownership warning before the explicit link button. Raw channel ID removed from this step. Original manifest, OAuth client and absence of a public key are preserved. Replace files in the original development folder and reload that existing extension. Do not substitute the beta manifest.
+
+User confirmed beta sign-in, empty initial setup, parent/subfolder creation and channel move on a second computer. Persistence and backup/restore testing there remains pending.

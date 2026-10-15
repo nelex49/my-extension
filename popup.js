@@ -22,7 +22,7 @@ function schedulePopupClose(mode = 'signedIn') {
   }, mode === 'signedOut' ? 7000 : 3000);
 }
 async function renderAccount() {
-  const data = await chrome.storage.local.get(['accessToken','accountStatus','folderOwner']);
+  const data = await chrome.storage.local.get(['accessToken','accountStatus','folderOwner','folderData']);
   const status = data.accountStatus || {};
   candidate = null; linkBtn.hidden = true;
   if (!data.accessToken || status.session !== data.accessToken || status.state !== 'ready') cancelPopupClose();
@@ -36,7 +36,11 @@ async function renderAccount() {
   }
   else if (status.state === 'needsLink') {
     candidate = status.account;
-    statusBox.textContent = `Authorised account: ${candidate.title}\nChannel ID: ${candidate.id}\n\nLink your existing folder setup only if it belongs to this account. Your folder data will be preserved.`;
+    const hasExistingFolders = Object.keys(data.folderData || {}).length > 0;
+    statusBox.textContent = hasExistingFolders
+      ? `Link existing folders to this YouTube account?\n\n${candidate.title}\n\nOnly continue if your existing folders belong to this account. They will be preserved and linked to it.`
+      : `Use this YouTube account?\n\n${candidate.title}\n\nYour folders will be linked to this account.`;
+    linkBtn.textContent = hasExistingFolders ? 'Link existing folders' : 'Use this account';
     linkBtn.hidden = false;
   } else if (status.state === 'blocked') statusBox.textContent = `Authorised account: ${status.account.title}\nThis setup belongs to ${status.owner.title}. Sign out and sign in with the linked account. Your folders have not been changed.`;
   else statusBox.textContent = status.message || 'Account verification failed. Sign out and sign in again.';
@@ -69,7 +73,7 @@ logoutBtn.addEventListener('click', async () => {
   finally { logoutBtn.disabled = false; loginBtn.disabled = false; }
 });
 linkBtn.addEventListener('click', async () => {
-  if (!candidate || !confirm(`Link your existing folders to ${candidate.title} (${candidate.id})? Only confirm if this is the account they belong to.`)) return;
+  if (!candidate || linkBtn.disabled) return;
   linkBtn.disabled = true;
   try {
     const result = await chrome.runtime.sendMessage({action:'linkFolderAccount',accountId:candidate.id});

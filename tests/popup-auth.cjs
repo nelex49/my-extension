@@ -25,6 +25,25 @@ module.exports=async function testPopupSignOut(){
     assert.equal(cache.accessToken,'mock-token');assert.equal(timers.size,0);
     assert.ok(elements.status.textContent.includes('could not finish'));
   }
+  // First-use confirmation stays inside the popup; never invoke browser confirm().
+  cache.accessToken='mock-token';cache.accountStatus={state:'needsLink',session:'mock-token',account:owner};
+  delete cache.folderOwner;cache.folderData={};
+  c.confirm=()=>{throw Error('Browser confirmation must not open')};
+  await c.renderAccount();
+  assert.equal(elements['link-account'].hidden,false);
+  assert.equal(elements['link-account'].textContent,'Use this account');
+  assert.ok(elements.status.textContent.includes('Use this YouTube account?'));
+  assert.ok(!elements.status.textContent.includes('UC_OWNER'));
+  let linkRequests=0;
+  c.chrome.runtime.sendMessage=async request=>{assert.equal(request.action,'linkFolderAccount');assert.equal(request.accountId,owner.id);linkRequests++;return {success:false,error:'Test linking error'}};
+  await elements['link-account'].events.click();assert.equal(linkRequests,1);assert.equal(elements['link-account'].disabled,false);
+  assert.equal(elements.status.textContent,'Test linking error');
+  cache.folderData=folders;await c.renderAccount();
+  assert.equal(elements['link-account'].textContent,'Link existing folders');
+  assert.ok(elements.status.textContent.includes('Only continue if your existing folders belong'));
+  cache.folderOwner=owner;
+  if(mode==='success'){delete cache.accessToken;cache.accountStatus={state:'signedOut'}}
+  else cache.accountStatus={state:'ready',session:'mock-token',account:owner};
   // Deterministic timers verify delay/fade/close only after successful login.
   if (mode==='success') {
     let closed=0,fading=false;

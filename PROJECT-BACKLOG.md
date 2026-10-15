@@ -83,3 +83,6 @@ Compiled from the user's current checkpoint and this thread, the supplied latest
 - Backup feedback refinement: short success notices inside Manage, five-second display and 300ms fade; persistent dismissible errors. Automated suites pass; final message placement awaits user review.
 
 Latest feedback adjustment: backup/restore notices are now centred below the Manage header and above folder navigation, rather than beside the menu. Success displays for four seconds then fades over 300ms. Errors remain dismissible. User confirmed the previous build worked; this placement awaits visual review.
+
+- Portable beta: user confirmed sign-in, fresh setup, folder/subfolder creation and a channel move on the second computer. Restart/persistence and backup/restore checks remain.
+- Popup fix now included in original project: single in-popup account confirmation, fresh/existing folder wording, no native confirm dialog. Original development identity/configuration preserved.
