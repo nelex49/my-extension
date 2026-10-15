@@ -48,6 +48,7 @@
         "src/components/SidebarButton.js",
         "src/components/SubfolderView/ManageViewHelpers.js",
         "src/components/SubfolderView/ManageState.js",
+        "src/components/SubfolderView/ManageTools.js",
         "src/components/SubfolderView/ManageLayout.js",
         "src/components/SubfolderView/MovePicker.js",
         "src/components/SubfolderView/ChannelOptionsMenu.js",

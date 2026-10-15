@@ -54,8 +54,14 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
   if (changes.folderOwner) window.folderOwner = changes.folderOwner.newValue || null;
   if (changes.accessToken) activeAccountSession = changes.accessToken.newValue || null;
   if (changes.accountStatus || changes.accessToken) {
-    if (!accountIsReady()) activeManageView?.close();
-    handleLoginState(activeAccountSession, !!changes.accessToken);
+    // A routine refresh re-verifies the same session before fetching subscriptions.
+    // Keep its existing view mounted; accountIsReady still blocks writes meanwhile.
+    const recheckingCurrentSession = !changes.accessToken && !!activeAccountSession &&
+      window.accountStatus?.state === 'verifying' && window.accountStatus.session === activeAccountSession;
+    if (!recheckingCurrentSession) {
+      if (!accountIsReady()) activeManageView?.close();
+      handleLoginState(activeAccountSession, !!changes.accessToken);
+    }
   }
 });
 

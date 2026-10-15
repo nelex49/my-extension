@@ -11,4 +11,6 @@ controller.show('Try again','error');assert.equal(timers.size,0);assert.ok(!clas
 button.click();assert.equal(notice.hidden,true);
 controller.show('Restored','success');controller.show('New message','success');assert.equal(timers.size,1);controller.destroy();assert.equal(timers.size,0);assert.equal(notice.hidden,true);
 controller.show('Done','success');const timer=[...timers.values()][0];timers.clear();timer.fn();const fade=[...timers.values()][0];timers.clear();fade.fn();assert.equal(notice.hidden,true);
-console.log('PASS: four-second display, 300ms fade, persistent errors, dismissal, timer replacement and close cleanup.');
+controller.show('Moved to Parent / Subfolder','success',2000);assert.equal([...timers.values()][0].ms,2000);
+const moveTimer=[...timers.values()][0];timers.clear();moveTimer.fn();assert.ok(classes.has('is-fading'));assert.equal([...timers.values()][0].ms,300);controller.destroy();assert.equal(timers.size,0);
+console.log('PASS: two-second move display; four-second display, 300ms fade, persistent errors, dismissal, timer replacement and close cleanup.');

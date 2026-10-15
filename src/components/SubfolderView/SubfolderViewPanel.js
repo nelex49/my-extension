@@ -106,7 +106,7 @@ function showSubfolderView() {
     modal.querySelector('.ysm-visible-parents .ysm-tab.is-active')?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
   }
   modal.addEventListener('click', createManageActions({ modal, state, render, close, dismissMenus,
-    selectParent, parents, showChannelMenu, closeChannelMenu, closeMovePicker, renderMovePicker }));
+    selectParent, parents, showChannelMenu, closeChannelMenu, closeMovePicker, renderMovePicker, backupNotice }));
   modal.querySelector(".ysm-channel-search").addEventListener("input", event => { state.query = event.target.value; render(); });
   modal.querySelector(".ysm-folder-search").addEventListener("input", event => { state.folderQuery = event.target.value; render(); });
   modal.querySelector(".ysm-sort").addEventListener("change", event => { state.sort = event.target.value; render(); });

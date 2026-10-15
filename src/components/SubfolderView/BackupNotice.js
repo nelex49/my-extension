@@ -1,3 +1,4 @@
+// Shared notification area for backup and channel-move feedback.
 // One notice per Manage instance. Timers are cancelled on replacement and close.
 function createManageBackupNotice(modal) {
   const notice = modal.querySelector('.ysm-backup-notice');
@@ -11,16 +12,17 @@ function createManageBackupNotice(modal) {
   function hide() {
     clearTimers(); notice.hidden = true; notice.classList.remove('is-fading');
   }
-  function show(message, type = 'info') {
+  function show(message, type = 'info', duration = 4000) {
     clearTimers();
     notice.classList.remove('is-fading');
     notice.dataset.type = type;
     text.textContent = message;
+    text.title = message;
     notice.hidden = false;
     if (type === 'success') timer = setTimeout(() => {
       notice.classList.add('is-fading');
       fadeTimer = setTimeout(hide, 300);
-    }, 4000);
+    }, duration);
   }
   dismiss.addEventListener('click', hide);
   return { show, destroy: hide };

@@ -105,7 +105,7 @@
   #subfolder-view-modal .ysm-content-heading > div { grid-column: 1 / -1; }
 }
 
-#subfolder-view-modal .ysm-parent-heading { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+#subfolder-view-modal .ysm-parent-heading { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 12px; margin-bottom: 12px; }
 #subfolder-view-modal .ysm-parent-heading .ysm-section-title { margin: 0; }
 #subfolder-view-modal .ysm-create-parent { flex-shrink: 0; text-align: center; }
 #subfolder-view-modal .ysm-visible-parents { display: flex; gap: 10px; overflow-y: hidden; scrollbar-color: #718397 #26313c; scroll-behavior: smooth; }
@@ -379,3 +379,21 @@
 #subfolder-view-modal .ysm-backup-notice.is-fading { opacity: 0; }
 #subfolder-view-modal .ysm-backup-notice button { flex-shrink: 0; padding: 2px 5px; min-height: 24px; border-color: transparent; background: transparent; }
 #subfolder-view-modal .ysm-backup-notice[hidden] { display: none; }
+
+/* A permanent slot keeps notifications from moving the folder navigation. */
+#subfolder-view-modal .ysm-notice-slot { min-width: 0; height: 40px; display: flex; align-items: center; justify-content: center; }
+#subfolder-view-modal .ysm-notice-slot .ysm-backup-notice { min-width: 0; max-width: 100%; height: 38px; padding: 5px 8px; gap: 4px; }
+#subfolder-view-modal .ysm-backup-notice-text { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#subfolder-view-modal .ysm-main-menu { width: min(340px, calc(100vw - 64px)); max-height: min(400px, 65vh); }
+#subfolder-view-modal .ysm-main-menu button { display: flex; align-items: center; gap: 12px; padding: 11px 10px; background: transparent; border-color: transparent; }
+#subfolder-view-modal .ysm-main-menu button:hover { background: #343e48; }
+#subfolder-view-modal .ysm-main-menu button svg { flex: 0 0 20px; color: #a9c5de; }
+#subfolder-view-modal .ysm-main-menu button span { min-width: 0; }
+#subfolder-view-modal .ysm-main-menu strong { display: block; font-size: 14px; font-weight: 500; }
+#subfolder-view-modal .ysm-main-menu small { display: block; margin-top: 3px; color: #b8c0cc; font-size: 12px; line-height: 1.4; }
+#subfolder-view-modal .ysm-main-menu button:last-child { margin-bottom: 0; border-top: 1px solid #3c4650; border-radius: 0 0 6px 6px; }
+@media (max-width: 700px) {
+  #subfolder-view-modal .ysm-parent-heading { grid-template-columns: auto minmax(0, 1fr); gap: 8px; }
+  #subfolder-view-modal .ysm-parent-heading-actions { grid-column: 2; grid-row: 1; }
+  #subfolder-view-modal .ysm-notice-slot { grid-column: 1 / -1; grid-row: 2; }
+}

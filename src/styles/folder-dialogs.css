@@ -51,3 +51,7 @@
 .ytsm-restore-dialog .ytsm-dialog-panel { width: min(420px,calc(100vw - 24px)); }
 .ytsm-restore-dialog .ytsm-backup-date { margin-bottom: 12px; color: var(--ytsm-form-muted); }
 .ytsm-restore-dialog .ytsm-backup-note,.ytsm-restore-dialog .ytsm-backup-status { margin-top: 12px; }
+
+.ytsm-about-dialog .ytsm-dialog-panel { width: min(400px,calc(100vw - 24px)); }
+.ytsm-about-dialog .ytsm-about-version { margin-top: 4px; color: var(--ytsm-form-muted); font-size: 12px; }
+.ytsm-about-dialog .ytsm-about-copy { margin-top: 12px; }

@@ -1,3 +1,21 @@
+# Refresh correction - current follow-up
+
+Based on the last tools/feedback replacement, including its accepted move-notice position and four-entry tools menu. Refresh no longer closes Manage during the current session's temporary verification status. Selection and cached subscriptions remain visible, Updating is shown, and saves remain blocked by accountIsReady until verification succeeds. Account mismatch, sign-out, changed-session verification and failed verification still close/protect the view. Fetch errors remain visible; the tools dropdown closes when Refresh is selected.
+
+All six automated suites must pass for this follow-up. Startup now covers the menu refresh/storage-event sequence and the security/failure paths. Original development identity/OAuth preserved. No branch operation, commit or push.
+
+---
+
+# Current follow-up - 15 October 2026
+
+Authoritative baseline: extension-current(1).zip. Continue on ui-redesign. No Git branch operation, commit or push performed. Original development identity, permissions and OAuth configuration preserved. Manifest only adds the ManageTools.js content script.
+
+Move feedback uses a permanent slot between Uncategorised and All Folders, above the parent tabs, with no layout shift on show/hide: `Moved to Parent / Subfolder`, two seconds followed by a 300ms fade, only after successful saving. Source selection stays in place. Backup notice timing remains four seconds. Channel menu is unchanged. Tools menu now has four icon/description entries: Refresh subscriptions, Backup folders, Restore backup and About. About uses the shared dark dialog, traps Tab on its Close button, supports Escape/outside-click dismissal and returns focus to the tools trigger. Decisions are recorded in PROJECT-BACKLOG.md; premium work is discussion only.
+
+The user confirms backup/restore, safety copies, account linking and portable beta second-computer testing passed. Historical pending-check statements below are superseded by this checkpoint. Automated verification for this follow-up: dialogs, manage, retrieval, startup, backup and backup-notice suites. Live visual checking of the notice and menu remains for the user. Automated browser rendering could not run because this environment has no installed Chromium executable; DOM/Chrome simulation suites passed.
+
+---
+
 # YouTube Subscription Manager handover
 
 Work on ui-redesign. This complete replacement is based only on extension-latest(3).zip. No commit, push or merge has been performed. Preserve accepted UI; keep changes modular and run dialogs/manage/retrieval/startup after application changes.

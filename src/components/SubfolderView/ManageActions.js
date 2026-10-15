@@ -1,6 +1,6 @@
 // Routes Manage controls to components and existing folder operations.
 function createManageActions({ modal, state, render, close, dismissMenus, selectParent, parents,
-  showChannelMenu, closeChannelMenu, closeMovePicker, renderMovePicker }) {
+  showChannelMenu, closeChannelMenu, closeMovePicker, renderMovePicker, backupNotice }) {
   return event => {
     dismissMenus(event);
     if (event.target === modal) { close(); return; }
@@ -25,14 +25,22 @@ function createManageActions({ modal, state, render, close, dismissMenus, select
     }
     if (button.hasAttribute("data-parent")) { selectParent(button.dataset.parent); return; }
     if (button.hasAttribute("data-child")) { state.child = button.dataset.child; state.moveChannel = null; render(); return; }
-    if (action === "backup" || action === "restore") {
+    if (action === "backup" || action === "restore" || action === "about") {
       modal.querySelector(".ysm-main-menu").hidden = true;
       modal.querySelector('[data-action="menu"]').setAttribute("aria-expanded", "false");
-      if (action === "backup") window.exportFolderBackup(); else window.chooseFolderBackup();
+      if (action === "backup") window.exportFolderBackup();
+      else if (action === "restore") window.chooseFolderBackup();
+      else { modal.querySelector('[data-action="menu"]').focus(); showManageAbout(); }
       return;
     }
     if (action === "refresh") {
-      chrome.runtime.sendMessage({ action: 'refreshSubscriptions' }).catch(() => {
+      modal.querySelector('.ysm-main-menu').hidden = true;
+      modal.querySelector('[data-action="menu"]').setAttribute('aria-expanded', 'false');
+      chrome.runtime.sendMessage({ action: 'refreshSubscriptions' }).then(result => {
+        if (result?.success || result?.accountRequired || result?.cancelled || !modal.isConnected) return;
+        window.subscriptionLoadStatus = { state: 'error', message: result?.error || 'Could not refresh subscriptions. Please retry.' };
+        render();
+      }).catch(() => {
         window.subscriptionLoadStatus = { state: 'error', message: 'Reload the extension and YouTube to refresh subscriptions.' };
         render();
       });
@@ -93,7 +101,10 @@ function createManageActions({ modal, state, render, close, dismissMenus, select
       }
       addToSubfolder(id, destinationParent, destinationChild, success => {
         if (!modal.isConnected) return;
-        if (success) closeMovePicker();
+        if (success) {
+          closeMovePicker();
+          backupNotice.show(`Moved to ${destinationParent} / ${destinationChild}`, 'success', 2000);
+        }
         render();
       });
     } else if (action === "remove") {

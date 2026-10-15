@@ -46,6 +46,43 @@ let sidebar=document.getElementById('yt-folder-dropdown');assert.equal(sidebar.h
 sidebar.querySelector('.ytsm-folder').events.click();sidebar=document.getElementById('yt-folder-dropdown');assert.ok(sidebar.querySelector('.ytsm-subfolder'));sidebar.querySelector('.ytsm-subfolder').events.click();assert.equal(sidebar.querySelectorAll('.ytsm-channel').length,2);
 const channels=sidebar.querySelector('.ytsm-channels');channels.scrollTop=45;context.refreshFolderDropdown();assert.equal(sidebar.querySelector('.ytsm-channels').scrollTop,45);
 sidebar.querySelector('.ytsm-manage').events.click();let manage=document.getElementById('subfolder-view-modal');assert.ok(manage);assert.equal(manage.querySelector('.ysm-total').textContent,'3 subscriptions');
+// Routine refresh keeps the same Manage mounted, blocks writes and updates Uncategorised.
+const emitChanges=data=>{
+  const changes={};for(const [key,value] of Object.entries(data)){changes[key]={newValue:value};store[key]=value;}
+  for(const listener of [...listeners])listener(changes,'local');
+};
+let finishRefresh;
+context.chrome.runtime.sendMessage=request=>{
+  assert.equal(request.action,'refreshSubscriptions');
+  emitChanges({accountStatus:{state:'verifying',session:'token'},subscriptionLoadStatus:{state:'loading'}});
+  return new Promise(resolve=>finishRefresh=resolve);
+};
+context.showUserNotification=()=>{};
+manage.events.click({target:manage.querySelector('[data-action="menu"]')});
+manage.events.click({target:manage.querySelector('[data-action="refresh"]')});
+assert.ok(manage.isConnected);assert.equal(document.getElementById('subfolder-view-modal'),manage);
+assert.equal(manage.querySelector('.ysm-main-menu').hidden,true);
+assert.ok(manage.querySelector('.ysm-total').textContent.includes('Updating...'));
+assert.equal(manage.querySelector('[data-action="refresh"]').disabled,true);assert.equal(context.accountIsReady(),false);
+let pendingSaved;const pendingFolders=JSON.stringify(context.folderData);
+context.createParentFolderRecord('While verifying','#123456','#ffffff',ok=>pendingSaved=ok);
+assert.equal(pendingSaved,false);assert.equal(JSON.stringify(context.folderData),pendingFolders);
+emitChanges({accountStatus:{state:'ready',session:'token',account:store.folderOwner}});
+const fresh=sub('UC_NEW','New arrival');
+emitChanges({userSubscriptions:[a,b,c,fresh],subscriptionLoadStatus:{state:'ready'}});finishRefresh({success:true,count:4});
+await new Promise(resolve=>setImmediate(resolve));
+assert.ok(manage.isConnected);assert.equal(manage.querySelector('.ysm-total').textContent,'4 subscriptions');
+assert.ok(manage.querySelector('.ysm-channel-list').textContent.includes('New arrival'));
+assert.equal(manage.querySelector('[data-action="refresh"]').disabled,false);
+manage.events.click({target:manage.querySelectorAll('button').find(e=>e.dataset.parent==='Sports')});
+assert.equal(manage.querySelector('.ysm-selected').textContent,'Ball');
+manage.events.click({target:manage.querySelector('[data-action="refresh"]')});assert.ok(manage.isConnected);
+emitChanges({accountStatus:{state:'ready',session:'token',account:store.folderOwner},subscriptionLoadStatus:{state:'error',message:'YouTube unavailable'}});
+finishRefresh({success:false,error:'YouTube unavailable'});await new Promise(resolve=>setImmediate(resolve));
+assert.ok(manage.isConnected);assert.equal(manage.querySelector('.ysm-selected').textContent,'Ball');
+assert.ok(manage.querySelector('.ysm-load-message').textContent.includes('YouTube unavailable'));assert.equal(context.userSubscriptions.length,4);
+emitChanges({userSubscriptions:[a,b,c],subscriptionLoadStatus:{state:'ready'}});
+manage.events.click({target:manage.querySelector('[data-action="uncategorised"]')});
 // Backup menu routing and themed confirmation use real manifest-loaded modules.
 context.TextEncoder=TextEncoder;context.clearTimeout=()=>{};
 context.setTimeout=()=>1;
@@ -87,6 +124,22 @@ menu=openParentMenu();menu.querySelectorAll('button')[1].events.click();let quic
 quickDialog.querySelector('#ytsm-folder-name').value='Quick child';quickDialog.querySelector('[data-action="save"]').events.click();assert.ok(store.folderData.Sports.subfolders['Quick child']);assert.ok(manage.querySelectorAll('button').find(e=>e.dataset.child==='Quick child'));
 let childOptions=sidebar.querySelector('.ytsm-subfolder-group .ytsm-folder-more');childOptions.events.click();menu=document.getElementById('ytsm-sidebar-folder-menu');assert.equal(menu.style.left,'702px');assert.equal(menu.style.top,'202px');assert.equal(menu.querySelectorAll('button').length,1);assert.equal(menu.querySelector('button').textContent,'Edit subfolder');menu.querySelector('button').events.click();quickDialog=body.children.at(-1);assert.equal(quickDialog.firstElementChild.style.left,'422px');assert.equal(quickDialog.firstElementChild.style.top,'202px');assert.equal(quickDialog.querySelector('#ytsm-folder-name').value,'Ball');quickDialog.querySelector('#ytsm-folder-name').value='Renamed ball';quickDialog.querySelector('[data-action="save"]').events.click();assert.ok(store.folderData.Sports.subfolders['Renamed ball']);assert.equal(manage.querySelector('.ysm-selected').textContent,'Renamed ball');assert.equal(store.folderData.Sports.subfolders['Renamed ball'].subscriptions.length,2);
 menu=openParentMenu();menu.querySelector('button').events.click();quickDialog=body.children.at(-1);assert.equal(quickDialog.firstElementChild.style.left,'422px');assert.equal(quickDialog.firstElementChild.style.top,'202px');assert.equal(quickDialog.querySelector('#ytsm-folder-name').value,'Sports');quickDialog.querySelector('#ytsm-folder-name').value='Sports renamed';quickDialog.querySelector('[data-action="save"]').events.click();assert.ok(store.folderData['Sports renamed']);assert.equal(manage.querySelector('.ysm-nav-heading h3').textContent,'Sports renamed folders');assert.equal(manage.querySelector('.ysm-selected').textContent,'Renamed ball');
+// Tools remain four working entries; About uses the shared lifecycle and restores focus.
+const tools=manage.querySelector('.ysm-main-menu');
+assert.equal(tools.querySelectorAll('button').length,4);
+assert.equal(tools.querySelectorAll('svg').length,4);
+assert.ok(tools.textContent.includes('Download your folders'));
+const toolsTrigger=manage.querySelector('[data-action="menu"]');toolsTrigger.focus();
+manage.events.click({target:toolsTrigger});
+manage.events.click({target:tools.querySelector('[data-action="about"]')});
+let about=body.children.at(-1);assert.ok(about.classList.contains('ytsm-about-dialog'));
+assert.equal(tools.hidden,true);assert.ok(about.textContent.includes('stored locally'));
+const aboutClose=about.querySelector('[data-dialog-close]');assert.equal(document.activeElement,aboutClose);
+let trapped=false;aboutClose.events.keydown({key:'Tab',preventDefault(){trapped=true}});assert.ok(trapped);
+about.events.click({target:aboutClose});assert.ok(!about.isConnected);assert.equal(document.activeElement,toolsTrigger);
+manage.events.click({target:tools.querySelector('[data-action="about"]')});about=body.children.at(-1);
+for(const fn of [...document.events.keydown])fn({key:'Escape',preventDefault(){},stopImmediatePropagation(){}});
+assert.ok(!about.isConnected);assert.ok(manage.isConnected);
 // Open the real shared parent dialog from Manage, save and select the new parent.
 manage.events.click({target:manage.querySelector('[data-action="create-parent"]')});let dialog=body.children.at(-1);dialog.querySelector('#ytsm-folder-name').value='From Manage';dialog.querySelector('[data-action="save"]').events.click();assert.equal(store.folderData['From Manage'].color,'#393052');assert.equal(manage.querySelector('.ysm-selected').textContent,'From Manage');assert.equal(manage.querySelector('.ysm-add'),document.activeElement);
 // Escape on a folder dialog must not close the Manage layer below it.
@@ -94,11 +147,18 @@ manage.events.click({target:manage.querySelector('[data-action="add"]')});dialog
 manage.events.click({target:manage.querySelector('[data-action="close"]')});assert.equal(Object.values(document.events).reduce((n,set)=>n+set.size,0),1); // DOMContentLoaded listener only
 // Account state still remounts the correct launcher and removes the previous dropdown.
 for(const fn of [...listeners])fn({accessToken:{newValue:null}},'local');entry=document.getElementById('yt-manage-guide-entry');assert.equal(entry.dataset.state,'login');assert.equal(document.getElementById('yt-folder-dropdown'),null);
+// Verification failure still closes an existing Manage instance.
+emitChanges({accessToken:'token',accountStatus:{state:'ready',session:'token',account:store.folderOwner}});
+context.showSubfolderView();let verificationView=document.getElementById('subfolder-view-modal');assert.ok(verificationView);
+emitChanges({accountStatus:{state:'verifying',session:'token'}});assert.ok(verificationView.isConnected);
+emitChanges({accountStatus:{state:'error',session:'token',message:'Cannot verify'}});assert.ok(!verificationView.isConnected);
+emitChanges({accountStatus:{state:'ready',session:'token',account:store.folderOwner}});
+context.showSubfolderView();verificationView=document.getElementById('subfolder-view-modal');assert.ok(verificationView);
 // A mismatched authorised account closes Manage and prevents folder writes.
 const beforeBlocked=JSON.stringify(context.folderData), writesBeforeBlocked=writes;
 for(const listener of [...listeners])listener({accountStatus:{newValue:{state:'blocked',session:'token',account:{id:'UC_OTHER',title:'Other'},owner:store.folderOwner}}},'local');
-assert.equal(context.isLoggedIn,false);
+assert.equal(context.isLoggedIn,false);assert.ok(!verificationView.isConnected);
 context.createParentFolderRecord('Blocked create','#123456','#ffffff',ok=>assert.equal(ok,false));
 assert.equal(JSON.stringify(context.folderData),beforeBlocked);assert.equal(writes,writesBeforeBlocked);
-console.log('PASS: full manifest load and startup; login launcher, sidebar parent/subfolder expansion, direct edit/create menus, Escape and outside-click cleanup, open Manage rename refresh, no sidebar counts, independent channel scroll; Manage creation selects parent; nested-dialog Escape; logout remount.');
+console.log('PASS: Refresh keeps Manage open during same-session verification, blocks pending saves, updates Uncategorised, preserves selection/cache on fetch error, and closes on verification error or mismatch; full manifest load and startup; login launcher, sidebar parent/subfolder expansion, direct edit/create menus, Escape and outside-click cleanup, open Manage rename refresh, no sidebar counts, independent channel scroll; Manage creation selects parent; nested-dialog Escape; logout remount.');
 })().catch(error=>{console.error(error);process.exitCode=1});

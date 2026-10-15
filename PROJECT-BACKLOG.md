@@ -7,14 +7,14 @@ This is the running record of deferred work and future ideas. Update statuses an
 ## Current checkpoint
 
 - Working branch: `ui-redesign`.
-- Authoritative source: `extension-latest(3).zip`. Do not use older ZIPs.
+- Authoritative source: `extension-current(1).zip`. Do not use older ZIPs.
 - User confirms the current checkpoint is committed and pushed.
 - Dark Manage interface, modular components, shared dialogs, custom colours and sidebar refinements are accepted.
 - Moves use one complete save. Failed moves/removals preserve previous assignments and show an error. Overlapping saves within one tab are guarded.
 - One verified YouTube channel owns the folder setup. Other authorised channels are blocked. Sign-out preserves folders and ownership.
 - Repeat sign-in and popup timing were manually confirmed by the user. The supplied HANDOVER.md still says confirmation is needed; that statement is superseded by the current checkpoint.
-- All four regression suites passed after backup/restore implementation, plus the new backup tests. Live Chrome checks for this addition are pending.
-- Backup/restore is now implemented in this replacement ZIP; it has not been committed or pushed.
+- Backup/restore, safety copies and account linking are working. The portable beta passed second-computer testing, as confirmed by the user.
+- This follow-up changes move feedback and project records only; no commit or push has been performed.
 
 ## Agreed next steps
 
@@ -86,3 +86,39 @@ Latest feedback adjustment: backup/restore notices are now centred below the Man
 
 - Portable beta: user confirmed sign-in, fresh setup, folder/subfolder creation and a channel move on the second computer. Restart/persistence and backup/restore checks remain.
 - Popup fix now included in original project: single in-popup account confirmation, fresh/existing folder wording, no native confirm dialog. Original development identity/configuration preserved.
+
+## Current interface decisions - 15 October 2026
+
+- Successful channel moves show `Moved to Parent / Subfolder` in the permanent notification slot between Uncategorised and All Folders, above the parent-folder tabs. Display for two seconds, then fade over 300ms. Show only after persistence succeeds; keep the source parent/subfolder selected. Failed saves retain the existing error behaviour and never show move success.
+- Preserve the channel three-dot menu and its current contents.
+- Tools menu: user approved implementation. Four entries: Refresh subscriptions, Backup folders, Restore backup and About. Each has a line icon and short description. Backup uses a download arrow; restore uses an upload arrow. About uses the shared dark dialog and displays the installed manifest version, a short description and local-storage/backup information.
+- Backup/restore notices share this fixed slot and retain their existing four-second success duration. The slot does not grow when a message appears. Long messages are truncated visually with their full text available on hover and to screen readers. At narrow widths the slot has a permanently reserved row below the controls.
+
+## Premium planning decisions - current, supersedes earlier candidates
+
+Discussion only until agreed. Do not implement entitlements, restrictions, billing or premium UI, or create a premium branch without instructions.
+
+| Item | Current position |
+| --- | --- |
+| Unlimited parent folders and subfolders | Planned premium scope for discussion; not implemented. |
+| Free folder allowance | Undecided. Three parents with three subfolders each was proposed, not agreed. |
+| Multiple YouTube accounts | Separate local setups proposed for premium. Existing single-owner protection stays in place. |
+| Multi-channel moves | Premium proposal: checkboxes; Ctrl/Shift selection is possible, not agreed. |
+| Optional folder icon library | Premium proposal. |
+| Scheduled backups and bulk unsubscribe | Candidates; not agreed. |
+| Cross-device sync | Later work. |
+| Selective restore and backup history | Deferred. |
+| Sidebar-state persistence and light theme | Should be free; implementation remains deferred. |
+| Billing | Yearly preferred. Price, payment service, upgrade placement and expiry rules undecided. |
+| Oversized-backup restore rules | Undecided; no new restore limits implemented. |
+| Cross-tab save protection | Remains deferred. |
+
+Working baseline is the original development identity and OAuth configuration, not the separate portable beta configuration. Continue on `ui-redesign`; do not touch `main`, commit or push without explicit instructions.
+
+## Refresh correction - 15 October 2026
+
+- User confirmed the move notice placement and tools-menu appearance. Backup, restore and About work in live Chrome.
+- Refresh was closing Manage because the worker's temporary same-session `verifying` status was treated as lost access. Keep the existing Manage/sidebar mounted during that recheck; retain selection and show Updating. Folder mutations still require accountIsReady and are blocked until verification completes.
+- Sign-out, changed-session verification, account mismatch and verification errors retain the closing/access-protection behaviour. A subscription-fetch error keeps saved subscriptions and displays an error in Manage.
+- Refresh closes the tools dropdown, not Manage. Rejected worker responses also produce a visible error rather than silently failing.
+- Startup regression now exercises Refresh through the menu, verifying/loading, blocked pending saves, newly retrieved Uncategorised channels, retained subfolder selection, fetch errors, and verification-failure closure.
