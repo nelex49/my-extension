@@ -29,6 +29,8 @@
       ],
       "js": [
         "src/shared/BackupFormat.js",
+        "src/accounts/AccountSetupStore.js",
+        "src/accounts/AccountSetupMigration.js",
         "src/utils/constants.js",
         "src/plans/FolderPlan.js",
         "src/plans/FolderCreationGate.js",

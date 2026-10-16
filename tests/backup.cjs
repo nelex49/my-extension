@@ -1,6 +1,6 @@
 const fs = require('fs'), vm = require('vm'), assert = require('assert');
 const root = require('path').resolve(__dirname, '..');
-const source = ['src/shared/BackupFormat.js','src/background/BackupService.js'].map(p=>fs.readFileSync(root+'/'+p,'utf8')).join('\n');
+const source = ['src/accounts/AccountSetupStore.js','src/shared/BackupFormat.js','src/background/BackupService.js'].map(p=>fs.readFileSync(root+'/'+p,'utf8')).join('\n');
 function setup() {
  const data = {accessToken:'session',folderOwner:{id:'UC_OWNER',title:'Owner'},accountStatus:{state:'ready',session:'session',account:{id:'UC_OWNER'}},folderData:{Music:{color:'#123456',textColor:'#ffffff',subscriptions:[],subfolders:{Blues:{subscriptions:[{snippet:{title:'Test',resourceId:{channelId:'UC_TEST'}}}]}}}}};
  const files=[]; let state='complete', writes=0, failWrite=false, duringDownload=()=>{};

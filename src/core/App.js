@@ -21,26 +21,25 @@ function syncSubscriptions(subscriptions) {
 
 function initialize() {
   if (appInitialization) return appInitialization;
-  appInitialization = new Promise((resolve) => {
-    chrome.storage.local.get(["folderData", "userSubscriptions", "accessToken", "accountStatus", "folderOwner", FolderPlan.developmentKey], (data) => {
-      FolderPlan.applyStorage(data);
-      activeAccountSession = data.accessToken || null;
-      window.accountStatus = data.accountStatus || {state:'verifying'};
-      window.folderOwner = data.folderOwner || null;
-      folderData = data.folderData || {};
-      window.folderData = folderData;
-      syncSubscriptions(data.userSubscriptions);
-      handleLoginState(data.accessToken);
-      watchSidebarGuide();
-      window.appInitialized = true;
-      resolve();
-    });
+  appInitialization = AccountSetupMigration.ensure().then(data => {
+    window.accountSetupData = data[AccountSetupStore.key];
+    FolderPlan.applyStorage(data);
+    activeAccountSession = data.accessToken || null;
+    window.accountStatus = data.accountStatus || {state:'verifying'};
+    window.folderOwner = data.folderOwner || null;
+    folderData = data.folderData || {};
+    window.folderData = folderData;
+    syncSubscriptions(data.userSubscriptions);
+    handleLoginState(data.accessToken);
+    watchSidebarGuide();
+    window.appInitialized = true;
   });
   return appInitialization;
 }
 
 chrome.storage.onChanged.addListener((changes, namespace) => {
   if (namespace !== "local") return;
+  if (changes[AccountSetupStore.key]) window.accountSetupData = changes[AccountSetupStore.key].newValue;
   if (changes[FolderPlan.developmentKey]) FolderPlan.applyStorage({ [FolderPlan.developmentKey]: changes[FolderPlan.developmentKey].newValue });
   if (changes.folderData) {
     folderData = changes.folderData.newValue || {};

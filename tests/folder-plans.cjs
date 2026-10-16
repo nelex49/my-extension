@@ -7,7 +7,7 @@ const c={console,TextEncoder,Date,setTimeout,CONFIG:{DEVELOPMENT_PLAN_TESTING:tr
  showUserNotification(){},showFolderLimitDialog:decision=>denials.push(decision),accountIsReady:()=>true,
  chrome:{runtime:{lastError:null},storage:{local:{get:async()=>structuredClone(cache),set(data,callback){writes++;Object.assign(cache,structuredClone(data));callback?.();return Promise.resolve()}}},downloads:{async download(options){downloads.push(JSON.parse(decodeURIComponent(options.url.split(',').slice(1).join(','))));return 1},async search(){return [{state:'complete'}]}}}};
 c.window=c;vm.createContext(c);
-for(const p of ['src/plans/FolderPlan.js','src/plans/FolderCreationGate.js','src/services/FolderService.js','src/components/SubscriptionManager.js','src/shared/BackupFormat.js','src/background/BackupService.js'])vm.runInContext(read(p),c,{filename:p});
+for(const p of ['src/accounts/AccountSetupStore.js','src/plans/FolderPlan.js','src/plans/FolderCreationGate.js','src/services/FolderService.js','src/components/SubscriptionManager.js','src/shared/BackupFormat.js','src/background/BackupService.js'])vm.runInContext(read(p),c,{filename:p});
 function plan(state){c.FolderPlan.applyStorage({developmentFolderPlan:state})}
 function parent(name,expected=true){let result;c.createParentFolderRecord(name,'#123456','#ffffff',ok=>result=ok);assert.equal(result,expected)}
 function child(p,name,expected=true){let result;c.createSubfolderRecord(p,name,'#123456','#ffffff',ok=>result=ok);assert.equal(result,expected)}

@@ -15,6 +15,11 @@ async function checkAccount(token, session, currentSession) {
   if (!await currentSession()) return false;
   const { folderOwner } = await chrome.storage.local.get('folderOwner');
   const state = !folderOwner ? 'needsLink' : folderOwner.id === account.id ? 'ready' : 'blocked';
+  if (state === 'ready') {
+    try { await AccountSetupMigration.ensure(); }
+    catch (error) { error.accountVerification = true; throw error; }
+    if (!await currentSession()) return false;
+  }
   await chrome.storage.local.set({ accountStatus: { state, account, owner: folderOwner || null, session },
     ...(state === 'ready' ? {} : { userSubscriptions: [], subscriptionLoadStatus: { state: 'accountRequired' } }) });
   return state === 'ready';
@@ -28,10 +33,10 @@ async function linkFolderAccount(request) {
     if (!session || folderOwner || accountStatus?.state !== 'needsLink' || accountStatus.session !== session || accountStatus.account.id !== request.accountId)
       return { success: false, error: 'Account state changed. Reopen the popup and try again.' };
     const token = await identityToken(), account = await identifyYouTubeAccount(token);
-    const latest = await chrome.storage.local.get(['accessToken','folderOwner']);
+    const latest = await chrome.storage.local.get(['accessToken','folderOwner','folderData',AccountSetupStore.key]);
     if (latest.accessToken !== session || latest.folderOwner || account.id !== request.accountId)
       return { success: false, error: 'The authorised account changed. Nothing was linked.' };
-    await chrome.storage.local.set({ folderOwner: account, accountStatus: { state: 'ready', account, owner: account, session }, userSubscriptions: [] });
+    await chrome.storage.local.set({ ...AccountSetupStore.withFolders({ ...latest, folderOwner: account }, latest.folderData || {}), folderOwner: account, accountStatus: { state: 'ready', account, owner: account, session }, userSubscriptions: [] });
     await refreshSubscriptions();
     return { success: true };
   } catch (error) { return { success: false, error: error.message }; }

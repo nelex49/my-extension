@@ -1,3 +1,17 @@
+# Current checkpoint: account storage and migration, stage 1
+
+Based on the cleaned folder stage which the user tested and confirmed pushed on premium-folders. This stage introduces src/accounts/AccountSetupStore.js and AccountSetupMigration.js, with small integrations in startup, verified linking, folder persistence and restore.
+
+It preserves the current linked setup, including original working folderData/folderOwner, and adds accountSetupData schema version 1 keyed by verified YouTube channel ID. Saves/restores update both active copies in one write. Inactive account records are preserved. Unsupported, mismatched or differing stored copies fail without overwrite; storage failures retain original data. Tokens/cache/plan state stay outside the new account registry.
+
+This is the storage/migration section, not the complete multi-account feature. Popup behaviour, different-account blocking, Free/Pro folder behaviour and existing appearance remain. Account switching and its plan rules are the next section after manual acceptance. Expiry direction is recorded in PROJECT-BACKLOG.md; replacing the Free account after expiry is not designed yet.
+
+Manual instructions: development/account-storage-testing.md. Automated coverage: the existing eight suites plus account-setups.cjs. Original OAuth, permissions, popup, backup format, move feedback and tools-menu design preserved. No branch operation, commit, push or merge performed. Target remains premium-folders; leave main/ui-redesign untouched.
+
+The active working setup is temporarily duplicated in its account record; storage quota failures must retain the original data. Cross-tab stale-save protection remains deferred. Production licensing and cloud sync remain outside scope.
+
+---
+
 # Current cleanup checkpoint
 
 The user confirmed Free/Pro/expired manual testing works in Chrome. The tests directory is now cleaned: old copied application files, tests/src and tests/tests were removed. It contains the eight current suite entry points, popup-auth.cjs (used by retrieval), and a test-specific README. Application files are unchanged from premium-folders-stage1.zip.

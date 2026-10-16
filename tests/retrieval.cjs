@@ -1,5 +1,5 @@
 const vm=require('vm'),fs=require('fs'),assert=require('assert');
-const source=fs.readFileSync(require('path').resolve(__dirname,'..','src/background/AccountProtection.js'),'utf8')+'\n'+fs.readFileSync(require('path').resolve(__dirname,'..','background.js'),'utf8').replace(/^importScripts.*\n/,'');new vm.Script(source);
+const source=['src/accounts/AccountSetupStore.js','src/accounts/AccountSetupMigration.js'].map(p=>fs.readFileSync(require('path').resolve(__dirname,'..',p),'utf8')).join('\n')+'\n'+fs.readFileSync(require('path').resolve(__dirname,'..','src/background/AccountProtection.js'),'utf8')+'\n'+fs.readFileSync(require('path').resolve(__dirname,'..','background.js'),'utf8').replace(/^importScripts.*\n/,'');new vm.Script(source);
 function setup(fetcher){
  const cache={accessToken:'mock-session',userSubscriptions:[{id:'old'}],folderOwner:{id:'UC_OWNER',title:'Owner'}};let tokenCalls=0,forgot=0;const listeners=[];
  const c={URL,URLSearchParams,Date,Map,Set,console,fetch:(url,options)=>new URL(url).pathname.endsWith('/channels')?Promise.resolve({ok:true,json:async()=>({items:[{id:'UC_OWNER',snippet:{title:'Owner'}}]})}):fetcher(url,options),chrome:{runtime:{onMessage:{addListener(){}},lastError:null},action:{openPopup:async()=>{}},identity:{getAuthToken(options,callback){tokenCalls++;assert.equal(options.interactive,false);callback(tokenCalls===1?'mock-oauth':{token:'mock-renewed'})},removeCachedAuthToken({token},callback){forgot++;callback()}},storage:{local:{get:async()=>({...cache}),set:async data=>{Object.assign(cache,data)}},onChanged:{addListener:f=>listeners.push(f)}},tabs:{onUpdated:{addListener(){}}}}};vm.createContext(c);vm.runInContext(source,c);return {c,cache,listeners,get tokens(){return tokenCalls},get forgot(){return forgot}};
@@ -23,6 +23,8 @@ const ok=page=>({ok:true,status:200,json:async()=>page});const fail=status=>({ok
  assert.equal(JSON.stringify(account.cache.folderData),originalFolders);
  let linked=await account.c.linkFolderAccount({accountId:'WRONG'});assert.equal(linked.success,false);assert.equal(account.cache.folderOwner,undefined);
  linked=await account.c.linkFolderAccount({accountId:'UC_OWNER'});assert.equal(linked.success,true);assert.equal(account.cache.folderOwner.id,'UC_OWNER');
+ assert.equal(account.cache.accountSetupData.activeAccountId,'UC_OWNER');
+ assert.equal(JSON.stringify(account.cache.accountSetupData.setups.UC_OWNER.folderData),originalFolders);
  assert.equal(account.cache.accountStatus.state,'ready');assert.equal(JSON.stringify(account.cache.folderData),originalFolders);
  delete account.cache.accessToken;account.listeners[0]({accessToken:{newValue:undefined}},'local');
  assert.equal(account.cache.folderOwner.id,'UC_OWNER');assert.equal(JSON.stringify(account.cache.folderData),originalFolders);

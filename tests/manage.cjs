@@ -29,7 +29,7 @@ const context={console,document,URL,innerWidth:1200,innerHeight:900,ResizeObserv
 context.window=context;context.userSubscriptions=[a,b,c];context.folderData={'Music "test"':{color:'#44345d',subfolders:{Blues:{subscriptions:[a,b]},Empty:{color:'#12ab34',subscriptions:[]}},subscriptions:[]},Sports:{subfolders:{Ball:{subscriptions:[]}}}};
 vm.createContext(context);
 context.chrome.storage.local={set(data,callback){writes++;callback?.();}};
-for(const file of ['src/plans/FolderPlan.js','src/plans/FolderCreationGate.js','src/services/FolderService.js'])vm.runInContext(fs.readFileSync(root+file,'utf8'),context);
+for(const file of ['src/accounts/AccountSetupStore.js','src/accounts/AccountSetupMigration.js','src/plans/FolderPlan.js','src/plans/FolderCreationGate.js','src/services/FolderService.js'])vm.runInContext(fs.readFileSync(root+file,'utf8'),context);
 vm.runInContext(fs.readFileSync(root+'src/components/SubscriptionManager.js','utf8'),context);
 vm.runInContext(fs.readFileSync(root+'src/components/SubfolderView/ManageViewHelpers.js','utf8'),context);
 for(const name of ['ManageState', 'ManageTools', 'ManageLayout', 'MovePicker', 'ChannelOptionsMenu', 'ParentFolderNavigation', 'SubfolderNavigation', 'ChannelList', 'ManageActions'])vm.runInContext(fs.readFileSync(root+'src/components/SubfolderView/'+name+'.js','utf8'),context);

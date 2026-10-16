@@ -35,12 +35,12 @@ context.MutationObserver=class{observe(){}disconnect(){}};
 context.requestAnimationFrame=fn=>fn();
 const section=new E('ytd-guide-section-renderer'),items=new E('div');items.id='items';section.append(items);body.append(section);
 let store={folderData:{Sports:{color:'#44345d',subfolders:{Ball:{subscriptions:[a,b]}}}},userSubscriptions:[a,b,c],accessToken:'token',folderOwner:{id:'UC_OWNER',title:'Owner'},accountStatus:{state:'ready',session:'token',account:{id:'UC_OWNER',title:'Owner'}},subscriptionLoadStatus:{state:'ready'}};
-context.chrome.storage.local={get(keys,callback){callback(structuredClone(store))},set(data,callback){for(const [key,value] of Object.entries(data))store[key]=structuredClone(value);callback?.()}};
+context.chrome.storage.local={get(keys,callback){const result=structuredClone(store);if(callback)callback(result);else return Promise.resolve(result)},set(data,callback){for(const [key,value] of Object.entries(data))store[key]=structuredClone(value);callback?.()}};
 context.chrome.runtime.onMessage={addListener(){}};
 vm.createContext(context);
 for(const file of manifest.content_scripts[0].js)vm.runInContext(fs.readFileSync(root+file,'utf8'),context,{filename:file});
 (async()=>{
-await context.initialize();assert.equal(context.FolderPlan.state,'free');assert.equal(context.appInitialized,true);assert.equal(context.userSubscriptions.length,3);
+await context.initialize();assert.equal(store.accountSetupData.activeAccountId,'UC_OWNER');assert.equal(JSON.stringify(store.accountSetupData.setups.UC_OWNER.folderData),JSON.stringify(store.folderData));assert.equal(context.FolderPlan.state,'free');assert.equal(context.appInitialized,true);assert.equal(context.userSubscriptions.length,3);
 let entry=document.getElementById('yt-manage-guide-entry');assert.equal(entry.dataset.state,'ready');entry.querySelector('button').events.click();
 let sidebar=document.getElementById('yt-folder-dropdown');assert.equal(sidebar.hidden,false);assert.equal(sidebar.querySelector('.ytsm-count'),null);assert.ok(sidebar.querySelector('.ytsm-folder-more'));
 sidebar.querySelector('.ytsm-folder').events.click();sidebar=document.getElementById('yt-folder-dropdown');assert.ok(sidebar.querySelector('.ytsm-subfolder'));sidebar.querySelector('.ytsm-subfolder').events.click();assert.equal(sidebar.querySelectorAll('.ytsm-channel').length,2);
@@ -149,6 +149,7 @@ manage.events.click({target:manage.querySelector('[data-action="create-parent"]'
 // Escape on a folder dialog must not close the Manage layer below it.
 manage.events.click({target:manage.querySelector('[data-action="add"]')});dialog=body.children.at(-1);const event={key:'Escape',preventDefault(){},stopImmediatePropagation(){}};for(const fn of [...document.events.keydown])fn(event);assert.ok(manage.isConnected);assert.ok(!dialog.isConnected);
 manage.events.click({target:manage.querySelector('[data-action="close"]')});assert.equal(Object.values(document.events).reduce((n,set)=>n+set.size,0),1); // DOMContentLoaded listener only
+assert.equal(JSON.stringify(store.accountSetupData.setups.UC_OWNER.folderData),JSON.stringify(store.folderData));
 // Account state still remounts the correct launcher and removes the previous dropdown.
 for(const fn of [...listeners])fn({accessToken:{newValue:null}},'local');entry=document.getElementById('yt-manage-guide-entry');assert.equal(entry.dataset.state,'login');assert.equal(document.getElementById('yt-folder-dropdown'),null);
 // Verification failure still closes an existing Manage instance.

@@ -49,6 +49,7 @@ node tests/backup.cjs
 node tests/backup-notice.cjs
 node tests/folder-plans.cjs
 node tests/plan-testing.cjs
+node tests/account-setups.cjs
 ```
 
 The tests simulate DOM and Chrome APIs. Chrome appearance and real installation behaviour require the manual checks above.

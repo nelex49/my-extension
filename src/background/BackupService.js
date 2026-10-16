@@ -1,7 +1,7 @@
 // Background-only downloads and restore. A restore never writes before its safety download completes.
 let backupOperationPending = false;
 async function backupAccountSnapshot() {
-  const data = await chrome.storage.local.get(['folderData', 'folderOwner', 'accountStatus', 'accessToken']);
+  const data = await chrome.storage.local.get(['folderData', 'folderOwner', 'accountStatus', 'accessToken', AccountSetupStore.key]);
   if (!data.accessToken || data.accountStatus?.state !== 'ready' || data.accountStatus.session !== data.accessToken ||
       !data.folderOwner?.id || data.accountStatus.account?.id !== data.folderOwner.id)
     throw new Error('Sign in and verify the linked YouTube account before using backup or restore.');
@@ -40,7 +40,7 @@ async function runFolderBackup(request) {
         JSON.stringify(latest.folderData || {}) !== JSON.stringify(current.folderData || {}))
       throw new Error('Your account or folders changed while the safety copy was downloading. Nothing was restored. Please try again.');
     // Only folder data is replaced. Owner, credentials and live YouTube subscriptions stay intact.
-    await chrome.storage.local.set({ folderData: imported.folderData });
+    await chrome.storage.local.set({ folderData: imported.folderData, ...AccountSetupStore.withFolders(latest, imported.folderData) });
     return { success: true, filename };
   } catch (error) { return { success: false, error: error.message || 'Backup or restore failed. Your existing folders were kept.' }; }
   finally { backupOperationPending = false; }

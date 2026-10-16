@@ -34,7 +34,7 @@ context.userSubscriptions=[a,b,c];
 let failure=false,pendingSave=null,holdSave=false;
 context.chrome.storage.local={set(data,callback){writes++;if(holdSave){pendingSave=callback;return}context.chrome.runtime.lastError=failure?{message:'test error'}:null;callback?.();context.chrome.runtime.lastError=null}};
 vm.createContext(context);
-for(const file of ['src/utils/FolderColours.js','src/plans/FolderPlan.js','src/plans/FolderCreationGate.js','src/components/PlanDialogs/FolderLimitDialog.js','src/services/FolderService.js','src/components/FolderDialogs/DialogLifecycle.js','src/components/FolderDialogs/DialogControls.js','src/components/FolderDialogs/ParentFolderDialog.js','src/components/FolderDialogs/SubfolderDialog.js'])vm.runInContext(fs.readFileSync(root+file,'utf8'),context,{filename:file});
+for(const file of ['src/utils/FolderColours.js','src/accounts/AccountSetupStore.js','src/accounts/AccountSetupMigration.js','src/plans/FolderPlan.js','src/plans/FolderCreationGate.js','src/components/PlanDialogs/FolderLimitDialog.js','src/services/FolderService.js','src/components/FolderDialogs/DialogLifecycle.js','src/components/FolderDialogs/DialogControls.js','src/components/FolderDialogs/ParentFolderDialog.js','src/components/FolderDialogs/SubfolderDialog.js'])vm.runInContext(fs.readFileSync(root+file,'utf8'),context,{filename:file});
 context.CONFIG={DEVELOPMENT_PLAN_TESTING:true};context.FolderPlan.applyStorage({developmentFolderPlan:'pro'});
 function click(modal,button){button?.events.click?.({target:button,currentTarget:button});if(modal.isConnected)modal.events.click?.({target:button})}
 function listenerCount(){return Object.values(document.events).reduce((n,set)=>n+set.size,0)}

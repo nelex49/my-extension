@@ -94,3 +94,18 @@ Next: user tests this complete replacement in Chrome on `premium-folders`, follo
 - No application code or plan behaviour changed during cleanup. Rerun all eight suites before delivery.
 - When applying the cleanup ZIP, remove the existing local `tests` folder before copying the replacement. Extracting over it alone will not delete stale files. Preserve the real project `src` and Git directory.
 - Next: accept cleanup and then commit/push on premium-folders when explicitly instructed. Multi-account implementation has not started.
+
+## Multiple-account stage 1 - 16 October 2026
+
+- User confirms the cleaned folder-plan checkpoint has been committed/pushed successfully on `premium-folders`. No new commit hash was supplied.
+- Multiple saved local account setups are the intended Pro feature; Free retains one linked setup. Google sign-in itself is not a paid feature.
+- Expiry direction agreed: honour a previously chosen Free account; otherwise default to the last active account. Preserve the other setups. The exact replacement rules after expiry remain undecided; do not introduce a replacement control yet.
+- Build/test one section at a time. This first section implements storage and migration only, before the account-switching interface and multi-account plan policy.
+- New small modules: AccountSetupStore.js and AccountSetupMigration.js in src/accounts. Use verified channel ID as the key, not email/display name.
+- On startup/verification, preserve the linked legacy setup and create its versioned account record. Unlinked setups remain unlinked. Reject unsupported/invalid or conflicting registry state rather than replacing any copy.
+- Folder saves and full restore update the active working folderData and that owner's registry record atomically. Initial linking also creates the account record. Preserve inactive records and existing owner/safety-download checks.
+- No account-switch UI or multi-account entitlement implemented yet; existing different-account blocking remains in place during this stage. Other proposed modules will be added only when their responsibilities are needed.
+- Tokens, live subscription cache and development plan state are not copied into setup records or backup exports. Backups retain their existing single-owner format.
+- Temporary mirrored active storage increases storage usage. Quota failures retain original data. General cross-tab stale-save protection is still deferred.
+- Run the existing eight suites plus account-setups. New tests cover idempotence, unlinked/empty setups, failed migration/retry, schema/owner conflicts, isolated inactive records, atomic saves/moves/restores, failure rollback and restart.
+- Manual next action: follow development/account-storage-testing.md on the same existing development installation. Confirm the current setup survives reload, edits, restore and sign-out/return before building switching controls. No commit/push performed for this stage.

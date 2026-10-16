@@ -21,11 +21,14 @@ function persistFolderMutation(nextData, previousData, done, rename = null) {
   folderSavePending = true;
   // Selection must follow renamed keys before Chrome emits storage notifications.
   prepareManageFolderRename(rename);
-  let completed = false;
+  let completed = false, accountPatch = null;
   function finish(success) {
     if (completed) return;
     completed = true; folderSavePending = false;
-    if (success) replaceFolderData(nextData);
+    if (success) {
+      replaceFolderData(nextData);
+      if (accountPatch?.[AccountSetupStore.key]) window.accountSetupData = accountPatch[AccountSetupStore.key];
+    }
     else {
       replaceFolderData(previousData); prepareManageFolderRename(rename, true);
       showUserNotification("Could not save folder changes. Your existing data was kept.", "error");
@@ -35,7 +38,9 @@ function persistFolderMutation(nextData, previousData, done, rename = null) {
     done?.(success);
   }
   try {
-    chrome.storage.local.set({ folderData: nextData }, () => finish(!chrome.runtime.lastError));
+    accountPatch = AccountSetupStore.withFolders({ folderOwner: window.folderOwner,
+      [AccountSetupStore.key]: window.accountSetupData }, nextData);
+    chrome.storage.local.set({ folderData: nextData, ...accountPatch }, () => finish(!chrome.runtime.lastError));
   } catch (error) { finish(false); }
   return true;
 }

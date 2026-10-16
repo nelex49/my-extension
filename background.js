@@ -1,4 +1,4 @@
-importScripts('src/background/AccountProtection.js', 'src/shared/BackupFormat.js', 'src/background/BackupService.js');
+importScripts('src/accounts/AccountSetupStore.js', 'src/accounts/AccountSetupMigration.js', 'src/background/AccountProtection.js', 'src/shared/BackupFormat.js', 'src/background/BackupService.js');
 /** @format */
 
 // Fetch private subscription data in the extension worker, not YouTube's page context.
