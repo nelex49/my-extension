@@ -1,57 +1,48 @@
-# Current checkpoint: account storage and migration, stage 1
+# Working handover - account storage and migration
 
-Based on the cleaned folder stage which the user tested and confirmed pushed on premium-folders. This stage introduces src/accounts/AccountSetupStore.js and AccountSetupMigration.js, with small integrations in startup, verified linking, folder persistence and restore.
+Updated: 17 October 2026
 
-It preserves the current linked setup, including original working folderData/folderOwner, and adds accountSetupData schema version 1 keyed by verified YouTube channel ID. Saves/restores update both active copies in one write. Inactive account records are preserved. Unsupported, mismatched or differing stored copies fail without overwrite; storage failures retain original data. Tokens/cache/plan state stay outside the new account registry.
+## Authoritative baseline and repository rules
 
-This is the storage/migration section, not the complete multi-account feature. Popup behaviour, different-account blocking, Free/Pro folder behaviour and existing appearance remain. Account switching and its plan rules are the next section after manual acceptance. Expiry direction is recorded in PROJECT-BACKLOG.md; replacing the Free account after expiry is not designed yet.
+Use the attached `extension-current.tar(1).gz`, before the unsuccessful account-switching implementation. Do not use the separately supplied `extension-source.zip` as the baseline.
 
-Manual instructions: development/account-storage-testing.md. Automated coverage: the existing eight suites plus account-setups.cjs. Original OAuth, permissions, popup, backup format, move feedback and tools-menu design preserved. No branch operation, commit, push or merge performed. Target remains premium-folders; leave main/ui-redesign untouched.
+Target branch: `premium-folders`. This archive has no Git metadata; its branch cannot be verified here. Verify the original checkout before applying changes. Do not touch `main` or `ui-redesign`, create branches, commit or push without explicit instructions. No Git operations were performed for this documentation update.
 
-The active working setup is temporarily duplicated in its account record; storage quota failures must retain the original data. Cross-tab stale-save protection remains deferred. Production licensing and cloud sync remain outside scope.
+Preserve the original development extension identity, OAuth client and permissions. Never substitute the separate portable Beta configuration. Keep files modular, clearly named and reasonably small; preserve accepted appearance and behaviour.
 
----
+## Working checkpoint
 
-# Current cleanup checkpoint
+- Accepted redesigned interface and modular folder-management code.
+- Move success appears without layout movement and leaves the user in the source subfolder. Channel three-dot menu preserved.
+- Tools: Refresh Subscriptions, Backup, Restore and About. Normal same-account Refresh keeps Manage open during verification; owner protection remains.
+- Backup/restore retains verified owner checks and completed safety-copy downloads before replacement. Restore replaces local organisation, not actual YouTube subscriptions.
+- AccountSetupStore and AccountSetupMigration preserve existing linked data and create versioned account records keyed by verified channel ID. Saves, linking and restore update working data and the owner's record together. Invalid/conflicting state fails without overwrite; failed writes preserve original data.
+- Tokens, live subscription cache and development plan state stay outside account records/backups. Active data is duplicated in its account record; quota failures must preserve it.
+- Existing single-account behaviour was manually tested successfully. The portable beta previously passed second-computer testing.
+- Historical baseline comparison and nine inactive switching-file removals are recorded in PROJECT-BACKLOG.md. Do not reintroduce switching files or controls.
 
-The user confirmed Free/Pro/expired manual testing works in Chrome. The tests directory is now cleaned: old copied application files, tests/src and tests/tests were removed. It contains the eight current suite entry points, popup-auth.cjs (used by retrieval), and a test-specific README. Application files are unchanged from premium-folders-stage1.zip.
+## Free, Pro and expiry rules
 
-Apply this complete replacement on premium-folders. Delete the existing local tests directory before copying the replacement tests directory; an ordinary overwrite does not remove files omitted from a ZIP. Preserve the project's actual src and Git metadata. No branch operation, commit or push performed.
+Free provisionally allows four parent folders and three subfolders per parent. Subscriptions are unlimited. Pro allows unlimited parents and subfolders.
 
-All eight suites must pass after cleanup. See tests/README.md for commands. Folder-plan testing instructions remain in development/README.md. The earlier "manual testing required" statements below are superseded by the user's acceptance of Free/Pro/expired checks; existing tests remain simulations of Chrome/DOM APIs.
+On expiry, preserve all folders and subscriptions, access, editing, deletion and channel moves. Block all new folder creation while any structure count exceeds Free limits. Once the complete structure fits, allow creation where capacity remains. Full oversized-backup restoration is allowed, followed by the same restrictions.
 
----
+FolderPlan, FolderCreationGate and FolderLimitDialog centralise these rules. The separate development options page simulates Free/Pro/expired states; this is not verified production licensing. Purchases are unavailable. Before selling, replace test-state resolution with verified licensing, disable development plan testing and remove development options from the release.
 
-# Folder plans handover - premium-folders
+## Shelved and deferred work
 
-Current implementation builds on the accepted and user-tested Refresh fix, preserving the move-notice placement, four-item tools menu, account protection, original development OAuth configuration, backup/restore and safety-copy rules.
+Multiple-account support is shelved for a future release because authentication and hosting need more work. Retain the working storage foundation and current single-account protection. Do not build a backend or account switcher now. Earlier multi-account plan/expiry proposals are not launch commitments.
 
-## Current section
+Multi-channel moves, seven-day trial, cross-device sync, selective restore, backup history and cross-tab save protection remain deferred. Sidebar-state persistence and light theme should be Free. Icon packs/custom uploads, scheduled backups and bulk unsubscribe remain candidates.
 
-- Free: provisionally four parents and three children per parent; no subscription-count limit.
-- Pro: unlimited folder counts.
-- Expired: Free creation rules. All existing content remains usable, editable, movable and deletable. Block all new creation while any count exceeds Free; resume where there is room once counts fit Free.
-- Full oversized restore is allowed and does not restore an entitlement or test plan. Current owner checks and confirmed safety download stay in place.
-- Shared creation forms and creation services both use the central policy, including a recheck before saving an already-open form.
-- A themed upgrade/renew prompt explains the limit and offers Pro details. It explicitly says purchases are not available yet. No billing/licensing has been implemented.
+## Next discussion and release requirements
 
-## Organisation
+Discuss the smallest useful first Pro release. Unlimited folders are already implemented, but the launch feature list is not agreed. GBP 9.99 annually is provisional; pricing, payment/licensing provider, upgrade placement and lifetime pricing remain undecided.
 
-`src/plans/FolderPlan.js`: limits, policy and explicitly development-only test-state resolution.
-`src/plans/FolderCreationGate.js`: bridges policy results to UI.
-`src/components/PlanDialogs/FolderLimitDialog.js`: limit dialog and read-only Pro details.
-`development/plan-testing.*`: standalone Extension options page for Free/Pro/expired simulation.
+Before selling Pro: verified licensing, replacement of development plan controls, release branding/privacy/store materials, all regression suites and real Chrome testing. No new feature implementation is authorised by this documentation update. PROJECT-BACKLOG.md is the current decision record.
 
-Existing FolderService, form controls and App receive small integration changes. Payment, other premium features and cross-tab save protection remain outside scope.
+## Validation and delivery
 
-## Testing and next action
+Run dialogs, manage, retrieval and startup after changes, plus relevant suites. This documentation delivery runs all nine: dialogs, manage, retrieval, startup, backup, backup-notice, folder-plans, plan-testing and account-setups. Commands and coverage are in tests/README.md. Tests simulate Chrome/DOM APIs; real Chrome installation, OAuth, appearance, persistence and download checks remain necessary before release.
 
-See `development/README.md` for the manual test checklist and commands. Reload the existing development extension, then YouTube. In Chrome extension Details -> Extension options, choose Test Free, Test Pro or Test expired Pro. The state persists and open YouTube tabs update immediately. It does not alter folders and is excluded from backups.
-
-All eight automated suites must pass before delivery: dialogs, manage, retrieval, startup, backup, backup-notice, folder-plans and plan-testing. They simulate DOM and Chrome APIs; live Chrome visual/installation testing is still required.
-
-This is a development build. `CONFIG.DEVELOPMENT_PLAN_TESTING` is true so the user can simulate plan states; default is Free. It is not a production entitlement system. Before release, replace simulated resolution with the agreed licensing flow, disable the flag, and remove the development options entry/page. With the flag off, stored test Pro is ignored.
-
-Target branch: `premium-folders`, created by the user from their pushed/tested `ui-redesign` checkpoint `6c35020`. This workspace contains source archives, not the user's Git repository; no branch switch, commit, push or merge has been performed here. No changes to main or ui-redesign are authorised. Deliver a complete replacement archive for local testing, then wait for acceptance before commit/push or multi-account work.
-
-`PROJECT-BACKLOG.md` is the authoritative current decision record, including provisional allowance/price and deferred features.
+Manual checklists: development/account-storage-testing.md and development/README.md. Deliver one complete replacement ZIP without Git metadata. This update changes only PROJECT-BACKLOG.md and HANDOVER.md; application code and configuration remain identical to the authoritative archive.
