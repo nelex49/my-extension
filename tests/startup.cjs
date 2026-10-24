@@ -25,7 +25,7 @@ const body=new E('body');const document={body,activeElement:body,createElement:t
 let listeners=[],writes=0,moves=0,removes=0,adds=0;
 const sub=(id,title)=>({snippet:{title,resourceId:{channelId:id}}});
 const a=sub('UC_A','Zulu <safe>'),b=sub('UC_B','Alpha'),c=sub('UC_C','Beta');b.snippet.description='A <script> & description';b.snippet.thumbnails={default:{url:'https://yt3.ggpht.com/mock.jpg'}};
-const context={console,document,URL,innerWidth:1200,innerHeight:900,ResizeObserver:class{constructor(callback){this.callback=callback;context.tabsObserver=this}observe(){}disconnect(){}},isLoggedIn:true,confirm:()=>true,sidebarFolderColour:colour=>colour||'#243f59',lightenColor:(colour,amount)=>{const rgb=[1,3,5].map(i=>Math.min(255,parseInt(colour.slice(i,i+2),16)+Math.round(amount*2.55)));return '#'+rgb.map(v=>v.toString(16).padStart(2,'0')).join('')},chrome:{storage:{onChanged:{addListener:f=>listeners.push(f),removeListener:f=>listeners=listeners.filter(x=>x!==f)}},runtime:{sendMessage(){return Promise.resolve({success:true})}}},showUnifiedFolderManager(name,mode,onCreated){adds++;context.pendingCreated=onCreated},showCreateSubfolderModal(){adds++},safeSaveFolderData(){writes++},refreshFolderDropdown(){},setTimeout:f=>f(),logStatus(){},showUserNotification(){},folderLimit:3,isPremium:false,folderDropdown:null};
+const context={console,document,URL,innerWidth:1200,innerHeight:900,ResizeObserver:class{constructor(callback){this.callback=callback;context.tabsObserver=this}observe(){}disconnect(){}},isLoggedIn:true,confirm:()=>true,sidebarFolderColour:colour=>colour||'#243f59',lightenColor:(colour,amount)=>{const rgb=[1,3,5].map(i=>Math.min(255,parseInt(colour.slice(i,i+2),16)+Math.round(amount*2.55)));return '#'+rgb.map(v=>v.toString(16).padStart(2,'0')).join('')},chrome:{storage:{onChanged:{addListener:f=>listeners.push(f),removeListener:f=>listeners=listeners.filter(x=>x!==f)}},runtime:{sendMessage(){return Promise.resolve({success:true})}}},showUnifiedFolderManager(name,mode,onCreated){adds++;context.pendingCreated=onCreated},showCreateSubfolderModal(){adds++},refreshFolderDropdown(){},setTimeout:f=>f(),logStatus(){},showUserNotification(){},folderLimit:3,isPremium:false,folderDropdown:null};
 
 
 context.window=context;document.readyState='loading';
@@ -159,6 +159,31 @@ emitChanges({accountStatus:{state:'verifying',session:'token'}});assert.ok(verif
 emitChanges({accountStatus:{state:'error',session:'token',message:'Cannot verify'}});assert.ok(!verificationView.isConnected);
 emitChanges({accountStatus:{state:'ready',session:'token',account:store.folderOwner}});
 context.showSubfolderView();verificationView=document.getElementById('subfolder-view-modal');assert.ok(verificationView);
+// Saved browsing state restores through the real sidebar/Manage integration.
+context.ViewPreferences.update({sidebarOpen:true,parents:['Sports renamed'],children:[JSON.stringify(['Sports renamed','Renamed ball'])],manageOpen:true,parent:'Sports renamed',child:'Renamed ball'});
+await context.ViewPreferences.flush();
+vm.runInContext('activeManageView.close(false); sidebarExpandedParents.clear(); sidebarExpandedSubfolders.clear();',context);
+await context.ViewPreferences.initialize(store.folderOwner.id);
+context.ViewPreferences.restoreSidebar();
+assert.equal(document.getElementById('subfolder-view-modal'),null);
+assert.equal(typeof context.ViewPreferences.restoreManage,'undefined');
+context.showSubfolderView();
+assert.equal(document.getElementById('yt-folder-dropdown').hidden,false);
+assert.ok(document.querySelector('#yt-manage-guide-entry .ytsm-launcher-chevron'));
+assert.equal(document.querySelector('#yt-manage-guide-entry .ytsm-launcher').attrs['aria-expanded'],'true');
+context.toggleFolderDropdown();
+assert.equal(document.querySelector('#yt-manage-guide-entry .ytsm-launcher').attrs['aria-expanded'],'false');
+context.toggleFolderDropdown();
+assert.ok(vm.runInContext("sidebarExpandedParents.has('Sports renamed')",context));
+assert.ok(vm.runInContext("sidebarExpandedSubfolders.has(JSON.stringify(['Sports renamed','Renamed ball']))",context));
+verificationView=document.getElementById('subfolder-view-modal');
+assert.equal(verificationView.querySelector('.ysm-selected').textContent,'Renamed ball');
+// Explicit close is retained; missing folder references fall back without changing folders.
+verificationView.events.click({target:verificationView.querySelector('[data-action="close"]')});
+assert.equal(document.getElementById('subfolder-view-modal'),null);
+context.ViewPreferences.update({manageOpen:true,parent:'Deleted',child:'Missing'});
+context.showSubfolderView();verificationView=document.getElementById('subfolder-view-modal');
+assert.equal(context.ViewPreferences.read().parent,null);assert.equal(context.ViewPreferences.read().child,null);
 // A mismatched authorised account closes Manage and prevents folder writes.
 const beforeBlocked=JSON.stringify(context.folderData), writesBeforeBlocked=writes;
 for(const listener of [...listeners])listener({accountStatus:{newValue:{state:'blocked',session:'token',account:{id:'UC_OTHER',title:'Other'},owner:store.folderOwner}}},'local');

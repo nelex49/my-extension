@@ -15,6 +15,8 @@ function showSubfolderView() {
   document.body.append(modal);
   const dialog = modal.querySelector(".ysm-manage");
   const state = createManageState();
+  const savedView = window.ViewPreferences?.read();
+  if (savedView) { state.parent = savedView.parent; state.child = savedView.child; }
   const backupNotice = createManageBackupNotice(modal);
   const previousChildRenameHandler = window.prepareManageSubfolderRename;
   window.prepareManageSubfolderRename = (parentName, oldName, newName) => {
@@ -43,7 +45,8 @@ function showSubfolderView() {
     }
   }
 
-  function close() {
+  function close(remember = true) {
+    if (remember) window.ViewPreferences?.update({ parent: state.parent, child: state.child });
     chrome.storage.onChanged.removeListener(storageChanged);
     document.removeEventListener("keydown", keydown);
     document.removeEventListener("pointerdown", dismissMenus);
@@ -66,6 +69,7 @@ function showSubfolderView() {
     const data = window.folderData || {};
     if (state.parent !== null && !Object.hasOwn(data, state.parent)) { state.parent = null; state.child = null; }
     if (state.parent !== null && state.child !== null && !Object.hasOwn(data[state.parent].subfolders || {}, state.child)) state.child = Object.keys(data[state.parent].subfolders || {})[0] ?? null;
+    window.ViewPreferences?.update({ parent: state.parent, child: state.child });
     const loadedCount = (window.userSubscriptions || []).length;
     const hasStoredChannels = Object.values(data).some(info => info.subscriptions?.length ||
       Object.values(info.subfolders || {}).some(sub => sub.subscriptions?.length));

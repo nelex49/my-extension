@@ -36,7 +36,7 @@
         "src/plans/FolderCreationGate.js",
         "src/utils/helpers.js",
         "src/utils/FolderColours.js",
-        "src/services/StorageService.js",
+        "src/services/ViewPreferences.js",
         "src/services/YouTubeAPI.js",
         "src/services/AuthService.js",
         "src/services/FolderService.js",

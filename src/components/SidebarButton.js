@@ -51,6 +51,12 @@ function mountSidebarEntry(loggedIn = isLoggedIn) {
   text.textContent = label;
   button.append(icon, text);
   if (loggedIn) {
+    const chevron = document.createElement('span');
+    chevron.className = 'ytsm-launcher-chevron';
+    chevron.setAttribute('aria-hidden', 'true');
+    button.append(chevron);
+  }
+  if (loggedIn) {
     button.setAttribute("aria-expanded", "false");
     button.setAttribute("aria-controls", "yt-folder-dropdown");
   }
@@ -61,6 +67,7 @@ function mountSidebarEntry(loggedIn = isLoggedIn) {
   entry.append(button);
   sizeSidebarLauncher(entry, container);
   window.sidebarButtonCreated = true;
+  if (loggedIn) window.ViewPreferences?.restoreSidebar();
   return entry;
 }
 

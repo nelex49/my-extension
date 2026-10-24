@@ -293,3 +293,21 @@
 
 /* Tonal outlines remain visible without the weight of a filled icon. */
 #yt-manage-guide-entry .ytsm-folder .ytsm-folder-icon { color: var(--folder-icon-colour, currentColor); }
+
+/* Launcher expansion follows the same aria state used by persistence. */
+#yt-manage-guide-entry .ytsm-launcher-chevron {
+  display: block;
+  flex: 0 0 6px;
+  width: 6px;
+  height: 6px;
+  margin-left: auto;
+  margin-right: 3px;
+  border-right: 1.5px solid currentColor;
+  border-bottom: 1.5px solid currentColor;
+  transform: rotate(-45deg);
+  opacity: .75;
+  pointer-events: none;
+}
+#yt-manage-guide-entry .ytsm-launcher[aria-expanded="true"] .ytsm-launcher-chevron {
+  transform: rotate(45deg);
+}

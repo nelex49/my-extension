@@ -2,7 +2,7 @@
 
 These scripts test the real application files in the project root and `src`. There should be no copied application tree or nested tests directory here.
 
-Run these nine suites from the extension project folder in Bash:
+Run these ten suites from the extension project folder in Bash:
 
 ```bash
 node tests/dialogs.cjs
@@ -14,6 +14,7 @@ node tests/backup-notice.cjs
 node tests/folder-plans.cjs
 node tests/plan-testing.cjs
 node tests/account-setups.cjs
+node tests/view-preferences.cjs
 ```
 
 | File | Coverage |
@@ -27,6 +28,7 @@ node tests/account-setups.cjs
 | folder-plans.cjs | Free/Pro/expired limits, oversized recovery, data preservation and creation after reduction |
 | plan-testing.cjs | Separate development options controls and storage failures |
 | account-setups.cjs | Migration, invalid/conflicting state, account isolation, atomic saves/restores, rollback and restart |
+| view-preferences.cjs | Preference validation, owner isolation, reload, serialized writes and failure recovery; startup also covers real view restoration |
 | popup-auth.cjs | Exported helper suite invoked automatically by retrieval.cjs; not a standalone entry point |
 
 Tests use Node's built-in modules with simulated DOM and Chrome APIs. No package installation is required. They do not replace manual Chrome layout, OAuth, downloads and persistence checks. See `../development/README.md` for the folder-plan manual checklist.

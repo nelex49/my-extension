@@ -9,6 +9,7 @@ function toggleFolderDropdown() {
   if (!folderDropdown) return;
   closeSidebarFolderMenu();
   folderDropdown.hidden = !folderDropdown.hidden;
+  window.ViewPreferences?.sidebar(!folderDropdown.hidden, sidebarExpandedParents, sidebarExpandedSubfolders);
   document.querySelector("#yt-manage-guide-entry .ytsm-launcher")
     ?.setAttribute("aria-expanded", String(!folderDropdown.hidden));
 }
@@ -101,6 +102,7 @@ function refreshFolderDropdown() {
   create.addEventListener("click", () => showUnifiedFolderManager());
   footer.append(manage, create);
   folderDropdown.replaceChildren(heading, list, footer);
+  window.ViewPreferences?.sidebar(!folderDropdown.hidden, sidebarExpandedParents, sidebarExpandedSubfolders);
   list.scrollTop = scrollTop;
   folderDropdown.querySelectorAll('.ytsm-subfolders').forEach(children => {
     children.scrollTop = subfolderScroll.get(children.dataset.scrollKey) || 0;

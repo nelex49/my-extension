@@ -21,7 +21,7 @@ function syncSubscriptions(subscriptions) {
 
 function initialize() {
   if (appInitialization) return appInitialization;
-  appInitialization = AccountSetupMigration.ensure().then(data => {
+  appInitialization = AccountSetupMigration.ensure().then(async data => {
     window.accountSetupData = data[AccountSetupStore.key];
     FolderPlan.applyStorage(data);
     activeAccountSession = data.accessToken || null;
@@ -29,6 +29,7 @@ function initialize() {
     window.folderOwner = data.folderOwner || null;
     folderData = data.folderData || {};
     window.folderData = folderData;
+    await ViewPreferences.initialize(data.folderOwner?.id);
     syncSubscriptions(data.userSubscriptions);
     handleLoginState(data.accessToken);
     watchSidebarGuide();
@@ -52,7 +53,12 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
     if (typeof window.refreshManageView === "function") window.refreshManageView();
   }
   if (changes.accountStatus) window.accountStatus = changes.accountStatus.newValue || {state:'signedOut'};
-  if (changes.folderOwner) window.folderOwner = changes.folderOwner.newValue || null;
+  if (changes.folderOwner) {
+    window.folderOwner = changes.folderOwner.newValue || null;
+    ViewPreferences.initialize(window.folderOwner?.id).then(() => {
+      if (accountIsReady()) { ViewPreferences.restoreSidebar(); }
+    });
+  }
   if (changes.accessToken) activeAccountSession = changes.accessToken.newValue || null;
   if (changes.accountStatus || changes.accessToken) {
     // A routine refresh re-verifies the same session before fetching subscriptions.
@@ -60,9 +66,9 @@ chrome.storage.onChanged.addListener((changes, namespace) => {
     const recheckingCurrentSession = !changes.accessToken && !!activeAccountSession &&
       window.accountStatus?.state === 'verifying' && window.accountStatus.session === activeAccountSession;
     if (!recheckingCurrentSession) {
-      if (!accountIsReady()) activeManageView?.close();
+      if (!accountIsReady()) activeManageView?.close(false);
       handleLoginState(activeAccountSession, !!changes.accessToken);
-    }
+      }
   }
 });
 
