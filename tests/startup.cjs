@@ -128,12 +128,25 @@ menu=openParentMenu();menu.querySelectorAll('button')[1].events.click();let quic
 quickDialog.querySelector('#ytsm-folder-name').value='Quick child';quickDialog.querySelector('[data-action="save"]').events.click();assert.ok(store.folderData.Sports.subfolders['Quick child']);assert.ok(manage.querySelectorAll('button').find(e=>e.dataset.child==='Quick child'));
 let childOptions=sidebar.querySelector('.ytsm-subfolder-group .ytsm-folder-more');childOptions.events.click();menu=document.getElementById('ytsm-sidebar-folder-menu');assert.equal(menu.style.left,'702px');assert.equal(menu.style.top,'202px');assert.equal(menu.querySelectorAll('button').length,1);assert.equal(menu.querySelector('button').textContent,'Edit subfolder');menu.querySelector('button').events.click();quickDialog=body.children.at(-1);assert.equal(quickDialog.firstElementChild.style.left,'422px');assert.equal(quickDialog.firstElementChild.style.top,'202px');assert.equal(quickDialog.querySelector('#ytsm-folder-name').value,'Ball');quickDialog.querySelector('#ytsm-folder-name').value='Renamed ball';quickDialog.querySelector('[data-action="save"]').events.click();assert.ok(store.folderData.Sports.subfolders['Renamed ball']);assert.equal(manage.querySelector('.ysm-selected').textContent,'Renamed ball');assert.equal(store.folderData.Sports.subfolders['Renamed ball'].subscriptions.length,2);
 menu=openParentMenu();menu.querySelector('button').events.click();quickDialog=body.children.at(-1);assert.equal(quickDialog.firstElementChild.style.left,'422px');assert.equal(quickDialog.firstElementChild.style.top,'202px');assert.equal(quickDialog.querySelector('#ytsm-folder-name').value,'Sports');quickDialog.querySelector('#ytsm-folder-name').value='Sports renamed';quickDialog.querySelector('[data-action="save"]').events.click();assert.ok(store.folderData['Sports renamed']);assert.equal(manage.querySelector('.ysm-nav-heading h3').textContent,'Sports renamed folders');assert.equal(manage.querySelector('.ysm-selected').textContent,'Renamed ball');
-// Tools remain four working entries; About uses the shared lifecycle and restores focus.
+// Tools include the theme control alongside the existing entries; About uses the shared lifecycle and restores focus.
 const tools=manage.querySelector('.ysm-main-menu');
-assert.equal(tools.querySelectorAll('button').length,4);
-assert.equal(tools.querySelectorAll('svg').length,4);
+assert.equal(tools.querySelectorAll('button').length,5);
+assert.equal(tools.querySelectorAll('svg').length,5);
 assert.ok(tools.textContent.includes('Download your folders'));
 const toolsTrigger=manage.querySelector('[data-action="menu"]');toolsTrigger.focus();
+// Theme selection is a working Tools action, independent of plan/owner data.
+manage.events.click({target:tools.querySelector('[data-action="theme"]')});
+let themeDialog=body.children.at(-1);assert.ok(themeDialog.classList.contains('ytsm-theme-dialog'));
+const themeChoices=themeDialog.querySelectorAll('button').filter(button=>button.dataset.theme);
+assert.equal(themeChoices.length,2);
+await themeChoices.find(button=>button.dataset.theme==='light').events.click();
+assert.equal(store.subscriptionTheme,'light');assert.equal(context.ThemeService.current,'light');
+assert.equal(themeChoices.find(button=>button.dataset.theme==='light').attrs['aria-pressed'],'true');
+const foldersBeforeTheme=JSON.stringify(store.folderData);
+await themeChoices.find(button=>button.dataset.theme==='dark').events.click();
+assert.equal(store.subscriptionTheme,'dark');assert.equal(JSON.stringify(store.folderData),foldersBeforeTheme);
+themeDialog.querySelector('[data-action="theme-done"]').events.click();assert.ok(!themeDialog.isConnected);assert.ok(manage.isConnected);
+
 manage.events.click({target:toolsTrigger});
 manage.events.click({target:tools.querySelector('[data-action="about"]')});
 let about=body.children.at(-1);assert.ok(about.classList.contains('ytsm-about-dialog'));

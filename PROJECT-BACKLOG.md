@@ -133,3 +133,19 @@ Development source stays on premium-folders; beta is a generated separate tester
 - Reopening Manage manually restores the last selected parent/subfolder. Sidebar section visibility and expanded rows still persist.
 - Subscription Folders launcher now has an aria-hidden CSS chevron: right when collapsed, down when expanded. The existing full button remains the toggle; no separate close control.
 - All ten suites pass, including restore-without-auto-open, remembered manual selection, ignored legacy open state and launcher aria state. Real Chrome appearance/reload checks remain required. Development OAuth/permissions unchanged; no Git operations.
+
+## Free theme checkpoint - 24 October 2026
+
+- User confirmed persistence refinement working and committed/pushed it to premium-folders; no commit hash supplied. This delivery adds theme switching on top of that accepted code.
+- Manage Tools now includes Theme alongside Refresh, Backup, Restore and About. Theme opens a shared dialog with explicit Dark/Light choices and Done; successful saves apply immediately. Saving failures retain the previous theme and report an error.
+- Dark remains default. Theme is a browser-profile preference (subscriptionTheme), independent of linked accounts, Free/Pro plan states and folder backups. It survives refresh/restart, applies to other open tabs and the sign-in popup, and never changes YouTube's own theme or saved folder fills/text.
+- Focused ThemeService owns persistence and cross-tab updates; ThemeDialog owns the shared dialog UI; theme.css defines the light palette. Existing style declarations use light tokens with their original dark colour as fallback, preserving dark panel styling and layout. New menu entry and theme dialog are the intended UI additions; sign-in popup now follows the chosen theme.
+- Eleven suites pass, including theme unit tests and startup integration that opens the actual Theme control and selects both states. Checks cover defaults, persisted choice, failed saves, cross-tab changes, plan/folder isolation, initialization races and exact dark CSS fallback preservation.
+- Chromium is not installed here; real rendered light-theme, native controls and contrast/layout checks remain pending in Chrome. User should test sidebar, Manage, overflow/move menus, create/edit/custom-colour dialogs, About, backup/restore/plan dialogs and sign-in popup in both themes, then refresh/restart. Confirm folder colours and assignments remain unchanged.
+- Original development OAuth/client identity, permissions and account-storage logic remain unchanged. No Git operations performed. Generate beta separately after acceptance; public plan controls/licensing and further Pro launch scope remain unfinished.
+
+## Light navigation contrast correction
+
+- User confirmed themes working. Fixed white text on light-theme Uncategorised (including count/icon and hover) and All Folders. Selected Uncategorised uses a light blue fill and inset outline to retain a visible selected state with dark text.
+- Dark theme, saved folder colours and Add Folder unchanged. Theme remains in Tools with explicit Dark/Light and Done; a header pill was discussed but not implemented.
+- Eleven suites pass, including numeric contrast checks for these light navigation states. Real Chrome appearance remains for user confirmation. No Git operations.

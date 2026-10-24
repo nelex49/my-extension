@@ -4,12 +4,14 @@ function manageToolsHTML() {
     refresh: '<path d="M20 7v5h-5M4 17v-5h5"/><path d="M6 7a7 7 0 0 1 12-1l2 3M4 15l2 3a7 7 0 0 0 12-1"/>',
     backup: '<path d="M12 3v12m-5-5 5 5 5-5M5 16v5h14v-5"/>',
     restore: '<path d="M12 16V4m-5 5 5-5 5 5M5 16v5h14v-5"/>',
+    theme: '<circle cx="12" cy="12" r="9"/><path d="M12 3v18a9 9 0 0 0 0-18Z"/>',
     about: '<circle cx="12" cy="12" r="9"/><path d="M12 11v6m0-10v1"/>'
   };
   const items = [
     ['refresh', 'Refresh subscriptions', 'Get your latest YouTube subscriptions'],
     ['backup', 'Backup folders', 'Download your folders and channel assignments'],
     ['restore', 'Restore backup', 'Replace your setup from a saved backup'],
+    ['theme', 'Theme', 'Choose Dark or Light for the extension'],
     ['about', 'About', 'About YouTube Subscription Manager']
   ];
   return items.map(([action, label, description]) => `<button type="button" data-action="${action}"><svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${paths[action]}</svg><span><strong>${label}</strong><small>${description}</small></span></button>`).join('');

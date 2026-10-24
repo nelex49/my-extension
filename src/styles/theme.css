@@ -1,0 +1,69 @@
+/* Only extension-specific variables are set on the host root; no YouTube rules change. */
+:root[data-ytsm-theme="light"] {
+  --ytsm-theme-canvas: #f5f7fa;
+  --ytsm-theme-surface: #ffffff;
+  --ytsm-theme-control: #edf1f6;
+  --ytsm-theme-hover: #dfe7f0;
+  --ytsm-theme-border: #b9c6d5;
+  --ytsm-theme-border-strong: #66809d;
+  --ytsm-theme-accent-soft: #dce9f5;
+  --ytsm-theme-accent-hover: #c6daef;
+  --ytsm-theme-accent-fill: #315f83;
+  --ytsm-theme-accent-border: #517da5;
+  --ytsm-theme-focus: #215c9b;
+  --ytsm-theme-icon: #41678d;
+  --ytsm-theme-text: #202b38;
+  --ytsm-theme-muted: #536478;
+  --ytsm-theme-scrollbar: #8795a6;
+  --ytsm-theme-danger-soft: #fbe8eb;
+  --ytsm-theme-danger-hover: #f4d5db;
+  --ytsm-theme-danger-fill: #8c3541;
+  --ytsm-theme-danger-border: #b45c6c;
+  --ytsm-theme-danger-text: #802c3d;
+  --ytsm-theme-warning-soft: #fff3d9;
+  --ytsm-theme-warning-text: #725219;
+  --ytsm-theme-success-soft: #e4f3e9;
+  --ytsm-theme-success-border: #487d5e;
+  --ytsm-theme-success-text: #23583a;
+}
+#yt-manage-guide-entry, #subfolder-view-modal, #ytsm-sidebar-folder-menu, .ytsm-folder-dialog { color-scheme: dark; }
+:root[data-ytsm-theme="light"] :is(#yt-manage-guide-entry, #subfolder-view-modal, #ytsm-sidebar-folder-menu, .ytsm-folder-dialog) { color-scheme: light; }
+/* Saved folder fills/text stay exact in both themes, including custom colours. */
+:root[data-ytsm-theme="light"] #subfolder-view-modal .ysm-tab span { color: inherit; }
+:root[data-ytsm-theme="light"] #subfolder-view-modal .ysm-tab.is-active { border-color: #173f69; box-shadow: inset 0 0 0 1px #173f69; }
+:root[data-ytsm-theme="light"] #subfolder-view-modal .ysm-row-actions .ysm-move,
+:root[data-ytsm-theme="light"] #yt-manage-guide-entry .ytsm-create,
+:root[data-ytsm-theme="light"] .ytsm-folder-dialog .ytsm-primary,
+:root[data-ytsm-theme="light"] .ytsm-folder-dialog .is-danger,
+:root[data-ytsm-theme="light"] .ytsm-folder-dialog .ytsm-delete { color: #fff; }
+:root[data-ytsm-theme="light"] .ytsm-folder-dialog button:hover { filter: brightness(.96); }
+:root[data-ytsm-theme="light"] .ytsm-folder-dialog .ytsm-swatch:hover { filter: none; }
+:root[data-ytsm-theme="light"] #yt-manage-guide-entry .ytsm-folder-more:hover,
+:root[data-ytsm-theme="light"] #yt-manage-guide-entry .ytsm-folder-more:focus-visible,
+:root[data-ytsm-theme="light"] #subfolder-view-modal .ysm-move-clear:hover,
+:root[data-ytsm-theme="light"] #subfolder-view-modal .ysm-folder-search-clear:hover { color: #202b38; }
+.ytsm-theme-dialog .ytsm-theme-copy { color: var(--ytsm-form-muted); }
+.ytsm-theme-dialog .ytsm-theme-options { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+.ytsm-theme-dialog .ytsm-theme-options button { min-height: 44px; }
+.ytsm-theme-dialog .ytsm-theme-options button[aria-pressed="true"] { border-color: var(--ytsm-form-accent-border); box-shadow: inset 0 0 0 1px var(--ytsm-form-accent-border); font-weight: 600; }
+.ytsm-theme-dialog .ytsm-theme-status { margin-top: 10px; min-height: 20px; color: var(--ytsm-form-muted); }
+/* The extension popup is a separate document sharing the same preference. */
+:root[data-ytsm-theme="dark"] .ytsm-popup,
+:root[data-ytsm-theme="dark"] .ytsm-popup .popup-container { background: #20272e; color: #eef0f3; color-scheme: dark; }
+:root[data-ytsm-theme="dark"] .ytsm-popup .popup-container { border-color: #46525e; }
+:root[data-ytsm-theme="dark"] .ytsm-popup .status { color: #c6d0da; }
+:root[data-ytsm-theme="light"] .ytsm-popup,
+:root[data-ytsm-theme="light"] .ytsm-popup .popup-container { background: #fff; color: #202b38; color-scheme: light; }
+:root[data-ytsm-theme="light"] .ytsm-popup .status { color: #536478; }
+
+/* Navigation controls use dark text on their light-theme surfaces. */
+:root[data-ytsm-theme="light"] #subfolder-view-modal .ysm-parent-heading .ysm-uncategorised,
+:root[data-ytsm-theme="light"] #subfolder-view-modal .ysm-parent-heading .ysm-uncategorised:hover,
+:root[data-ytsm-theme="light"] #subfolder-view-modal .ysm-parent-heading .ysm-uncategorised span,
+:root[data-ytsm-theme="light"] #subfolder-view-modal .ysm-all-folders-slot .ysm-more-parents summary {
+  color: var(--ytsm-theme-text);
+}
+:root[data-ytsm-theme="light"] #subfolder-view-modal .ysm-parent-heading .ysm-uncategorised.is-active {
+  background: #bfd4ea;
+  box-shadow: inset 0 0 0 1px #66809d;
+}

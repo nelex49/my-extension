@@ -25,7 +25,8 @@
       "css": [
         "src/styles/subfolder-view.css",
         "src/styles/sidebar.css",
-        "src/styles/folder-dialogs.css"
+        "src/styles/folder-dialogs.css",
+        "src/styles/theme.css"
       ],
       "js": [
         "src/shared/BackupFormat.js",
@@ -37,6 +38,7 @@
         "src/utils/helpers.js",
         "src/utils/FolderColours.js",
         "src/services/ViewPreferences.js",
+        "src/services/ThemeService.js",
         "src/services/YouTubeAPI.js",
         "src/services/AuthService.js",
         "src/services/FolderService.js",
@@ -54,6 +56,7 @@
         "src/components/SubfolderView/ManageViewHelpers.js",
         "src/components/SubfolderView/ManageState.js",
         "src/components/SubfolderView/ManageTools.js",
+        "src/components/SubfolderView/ThemeDialog.js",
         "src/components/SubfolderView/ManageLayout.js",
         "src/components/SubfolderView/MovePicker.js",
         "src/components/SubfolderView/ChannelOptionsMenu.js",

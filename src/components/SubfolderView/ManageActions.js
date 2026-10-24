@@ -25,11 +25,12 @@ function createManageActions({ modal, state, render, close, dismissMenus, select
     }
     if (button.hasAttribute("data-parent")) { selectParent(button.dataset.parent); return; }
     if (button.hasAttribute("data-child")) { state.child = button.dataset.child; state.moveChannel = null; render(); return; }
-    if (action === "backup" || action === "restore" || action === "about") {
+    if (action === "backup" || action === "restore" || action === "about" || action === "theme") {
       modal.querySelector(".ysm-main-menu").hidden = true;
       modal.querySelector('[data-action="menu"]').setAttribute("aria-expanded", "false");
       if (action === "backup") window.exportFolderBackup();
       else if (action === "restore") window.chooseFolderBackup();
+      else if (action === "theme") { modal.querySelector('[data-action="menu"]').focus(); showThemeDialog(); }
       else { modal.querySelector('[data-action="menu"]').focus(); showManageAbout(); }
       return;
     }

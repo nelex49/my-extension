@@ -1,6 +1,6 @@
 # YouTube Subscription Manager
 
-Chrome Manifest V3 extension for organising YouTube subscriptions into parent folders and subfolders. Current development checkpoint: account storage/migration plus Free interface-state persistence, on `premium-folders`.
+Chrome Manifest V3 extension for organising YouTube subscriptions into parent folders and subfolders. Current development checkpoint: account storage/migration, Free interface-state persistence and light/dark themes, on `premium-folders`.
 
 `PROJECT-BACKLOG.md` is the current record of decisions, limitations, testing findings and ordered next work. Root documentation is limited to this overview and that decision record.
 
@@ -17,7 +17,7 @@ Chrome Manifest V3 extension for organising YouTube subscriptions into parent fo
 - JSON backup/full restore with owner validation, confirmation and a completed safety-copy download before replacement. Backups exclude credentials, subscription cache and development plan state.
 - Free: provisionally four parents and three subfolders per parent. Pro: unlimited folders. Both allow unlimited subscriptions. Expiry preserves access/editing/moves/deletion; creation is blocked while any counts exceed Free, then resumes within available capacity. Full oversized restore is allowed.
 
-Free interface-state persistence is implemented: sidebar section visibility, expanded parents/subfolders, restore after reload once account verification succeeds. Manage stays closed after reload; opening it manually restores the last selected parent/subfolder. Explicit close stays closed. The Subscription Folders launcher has a right-facing chevron when collapsed and a downward chevron when expanded. Menus, searches, edit dialogs and exact pixel scroll positions are not restored. Preferences are local to this browser profile, owner-tagged and excluded from backups. Light/dark switching is next and is not implemented. Multiple-account switching, cloud sync and production licensing are not implemented. Cross-tab save conflict protection remains deferred; the existing write guard is per content script.
+Free interface-state persistence is implemented: sidebar section visibility, expanded parents/subfolders, restore after reload once account verification succeeds. Manage stays closed after reload; opening it manually restores the last selected parent/subfolder. Explicit close stays closed. The Subscription Folders launcher has a right-facing chevron when collapsed and a downward chevron when expanded. Menus, searches, edit dialogs and exact pixel scroll positions are not restored. Preferences are local to this browser profile, owner-tagged and excluded from backups. Free light/dark switching is available under Manage > Tools (three dots) > Theme. Dark is the default; the browser-profile preference persists across refresh/restart and updates other open tabs. It covers the sidebar, Manage, menus, shared dialogs and sign-in popup, without changing YouTube itself or saved folder colours. Theme choice is excluded from folder backups. Multiple-account switching, cloud sync and production licensing are not implemented. Cross-tab save conflict protection remains deferred; the existing write guard is per content script.
 
 ## Development installation
 
@@ -44,6 +44,7 @@ Classic scripts load in explicit dependency order in `manifest.json`; no bundler
 | `background.js`, `src/background/` | Retrieval orchestration, verified ownership and backup worker operations |
 | `src/accounts/` | Versioned account records and legacy migration |
 | `src/core/App.js`, `src/main.js` | Startup and shared state/message/storage synchronisation |
+| `src/services/ThemeService.js`, `src/styles/theme.css` | Profile theme preference, live updates and shared light palette; existing dark colours remain exact fallbacks |
 | `src/services/ViewPreferences.js` | Local view preference validation, serialized persistence and verified restoration |
 | `src/services/FolderService.js` | Folder mutations, guarded account-aware persistence and rollback |
 | `src/components/SubscriptionManager.js` | Channel assignments through the folder persistence path |
@@ -61,12 +62,12 @@ Keep CSS separate from behaviour; calculated colours and drag coordinates may re
 Run from the project root in Bash; Node.js built-ins suffice:
 
 ```bash
-for suite in dialogs manage retrieval startup backup backup-notice folder-plans plan-testing account-setups view-preferences; do
+for suite in dialogs manage retrieval startup backup backup-notice folder-plans plan-testing account-setups view-preferences theme; do
   node "tests/$suite.cjs" || break
 done
 ```
 
-All ten suites passed after persistence implementation. See `tests/README.md` for coverage. They simulate DOM/Chrome/API behaviour and do not replace real Chrome OAuth, layout, installation, downloads or persistence testing. Check browser/extension errors and the relevant manual checklist after applying updates.
+All eleven suites passed after theme implementation. See `tests/README.md` for coverage. They simulate DOM/Chrome/API behaviour and do not replace real Chrome OAuth, layout, installation, downloads or persistence testing. Check browser/extension errors and the relevant manual checklist after applying updates.
 
 ## Applying this cleanup
 
