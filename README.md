@@ -7,8 +7,9 @@ Chrome Manifest V3 extension for organising YouTube subscriptions into parent fo
 ## Working features
 
 - Compact dark sidebar with expandable parents/subfolders and one browsing scrollbar.
-- Manage panel with parent navigation, subfolder/channel search, sorting and channel details.
+- Manage panel with parent navigation, sorting and channel details. A magnifying-glass control beside Add Subfolder reveals optional subfolder search; closing it clears the filter. Channel search retains contains matching.
 - Shared themed create/edit dialogs, muted and custom colours, rename and deletion.
+- Uncategorised guidance includes a small static Move illustration matching the real action. Channel Remove uses a centred themed confirmation with channel/folder names, Cancel focused first with a visible focus outline, and explicit reassurance that YouTube subscriptions remain. Failed saves stay visible for retry; stale folder confirmations require review.
 - Channel Move/Remove preserves actual YouTube subscriptions. Move success stays in a fixed slot without layout movement and leaves the source subfolder selected. The three-dot channel menu remains.
 - Tools: Refresh Subscriptions, Backup, Restore and About. Same-account Refresh keeps Manage open while verification protects writes.
 - Complete paginated subscription retrieval; failed refresh retains the complete previous cache.

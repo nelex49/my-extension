@@ -149,3 +149,20 @@ Development source stays on premium-folders; beta is a generated separate tester
 - User confirmed themes working. Fixed white text on light-theme Uncategorised (including count/icon and hover) and All Folders. Selected Uncategorised uses a light blue fill and inset outline to retain a visible selected state with dark text.
 - Dark theme, saved folder colours and Add Folder unchanged. Theme remains in Tools with explicit Dark/Light and Done; a header pill was discussed but not implemented.
 - Eleven suites pass, including numeric contrast checks for these light navigation states. Real Chrome appearance remains for user confirmation. No Git operations.
+
+## Channel guidance and removal confirmation - 24 October 2026
+
+- User confirmed the theme/contrast checkpoint and reported it pushed to GitHub. Build these changes on that accepted development source; no commit hash supplied.
+- Uncategorised explanation now contains a miniature static Move/dropdown illustration in the sentence. It is a span, not an interactive button, with no tab stop or action. Both themes match the existing Move fill/text treatment.
+- Channel Remove now opens a compact centred shared-lifecycle dialog over the dimmed Manage window. Display escaped channel/folder names; explain that YouTube subscription remains. Cancel has initial focus; Escape/outside click cancel. During saving, prevent duplicate confirmation and premature close. Successful save closes and retains Manage selection; failure keeps the assignment and shows an inline retry error. Changed target records require reopening; account loss closes the dialog.
+- Added focused RemoveChannelDialog module and one optional shared lifecycle cleanup callback. Existing removal service, account-aware persistence, folder-plan rules and YouTube permissions unchanged.
+- Retain current channel ellipsis menus, Open on YouTube and disabled Unsubscribe placeholder: user explicitly chose to leave them and their row alignment untouched. No unsubscribe permission or premium feature implemented.
+- All eleven suites pass. Startup tests exercise real confirmation routing, Cancel/Escape, safe focus, storage failure and retry, duplicate clicks, same-folder result, stale records, listener cleanup and unchanged YouTube subscriptions. Static Move illustration verified non-interactive. Real Chrome dialog appearance in both themes remains pending user review.
+- No branch operations, commits or pushes performed. Current development source stays on premium-folders; beta remains separate.
+
+## Subfolder-search and confirmation refinement
+
+- Clarified removal reassurance: You will remain subscribed to this channel on YouTube. Cancel still receives focus first; its focus outline is now visible for mouse-opened dialogs as well as keyboard use.
+- Replaced the always-visible subfolder search row with a magnifying-glass toggle beside Add Subfolder. Starts closed, appears only in parent views, exposes aria-expanded/aria-controls and descriptive label, focuses the field when opened, and clears filters/restores the complete list when closed. Escape in the field closes search without dismissing Manage. Changing parent resets it. Search visibility is transient, excluded from saved view preferences.
+- Explicitly supersedes the earlier always-visible subfolder-search decision. Channel contains matching and sort behaviour remain unchanged; no starts-with prioritisation added. Ellipsis menus unchanged.
+- Eleven regression suites pass, including toggle/open focus, filtering/clear/close, Escape and removal wording/initial Cancel focus. Real Chrome layout and focus appearance remain for user confirmation. OAuth/permissions/account persistence unchanged; no Git operations.

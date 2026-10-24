@@ -7,6 +7,13 @@ function createManageActions({ modal, state, render, close, dismissMenus, select
     const button = event.target.closest("button");
     if (!button || button.disabled) return;
     const action = button.dataset.action;
+    if (action === "toggle-subfolder-search") {
+      state.folderSearchOpen = !state.folderSearchOpen;
+      state.folderQuery = ''; modal.querySelector('.ysm-folder-search').value = '';
+      render();
+      (state.folderSearchOpen ? modal.querySelector('.ysm-folder-search') : button).focus({ preventScroll: true });
+      return;
+    }
     if (action === "clear-subfolder-search") {
       state.folderQuery = ""; modal.querySelector('.ysm-folder-search').value = ""; render();
       modal.querySelector('.ysm-folder-search').focus({ preventScroll: true }); return;
@@ -110,10 +117,10 @@ function createManageActions({ modal, state, render, close, dismissMenus, select
       });
     } else if (action === "remove") {
       const id = button.closest("[data-channel]").dataset.channel;
-      if (!confirm("Remove this channel from the folder? Your YouTube subscription will remain.")) return;
-      removeFromSubfolder(id, state.parent, state.child, () => {
-        if (modal.isConnected) render();
-      });
+      showRemoveChannelDialog({ channelId: id, parent: state.parent, child: state.child, anchor: button,
+        onRemoved: () => {
+          if (modal.isConnected) { render(); modal.querySelector('.ysm-channel-search').focus({ preventScroll: true }); }
+        } });
     }
   };
 }

@@ -67,3 +67,34 @@
   background: #bfd4ea;
   box-shadow: inset 0 0 0 1px #66809d;
 }
+
+/* Static inline illustration: no button semantics, focus, click or hover behaviour. */
+#subfolder-view-modal .ysm-uncategorised-help .ysm-move-example {
+  display: inline-flex; align-items: center; gap: 3px; padding: 1px 6px;
+  border-radius: 4px; background: var(--ytsm-theme-accent-fill, #42658b);
+  color: #fff; font-size: 11px; font-weight: 500; line-height: 1.6;
+  vertical-align: baseline; white-space: nowrap;
+}
+.ytsm-remove-channel-dialog .ytsm-dialog-panel { width: min(390px, calc(100vw - 24px)); }
+.ytsm-remove-channel-dialog .ytsm-remove-copy { overflow-wrap: anywhere; }
+.ytsm-remove-channel-dialog .ytsm-remove-note { margin-top: 10px; color: var(--ytsm-form-muted); }
+.ytsm-remove-channel-dialog .ytsm-remove-actions {
+  display: flex; justify-content: flex-end; flex-wrap: wrap; gap: 8px;
+  margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--ytsm-form-border);
+}
+
+/* Cancel focus is visible for mouse-opened confirmations too. */
+.ytsm-remove-channel-dialog .ytsm-remove-cancel:focus {
+  outline: 2px solid var(--ytsm-theme-focus, #9ec9f3); outline-offset: 2px;
+}
+/* Search occupies a row only when requested. Keep creation and search aligned. */
+#subfolder-view-modal .ysm-nav-actions { gap: 8px; }
+#subfolder-view-modal .ysm-nav-actions .ysm-add { flex: 1; min-width: 0; width: auto; }
+#subfolder-view-modal .ysm-subfolder-search-toggle {
+  flex: 0 0 38px; width: 38px; height: 38px; padding: 0;
+  display: inline-flex; align-items: center; justify-content: center;
+  background: var(--ytsm-theme-control, #303b4b); border-color: transparent;
+}
+#subfolder-view-modal .ysm-subfolder-search-toggle:hover { background: var(--ytsm-theme-hover, #39485b); }
+#subfolder-view-modal .ysm-subfolder-search-toggle[aria-expanded="true"] { border-color: var(--ytsm-theme-focus, #9ec9f3); }
+#subfolder-view-modal .ysm-subfolder-search-toggle[hidden] { display: none; }

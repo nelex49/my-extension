@@ -117,7 +117,7 @@ assert.equal(manage.querySelector('.ysm-folder-search-field').hidden,true);
 assert.ok(manage.querySelector('.ysm-uncategorised-help'));
 assert.equal(manage.querySelector('.ysm-parent-count'),null);assert.equal(manage.querySelector('.ysm-heading-count').hidden,true);
 manage.events.click({target:manage.querySelectorAll('button').find(e=>e.dataset.parent==='Sports')});
-assert.equal(manage.querySelector('.ysm-folder-search-field').hidden,false);
+assert.equal(manage.querySelector('.ysm-folder-search-field').hidden,true);manage.events.click({target:manage.querySelector('.ysm-subfolder-search-toggle')});assert.equal(manage.querySelector('.ysm-folder-search-field').hidden,false);assert.equal(document.activeElement,manage.querySelector('.ysm-folder-search'));
 const menuListeners=Object.values(document.events).reduce((n,set)=>n+set.size,0);
 function openParentMenu(){sidebar.querySelector('.ytsm-folder-more').events.click();return document.getElementById('ytsm-sidebar-folder-menu')}
 let menu=openParentMenu();assert.equal(menu.parentElement,body);sidebar.querySelector('.ytsm-folder-more').events.click();assert.equal(document.getElementById('ytsm-sidebar-folder-menu'),null);menu=openParentMenu();assert.equal(menu.style.left,'702px');assert.equal(menu.style.top,'202px');assert.equal(menu.querySelectorAll('button').length,2);assert.equal(sidebar.querySelector('.ytsm-folder').attrs['aria-expanded'],'true');
@@ -128,7 +128,40 @@ menu=openParentMenu();menu.querySelectorAll('button')[1].events.click();let quic
 quickDialog.querySelector('#ytsm-folder-name').value='Quick child';quickDialog.querySelector('[data-action="save"]').events.click();assert.ok(store.folderData.Sports.subfolders['Quick child']);assert.ok(manage.querySelectorAll('button').find(e=>e.dataset.child==='Quick child'));
 let childOptions=sidebar.querySelector('.ytsm-subfolder-group .ytsm-folder-more');childOptions.events.click();menu=document.getElementById('ytsm-sidebar-folder-menu');assert.equal(menu.style.left,'702px');assert.equal(menu.style.top,'202px');assert.equal(menu.querySelectorAll('button').length,1);assert.equal(menu.querySelector('button').textContent,'Edit subfolder');menu.querySelector('button').events.click();quickDialog=body.children.at(-1);assert.equal(quickDialog.firstElementChild.style.left,'422px');assert.equal(quickDialog.firstElementChild.style.top,'202px');assert.equal(quickDialog.querySelector('#ytsm-folder-name').value,'Ball');quickDialog.querySelector('#ytsm-folder-name').value='Renamed ball';quickDialog.querySelector('[data-action="save"]').events.click();assert.ok(store.folderData.Sports.subfolders['Renamed ball']);assert.equal(manage.querySelector('.ysm-selected').textContent,'Renamed ball');assert.equal(store.folderData.Sports.subfolders['Renamed ball'].subscriptions.length,2);
 menu=openParentMenu();menu.querySelector('button').events.click();quickDialog=body.children.at(-1);assert.equal(quickDialog.firstElementChild.style.left,'422px');assert.equal(quickDialog.firstElementChild.style.top,'202px');assert.equal(quickDialog.querySelector('#ytsm-folder-name').value,'Sports');quickDialog.querySelector('#ytsm-folder-name').value='Sports renamed';quickDialog.querySelector('[data-action="save"]').events.click();assert.ok(store.folderData['Sports renamed']);assert.equal(manage.querySelector('.ysm-nav-heading h3').textContent,'Sports renamed folders');assert.equal(manage.querySelector('.ysm-selected').textContent,'Renamed ball');
+// The real themed Remove dialog cancels safely, retains failed saves and blocks duplicates.
+const originalConfirm=context.confirm;context.confirm=()=>{throw Error('Native confirm must not be used')};
+const removeTrigger=()=>manage.querySelector('[data-action="remove"]');
+let removalView;
+function openRemoval(){manage.events.click({target:removeTrigger()});removalView=body.children.at(-1);assert.ok(removalView.classList.contains('ytsm-remove-channel-dialog'));return removalView}
+const beforeRemoval=JSON.stringify(store.folderData),subscriptionsBeforeRemoval=JSON.stringify(store.userSubscriptions);
+const removalListeners=listeners.length;
+openRemoval();assert.equal(document.activeElement,removalView.querySelector('[data-action="remove-cancel"]'));
+assert.ok(removalView.textContent.includes('You will remain subscribed to this channel on YouTube.'));
+assert.ok(removalView.textContent.includes('Sports renamed / Renamed ball'));
+removalView.querySelector('[data-action="remove-cancel"]').events.click();assert.ok(!removalView.isConnected);assert.equal(JSON.stringify(store.folderData),beforeRemoval);assert.equal(listeners.length,removalListeners);
+openRemoval();for(const fn of [...document.events.keydown])fn({key:'Escape',preventDefault(){},stopImmediatePropagation(){}});
+assert.ok(!removalView.isConnected);assert.ok(manage.isConnected);assert.equal(JSON.stringify(store.folderData),beforeRemoval);
+openRemoval();const storageBeforeRemoval=context.chrome.storage.local.set;
+context.chrome.storage.local.set=(patch,callback)=>{if(patch.folderData){context.chrome.runtime.lastError={message:'Storage full'};callback?.();delete context.chrome.runtime.lastError}else storageBeforeRemoval(patch,callback)};
+removalView.querySelector('[data-action="remove-confirm"]').events.click();assert.ok(removalView.isConnected);assert.equal(removalView.querySelector('.ytsm-form-error').hidden,false);assert.equal(JSON.stringify(store.folderData),beforeRemoval);
+context.chrome.storage.local.set=storageBeforeRemoval;
+let finishRemoval,removalWrites=0;
+context.chrome.storage.local.set=(patch,callback)=>{if(patch.folderData){removalWrites++;finishRemoval=()=>storageBeforeRemoval(patch,callback)}else storageBeforeRemoval(patch,callback)};
+const confirmRemoval=removalView.querySelector('[data-action="remove-confirm"]');confirmRemoval.events.click();confirmRemoval.events.click();assert.equal(removalWrites,1);assert.equal(confirmRemoval.disabled,true);
+removalView.querySelector('[data-action="remove-cancel"]').events.click();assert.ok(removalView.isConnected);
+finishRemoval();context.chrome.storage.local.set=storageBeforeRemoval;
+assert.ok(!removalView.isConnected);assert.equal(manage.querySelector('.ysm-selected').textContent,'Renamed ball');assert.equal(store.folderData['Sports renamed'].subfolders['Renamed ball'].subscriptions.length,1);
+assert.equal(JSON.stringify(store.userSubscriptions),subscriptionsBeforeRemoval);assert.equal(listeners.length,removalListeners);
+// A changed folder requires review instead of applying a stale confirmation.
+openRemoval();context.folderData['Sports renamed'].subfolders['Renamed ball'].subscriptions.push(c);
+removalView.querySelector('[data-action="remove-confirm"]').events.click();assert.ok(removalView.textContent.includes('This folder changed.'));
+context.folderData['Sports renamed'].subfolders['Renamed ball'].subscriptions.pop();removalView.querySelector('[data-action="remove-cancel"]').events.click();
+context.confirm=originalConfirm;
 // Tools include the theme control alongside the existing entries; About uses the shared lifecycle and restores focus.
+manage.events.click({target:manage.querySelector('[data-action="uncategorised"]')});
+const moveExample=manage.querySelector('.ysm-move-example');assert.ok(moveExample);assert.equal(moveExample.tag,'span');assert.equal(moveExample.attrs.tabindex,undefined);assert.ok(moveExample.textContent.includes('Move'));
+// Restore the current folder for the rest of the startup checks.
+manage.events.click({target:manage.querySelectorAll('button').find(button=>button.dataset.parent==='Sports renamed')});
 const tools=manage.querySelector('.ysm-main-menu');
 assert.equal(tools.querySelectorAll('button').length,5);
 assert.equal(tools.querySelectorAll('svg').length,5);

@@ -101,7 +101,7 @@ function showSubfolderView() {
   }
   function selectParent(name) {
     state.parent = name; state.child = name === null ? null : Object.keys(window.folderData[name].subfolders || {})[0] ?? null;
-    state.query = ""; state.folderQuery = ""; state.moveChannel = null;
+    state.query = ""; state.folderQuery = ""; state.folderSearchOpen = false; state.moveChannel = null;
     state.descriptionChannels.clear();
     modal.querySelector('.ysm-channel-list').scrollTop = 0;
     modal.querySelector(".ysm-channel-search").value = "";
@@ -113,6 +113,13 @@ function showSubfolderView() {
     selectParent, parents, showChannelMenu, closeChannelMenu, closeMovePicker, renderMovePicker, backupNotice }));
   modal.querySelector(".ysm-channel-search").addEventListener("input", event => { state.query = event.target.value; render(); });
   modal.querySelector(".ysm-folder-search").addEventListener("input", event => { state.folderQuery = event.target.value; render(); });
+  modal.querySelector('.ysm-folder-search').addEventListener('keydown', event => {
+    if (event.key !== 'Escape') return;
+    event.preventDefault(); event.stopImmediatePropagation();
+    state.folderSearchOpen = false; state.folderQuery = '';
+    modal.querySelector('.ysm-folder-search').value = '';
+    render(); modal.querySelector('.ysm-subfolder-search-toggle').focus({ preventScroll: true });
+  });
   modal.querySelector(".ysm-sort").addEventListener("change", event => { state.sort = event.target.value; render(); });
   function storageChanged(changes, area) {
     if (area !== "local") return;

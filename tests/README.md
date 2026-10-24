@@ -34,3 +34,7 @@ node tests/theme.cjs
 | popup-auth.cjs | Exported helper suite invoked automatically by retrieval.cjs; not a standalone entry point |
 
 Tests use Node's built-in modules with simulated DOM and Chrome APIs. No package installation is required. They do not replace manual Chrome layout, OAuth, downloads and persistence checks. See `../development/README.md` for the folder-plan manual checklist.
+
+Startup also covers the centred Remove confirmation (Cancel/Escape/focus, failed save/retry, duplicate-save guard, stale target, listener cleanup and unchanged YouTube subscriptions), and the static Move illustration.
+
+Manage/startup regressions also exercise the optional subfolder-search toggle, focus, filtering, clear/close and Escape. Removal reassurance names the channel explicitly.

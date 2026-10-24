@@ -63,6 +63,7 @@
         "src/components/SubfolderView/ParentFolderNavigation.js",
         "src/components/SubfolderView/SubfolderNavigation.js",
         "src/components/SubfolderView/ChannelList.js",
+        "src/components/SubfolderView/RemoveChannelDialog.js",
         "src/components/SubfolderView/ManageActions.js",
         "src/components/SubfolderView/BackupNotice.js",
         "src/components/SubfolderView/SubfolderViewPanel.js",

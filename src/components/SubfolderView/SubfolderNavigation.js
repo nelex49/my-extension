@@ -19,11 +19,16 @@ function createSubfolderNavigation({ modal, state }) {
     modal.querySelector('.ysm-heading-icon').style.color = lightenColor(parentColour, 30);
     addSubfolder.style.setProperty('--add-fill', parentColour);
     addSubfolder.style.setProperty('--add-border', lightenColor(parentColour, 30));
-    modal.querySelector('.ysm-folder-search-field').hidden = state.parent === null;
+    const searchToggle = modal.querySelector('.ysm-subfolder-search-toggle');
+    searchToggle.hidden = state.parent === null;
+    searchToggle.setAttribute('aria-expanded', String(state.parent !== null && state.folderSearchOpen));
+    searchToggle.setAttribute('aria-label', state.folderSearchOpen ? 'Close subfolder search' : 'Search subfolders');
+    searchToggle.title = state.folderSearchOpen ? 'Close subfolder search' : 'Search subfolders';
+    modal.querySelector('.ysm-folder-search-field').hidden = state.parent === null || !state.folderSearchOpen;
     modal.querySelector('.ysm-folder-search-clear').hidden = !state.folderQuery;
     const entries = state.parent === null ? [] : Object.entries(data[state.parent].subfolders || {});
     modal.querySelector(".ysm-subfolders").innerHTML = state.parent === null ?
-      `<div class="ysm-uncategorised-help"><strong>Uncategorised channels</strong><p>These channels have no folder assignment. Use Move beside a channel to organise them.</p></div>` :
+      `<div class="ysm-uncategorised-help"><strong>Uncategorised channels</strong><p>These channels have no folder assignment. Use <span class="ysm-move-example">Move <span aria-hidden="true">▾</span></span> beside a channel to organise them.</p></div>` :
       ((data[state.parent].subscriptions?.length ? `<button type="button" class="ysm-subfolder ${state.child === null ? 'is-active' : ''}" data-action="direct"><span>Parent channels</span><small>${data[state.parent].subscriptions.length}</small></button>` : "") +
       entries.filter(([name]) => name.toLowerCase().includes(state.folderQuery.trim().toLowerCase())).map(([name, info], index) => {
         const colour = sidebarFolderColour(info.color, index), text = folderTextColour(colour);

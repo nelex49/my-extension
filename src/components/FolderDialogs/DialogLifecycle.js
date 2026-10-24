@@ -1,5 +1,5 @@
 // Shared lifecycle for compact folder forms. Edit forms may be anchored beside a Manage three-dot button.
-function openFolderDialog(kind, html, anchor = null, placement = 'beside', canClose = () => true) {
+function openFolderDialog(kind, html, anchor = null, placement = 'beside', canClose = () => true, onClosed = () => {}) {
   const previousFocus = document.activeElement;
   const modal = document.createElement('div');
   modal.className = `ytsm-folder-dialog ytsm-${kind}-dialog${anchor ? ' is-anchored' : ''}`;
@@ -24,7 +24,7 @@ function openFolderDialog(kind, html, anchor = null, placement = 'beside', canCl
   function close() {
     if (closed || !canClose()) return; closed = true;
     document.removeEventListener('keydown', keydown); window.removeEventListener?.('resize', position);
-    modal.remove(); if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
+    modal.remove(); onClosed(); if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
   }
   function keydown(event) { if (event.key === 'Escape') { event.preventDefault(); event.stopImmediatePropagation(); close(); } }
   document.addEventListener('keydown', keydown); window.addEventListener?.('resize', position);
