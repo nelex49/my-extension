@@ -29,13 +29,13 @@ This is the current decision record. Proposals are not approval to implement the
 
 | Decision | Current position |
 | --- | --- |
-| Free allowance | Provisionally four parent folders and three subfolders per parent. Defined centrally so feedback can change the numbers. |
+| Free allowance | Unlimited parent folders; three subfolders per parent. Defined centrally. |
 | Subscription counts | Unlimited subscriptions under both plans; no new channel limit. |
-| Pro allowance | Unlimited parent folders and subfolders. |
+| Pro allowance | Unlimited subfolders per parent, multi-channel moves and built-in folder icon choices. Parent folders are unlimited in Free too. |
 | Reaching a limit | Check when creating, explain the applicable limit and offer Pro. Declining preserves the complete setup. |
 | Expiry | Return to Free creation rules. Preserve access to all existing folders and assignments. Allow renaming, colours, deletion and channel moves/removal. |
-| Existing oversized setup | Block all new folder creation while any count exceeds the Free allowance. No automatic deletion or locked-away content. |
-| Reduced setup | Once all counts fit Free, creation is available wherever there is room within the limits. It never grants a fresh allocation on top of existing folders. At four parents, a fifth is blocked; a parent with two children can receive a third. |
+| Existing oversized setup | Keep all existing content. Block additional subfolders only in a parent already at/above three. Other parents retain their own allowance; parent creation stays unlimited. |
+| Reduced setup | Each parent is evaluated independently. A parent with two subfolders can receive a third. There is no parent-folder count limit. |
 | Oversized backup | Allow full restore, including all ten parents in the discussed example, then use the same Free/expiry creation rules. Existing owner validation and completed safety-copy download still apply. |
 | Restore trade-off | Full recovery is prioritised; a user could manually edit a backup to introduce extra folders. No signature or anti-tamper restrictions introduced. |
 | Current upgrade action | Themed prompt and Pro details only. It clearly says purchases are unavailable in this development build. No checkout or charge. |
@@ -93,9 +93,9 @@ Build and test one section at a time. Do not implement the following yet.
 
 ## Ordered next work and release preparation
 
-- Unlimited parent folders and subfolders are implemented. Discuss whether these alone make a useful first paid release before adding candidates. No additional launch feature is agreed by this documentation update.
-- Keep sidebar-state persistence and light theme Free. Icon packs/custom uploads, scheduled backups and bulk unsubscribe remain candidates only.
-- Multiple accounts, multi-channel moves, seven-day trial, cross-device sync, selective restore, backup history and cross-tab save protection are deferred.
+- Current Pro features: unlimited subfolders, multi-channel moves and built-in icon choices. Free includes unlimited parent folders.
+- Keep sidebar-state persistence and light theme Free. Ten built-in icons are implemented. Custom uploads, scheduled backups and bulk unsubscribe remain deferred candidates.
+- Multiple accounts, seven-day trial, cross-device sync, selective restore, backup history and cross-tab save protection are deferred. Multi-channel moves are implemented.
 - GBP 9.99 annually is provisional. Final pricing, payment/licensing provider, upgrade placement and lifetime pricing remain undecided.
 - Before selling: implement verified licensing and entitlement handling; replace development plan controls; finish branding, privacy and store materials; complete regression and real Chrome testing of install, OAuth, persistence, downloads, restore and plan behaviour.
 - No backend, switcher or licensing integration is included in this cleanup. Implement and test one agreed section at a time.
@@ -114,7 +114,7 @@ Build and test one section at a time. Do not implement the following yet.
 1. Free interface-state persistence: remember sidebar open/closed state and expanded parent/subfolder rows; remember the selected Manage parent/subfolder for manual reopening; keep Manage closed after refresh/restart. Validate saved references and fall back safely after deletion. Keep transient menus/edit dialogs closed and preferences separate from folder data/backups. Restore protected UI only after verified sign-in; sign-out must not expose it. Use a dedicated preferences module with small integrations. Not implemented by this cleanup.
 2. Free light/dark switching: dark remains default, remember the choice. Implement separately after persistence is accepted.
 3. Continue tester feedback and fix onboarding/identity clarity: Beta 1.0.3 uses the working application checkpoint with separate portable identity/OAuth. The third-account test succeeded after creating a YouTube channel, showed linking confirmation and an empty setup. A Google account without an identifiable channel currently receives an unclear verification error; improve this without treating every verification failure as a missing channel. Clearly show the linked channel, since switching website Gmail/YouTube sessions does not switch extension authorisation. These improvements are pending.
-4. Agree additional Pro launch scope, then implement chosen features one at a time. Unlimited folders remain the only implemented Pro feature. Multiple-account switching stays shelved; retain its working storage foundation.
+4. Agree additional Pro launch scope, then implement chosen features one at a time. Unlimited subfolders, multi-channel moves and built-in icons are implemented Pro features. Multiple-account switching stays shelved; retain its working storage foundation.
 5. Confirm pricing/provider and verified licensing; build customer upgrade/pricing/payment/activation and renewal/expiry flows. Replace developer plan controls before selling. Finish branding/privacy/store materials, regression and real Chrome release tests.
 
 Development source stays on premium-folders; beta is a generated separate tester package, not a confirmed Git branch. Update beta code from accepted development checkpoints while retaining beta configuration only in that package. Eventually verify branch ancestry before an explicitly authorised merge into main.
@@ -166,3 +166,11 @@ Development source stays on premium-folders; beta is a generated separate tester
 - Replaced the always-visible subfolder search row with a magnifying-glass toggle beside Add Subfolder. Starts closed, appears only in parent views, exposes aria-expanded/aria-controls and descriptive label, focuses the field when opened, and clears filters/restores the complete list when closed. Escape in the field closes search without dismissing Manage. Changing parent resets it. Search visibility is transient, excluded from saved view preferences.
 - Explicitly supersedes the earlier always-visible subfolder-search decision. Channel contains matching and sort behaviour remain unchanged; no starts-with prioritisation added. Ellipsis menus unchanged.
 - Eleven regression suites pass, including toggle/open focus, filtering/clear/close, Escape and removal wording/initial Cancel focus. Real Chrome layout and focus appearance remain for user confirmation. OAuth/permissions/account persistence unchanged; no Git operations.
+
+## Folder allowance and Pro wording checkpoint - 25 October 2026
+
+- Free: unlimited parent folders, three subfolders per parent, unlimited subscriptions, individual moves, colours/themes and backup/restore.
+- Pro: unlimited subfolders per parent, multi-channel moves and ten built-in icon choices (including the default folder).
+- Free/Expired capacity is local to each parent. Existing excess subfolders and saved icons remain usable; there is no global creation lock.
+- Feature prompts lead with the clicked benefit, then list the other benefits under Also included with Pro. Unlimited parent folders are explicitly Free. Purchases are still unavailable.
+- Development only; beta 1.0.4 and its separate OAuth/identity settings are untouched. No Git actions performed for this checkpoint.

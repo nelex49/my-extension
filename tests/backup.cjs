@@ -1,6 +1,6 @@
 const fs = require('fs'), vm = require('vm'), assert = require('assert');
 const root = require('path').resolve(__dirname, '..');
-const source = ['src/accounts/AccountSetupStore.js','src/shared/BackupFormat.js','src/background/BackupService.js'].map(p=>fs.readFileSync(root+'/'+p,'utf8')).join('\n');
+const source = ['src/shared/FolderIcons.js','src/accounts/AccountSetupStore.js','src/shared/BackupFormat.js','src/background/BackupService.js'].map(p=>fs.readFileSync(root+'/'+p,'utf8')).join('\n');
 function setup() {
  const data = {accessToken:'session',folderOwner:{id:'UC_OWNER',title:'Owner'},accountStatus:{state:'ready',session:'session',account:{id:'UC_OWNER'}},folderData:{Music:{color:'#123456',textColor:'#ffffff',subscriptions:[],subfolders:{Blues:{subscriptions:[{snippet:{title:'Test',resourceId:{channelId:'UC_TEST'}}}]}}}}};
  const files=[]; let state='complete', writes=0, failWrite=false, duringDownload=()=>{};
@@ -22,5 +22,16 @@ function setup() {
  t=setup();t.duringDownload=()=>{delete t.data.accessToken};r=await t.c.runFolderBackup({action:'restoreFolderBackup',text:JSON.stringify(backup)});assert.equal(r.success,false);assert.equal(t.writes,0);
  t=setup();const first=t.c.runFolderBackup({action:'exportFolderBackup'});const second=await t.c.runFolderBackup({action:'exportFolderBackup'});assert.equal(second.success,false);assert.ok((await first).success);
  t=setup();const roundtrip=t.c.BackupFormat.parse(JSON.stringify(t.c.BackupFormat.create(t.data.folderData,t.data.folderOwner)));assert.equal(roundtrip.folderData.Music.subfolders.Blues.subscriptions[0].snippet.resourceId.channelId,'UC_TEST');
+ // Icons survive export, safety copies and restores without requiring Pro.
+ t=setup();t.data.folderData.Music.iconId='music';t.data.folderData.Music.subfolders.Blues.iconId='gaming';
+ const iconBackup=t.c.BackupFormat.create(t.data.folderData,t.data.folderOwner);
+ const iconRoundtrip=t.c.BackupFormat.parse(JSON.stringify(iconBackup));
+ assert.equal(iconRoundtrip.folderData.Music.iconId,'music');assert.equal(iconRoundtrip.folderData.Music.subfolders.Blues.iconId,'gaming');
+ r=await t.c.runFolderBackup({action:'restoreFolderBackup',text:JSON.stringify(iconBackup)});assert.ok(r.success);
+ assert.equal(t.files[0].folderData.Music.iconId,'music');assert.equal(t.data.folderData.Music.subfolders.Blues.iconId,'gaming');
+ iconBackup.folderData.Music.iconId='<svg onload="bad">';
+ assert.equal(t.c.BackupFormat.parse(JSON.stringify(iconBackup)).folderData.Music.iconId,'folder');
+ iconBackup.folderData.Music.iconId={bad:true};assert.throws(()=>t.c.BackupFormat.parse(JSON.stringify(iconBackup)));
+ console.log('PASS: icon backup/restore and safety-copy preservation, unknown-ID fallback and invalid-icon rejection.');
  console.log('PASS: backup round trip, credential exclusion, complete safety download before replacement, invalid/version/account/prototype rejection, cancelled download, failed storage preservation, changed folders/account abort and duplicate operation guard.');
 })().catch(e=>{console.error(e);process.exitCode=1});

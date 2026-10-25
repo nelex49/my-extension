@@ -38,3 +38,7 @@ Tests use Node's built-in modules with simulated DOM and Chrome APIs. No package
 Startup also covers the centred Remove confirmation (Cancel/Escape/focus, failed save/retry, duplicate-save guard, stale target, listener cleanup and unchanged YouTube subscriptions), and the static Move illustration.
 
 Manage/startup regressions also exercise the optional subfolder-search toggle, focus, filtering, clear/close and Escape. Removal reassurance names the channel explicitly.
+
+Built-in icon checks cover ten choices, preview/cancel isolation, create/edit saves, failed-save retry, expiry retention/default reset, Pro-overlay Escape/focus, service/stale-form plan gates, manifest-loaded sidebar/Manage/move rendering, and backup/safety-copy preservation. See `../development/folder-icons.md` for manual appearance checks.
+
+The current allowance checkpoint verifies unlimited Free/Expired parent creation, three subfolders per parent independently, preserved excess subfolders, live-downgrade save checks, and accurate feature-specific Pro prompts.

@@ -1,3 +1,14 @@
+// A plan change while a form is open cannot grant a new Pro icon.
+function applyFolderRecordIcon(record, iconId, previous, done) {
+  if (iconId === undefined) return true;
+  if (!FolderIcons.has(iconId)) { showUserNotification('Choose an icon from the built-in library.', 'warn'); done?.(false); return false; }
+  const current = FolderIcons.normalise(previous?.iconId);
+  if (iconId !== 'folder' && iconId !== current && window.FolderPlan?.state !== 'pro') {
+    showUserNotification('Pro is required to choose a custom folder icon.', 'warn'); done?.(false); return false;
+  }
+  if (iconId !== 'folder' || previous?.iconId !== undefined) record.iconId = iconId;
+  return true;
+}
 // Folder mutations and persistence. UI code asks this service to mutate records; it does not edit storage directly.
 function cloneFolderData(data = window.folderData || {}) { return JSON.parse(JSON.stringify(data)); }
 function replaceFolderData(data) { folderData = data; window.folderData = data; }
@@ -44,19 +55,21 @@ function persistFolderMutation(nextData, previousData, done, rename = null) {
   } catch (error) { finish(false); }
   return true;
 }
-function createParentFolderRecord(name, color, textColor, done) {
+function createParentFolderRecord(name, color, textColor, done, iconId) {
   const current = window.folderData || {};
   if (Object.hasOwn(current, name)) { showUserNotification("A folder with this name already exists", "error"); done?.(false); return; }
   if (!requireFolderCreation('parent')) { done?.(false); return; }
   const previous = cloneFolderData(current), next = cloneFolderData(current);
   next[name] = { subscriptions: [], color, textColor, subfolders: {}, expanded: false };
+  if (!applyFolderRecordIcon(next[name], iconId, null, done)) return;
   persistFolderMutation(next, previous, done);
 }
-function updateParentFolderRecord(oldName, newName, color, textColor, done) {
+function updateParentFolderRecord(oldName, newName, color, textColor, done, iconId) {
   const current = window.folderData || {};
   if (!current[oldName]) { showUserNotification("That folder no longer exists", "error"); done?.(false); return; }
   if (newName !== oldName && Object.hasOwn(current, newName)) { showUserNotification("A folder with this name already exists", "error"); done?.(false); return; }
   const previous = cloneFolderData(current), next = cloneFolderData(current);
+  if (!applyFolderRecordIcon(next[oldName], iconId, current[oldName], done)) return;
   const record = next[oldName]; record.color = color; record.textColor = textColor;
   if (newName !== oldName) {
     // Replace the key in place; assigning a new key at the end reorders the tabs.
@@ -67,7 +80,7 @@ function updateParentFolderRecord(oldName, newName, color, textColor, done) {
   }
   persistFolderMutation(next, previous, done);
 }
-function createSubfolderRecord(parentName, name, color, textColor, done) {
+function createSubfolderRecord(parentName, name, color, textColor, done, iconId) {
   const current = window.folderData || {}, parent = current[parentName];
   if (!parent) { showUserNotification("That parent folder no longer exists", "error"); done?.(false); return; }
   if (Object.hasOwn(parent.subfolders || {}, name)) { showUserNotification("A subfolder with this name already exists", "error"); done?.(false); return; }
@@ -75,13 +88,15 @@ function createSubfolderRecord(parentName, name, color, textColor, done) {
   const previous = cloneFolderData(current), next = cloneFolderData(current);
   next[parentName].subfolders ||= {};
   next[parentName].subfolders[name] = { subscriptions: [], color, textColor };
+  if (!applyFolderRecordIcon(next[parentName].subfolders[name], iconId, null, done)) return;
   persistFolderMutation(next, previous, done);
 }
-function updateSubfolderRecord(parentName, oldName, newName, color, textColor, done) {
+function updateSubfolderRecord(parentName, oldName, newName, color, textColor, done, iconId) {
   const current = window.folderData || {}, children = current[parentName]?.subfolders || {};
   if (!children[oldName]) { showUserNotification("That subfolder no longer exists", "error"); done?.(false); return; }
   if (newName !== oldName && Object.hasOwn(children, newName)) { showUserNotification("A subfolder with this name already exists", "error"); done?.(false); return; }
   const previous = cloneFolderData(current), next = cloneFolderData(current), nextChildren = next[parentName].subfolders;
+  if (!applyFolderRecordIcon(nextChildren[oldName], iconId, children[oldName], done)) return;
   const record = nextChildren[oldName]; record.color = color; record.textColor = textColor;
   if (newName !== oldName) { nextChildren[newName] = record; delete nextChildren[oldName]; }
   persistFolderMutation(next, previous, done, oldName === newName ? null : { parentName, oldName, newName });

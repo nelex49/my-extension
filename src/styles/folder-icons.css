@@ -1,0 +1,35 @@
+/* Optional built-in icons; saved colours and default folder styling remain intact. */
+.ytsm-folder-dialog .ytsm-icon-controls { margin-top: 16px; }
+.ytsm-folder-dialog .ytsm-icon-summary { display: flex; align-items: center; gap: 9px; }
+.ytsm-folder-dialog .ytsm-icon-preview { display: inline-flex; align-items: center; color: var(--chosen-icon-colour, var(--ytsm-form-text)); background: var(--chosen-folder-colour); border-radius: 5px; padding: 4px; }
+.ytsm-folder-dialog .ytsm-icon-preview svg { display: block; }
+.ytsm-folder-dialog .ytsm-icon-name { flex: 1; min-width: 0; color: var(--ytsm-form-muted); font-size: 12px; }
+.ytsm-folder-dialog .ytsm-change-icon { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; }
+.ytsm-folder-dialog .ytsm-icon-pro-badge { display: inline-flex; align-items: center; gap: 3px; padding: 1px 4px; border: 1px solid var(--ytsm-form-accent-border); border-radius: 4px; font-size: 10px; font-weight: 700; background: var(--ytsm-theme-accent-soft, #33485b); }
+.ytsm-folder-dialog .ytsm-icon-pro-badge svg { width: 12px; height: 12px; flex-basis: 12px; }
+.ytsm-folder-dialog .ytsm-reset-icon { margin-top: 8px; padding: 3px 6px; min-height: 26px; font-size: 11px; background: transparent; }
+.ytsm-folder-dialog .ytsm-icon-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 7px; margin-top: 12px; }
+.ytsm-folder-dialog .ytsm-icon-choice { display: flex; align-items: center; justify-content: center; height: 40px; padding: 7px; color: var(--ytsm-form-text); }
+.ytsm-folder-dialog .ytsm-icon-choice.is-selected { border-color: var(--ytsm-form-accent-border); box-shadow: inset 0 0 0 1px var(--ytsm-form-accent-border); background: var(--ytsm-theme-accent-soft, #33485b); }
+.ytsm-folder-dialog .ytsm-icon-hint { margin-top: 8px; font-size: 11px; color: var(--ytsm-form-muted); }
+.ytsm-folder-dialog:not(.is-anchored) .ytsm-dialog-panel { max-height: calc(100dvh - 24px); overflow-y: auto; }
+.ytsm-folder-dialog.is-anchored .ytsm-dialog-panel { max-height: calc(100dvh - 24px); overflow-y: auto; }
+#yt-manage-guide-entry .ytsm-folder .ytsm-custom-folder-icon { border: 0; border-radius: 0; height: 18px; width: 18px; flex-basis: 18px; display: inline-flex; align-items: center; justify-content: center; }
+#yt-manage-guide-entry .ytsm-custom-folder-icon::before { display: none; }
+#yt-manage-guide-entry .ytsm-custom-folder-icon svg { width: 18px; height: 18px; display: block; }
+#subfolder-view-modal .ysm-parent-custom-icon { width: 17px; height: 17px; flex: 0 0 17px; vertical-align: middle; }
+
+/* Feature prompts explain the clicked benefit first, then the rest of Pro. */
+.ytsm-folder-dialog .ytsm-other-pro { margin-top: 16px; }
+.ytsm-folder-dialog .ytsm-other-pro h3 { margin: 0 0 8px; font-size: 12px; font-weight: 600; color: var(--ytsm-form-muted); }
+.ytsm-folder-dialog .ytsm-other-pro .ytsm-pro-benefits { margin: 0 0 14px; }
+.ytsm-plan-dialog .ytsm-pro-benefits { display: grid; gap: 12px; padding: 12px; border: 1px solid var(--ytsm-form-border); border-radius: 8px; background: var(--ytsm-form-surface); }
+.ytsm-plan-dialog .ytsm-pro-benefits strong { display: block; margin-bottom: 3px; font-size: 13px; }
+.ytsm-plan-dialog .ytsm-pro-benefits span { color: var(--ytsm-form-muted); font-size: 12px; line-height: 1.6; }
+.ytsm-plan-dialog .ytsm-dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; }
+.ytsm-plan-dialog [data-dialog-close]:focus { outline: 2px solid var(--ytsm-theme-focus, #9ec9f3); outline-offset: 2px; }
+
+/* One connected Free-plan note beneath the other Pro benefits. */
+.ytsm-folder-dialog .ytsm-free-note { margin-top: 12px; padding: 11px 12px; border-left: 2px solid var(--ytsm-form-border); color: var(--ytsm-form-muted); font-size: 12px; line-height: 1.6; }
+.ytsm-folder-dialog .ytsm-free-note strong { font-weight: 600; }
+.ytsm-folder-dialog .ytsm-free-note .ytsm-expired-icon-note { margin-top: 8px; }

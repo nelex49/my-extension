@@ -15,6 +15,10 @@
           out[field] = value[field];
         }
       }
+      if (value.iconId !== undefined) {
+        check(typeof value.iconId === 'string', 'A folder icon is invalid.');
+        out.iconId = FolderIcons.normalise(value.iconId);
+      }
       check(value.subscriptions === undefined || Array.isArray(value.subscriptions), 'A channel assignment list is invalid.');
       for (const sub of value.subscriptions || []) {
         const id = sub?.snippet?.resourceId?.channelId;

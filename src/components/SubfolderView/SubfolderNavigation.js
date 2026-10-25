@@ -16,6 +16,8 @@ function createSubfolderNavigation({ modal, state }) {
     folderList.style.setProperty('--subfolder-fill', lightenColor(parentColour, 8));
     folderList.style.setProperty('--subfolder-active-fill', lightenColor(parentColour, 12));
     folderList.style.setProperty('--subfolder-border', lightenColor(parentColour, 30));
+    modal.querySelector('.ysm-heading-icon').innerHTML = FolderIcons.paths(data[state.parent]?.iconId);
+    modal.querySelector('.ysm-heading-icon').setAttribute('fill', 'none');
     modal.querySelector('.ysm-heading-icon').style.color = lightenColor(parentColour, 30);
     addSubfolder.style.setProperty('--add-fill', parentColour);
     addSubfolder.style.setProperty('--add-border', lightenColor(parentColour, 30));
@@ -32,7 +34,7 @@ function createSubfolderNavigation({ modal, state }) {
       ((data[state.parent].subscriptions?.length ? `<button type="button" class="ysm-subfolder ${state.child === null ? 'is-active' : ''}" data-action="direct"><span>Parent channels</span><small>${data[state.parent].subscriptions.length}</small></button>` : "") +
       entries.filter(([name]) => name.toLowerCase().includes(state.folderQuery.trim().toLowerCase())).map(([name, info], index) => {
         const colour = sidebarFolderColour(info.color, index), text = folderTextColour(colour);
-        return `<div class="ysm-subfolder-item"><button type="button" class="ysm-subfolder ${state.child === name ? 'is-active' : ''}" data-child="${manageEscape(name)}" aria-pressed="${state.child === name}" title="${manageEscape(name)}" style="--subfolder-fill:${colour};--subfolder-border:${lightenColor(colour,30)};--subfolder-text:${text}">${manageFolderIcon("ysm-folder-icon")}<span>${manageEscape(name)}</span><small>${info.subscriptions?.length || 0}</small></button><button type="button" class="ysm-folder-more" data-action="edit-subfolder" data-edit-child="${manageEscape(name)}" aria-label="Edit ${manageEscape(name)}">•••</button></div>`;
+        return `<div class="ysm-subfolder-item"><button type="button" class="ysm-subfolder ${state.child === name ? 'is-active' : ''}" data-child="${manageEscape(name)}" aria-pressed="${state.child === name}" title="${manageEscape(name)}" style="--subfolder-fill:${colour};--subfolder-border:${lightenColor(colour,30)};--subfolder-text:${text}">${manageFolderIcon("ysm-folder-icon", false, info.iconId)}<span>${manageEscape(name)}</span><small>${info.subscriptions?.length || 0}</small></button><button type="button" class="ysm-folder-more" data-action="edit-subfolder" data-edit-child="${manageEscape(name)}" aria-label="Edit ${manageEscape(name)}">•••</button></div>`;
       }).join("") ||
       `<p class="ysm-empty">${entries.length ? 'No matching folders.' : 'No subfolders yet. Use + Subfolder to create one.'}</p>`);
   }

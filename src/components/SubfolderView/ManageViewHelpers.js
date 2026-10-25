@@ -25,7 +25,8 @@ function manageFilteredSubscriptions(parent, child, query, sort) {
     .slice().sort((a, b) => manageChannelTitle(a).localeCompare(manageChannelTitle(b)) * (sort === "za" ? -1 : 1));
 }
 
-function manageFolderIcon(className, solid = false) {
+function manageFolderIcon(className, solid = false, iconId = 'folder') {
+  if (FolderIcons.normalise(iconId) !== 'folder') return FolderIcons.svg(iconId, className);
   return `<svg class="${className}" viewBox="0 0 24 24" aria-hidden="true" focusable="false" fill="${solid ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h5l2 3h7a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg>`;
 }
 
@@ -61,6 +62,6 @@ function manageParentCount(info) {
     .forEach(subscriptions => subscriptions.forEach(sub => { const id = manageChannelId(sub); if (id) ids.add(id); }));
   return ids.size;
 }
-function manageParentLabel(name) {
-  return `<span class="ysm-parent-name">${manageEscape(name)}</span>`;
+function manageParentLabel(name, record = {}) {
+  return `${FolderIcons.normalise(record.iconId) !== 'folder' ? FolderIcons.svg(record.iconId, 'ysm-parent-custom-icon') : ''}<span class="ysm-parent-name">${manageEscape(name)}</span>`;
 }

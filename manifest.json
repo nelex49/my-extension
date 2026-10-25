@@ -26,9 +26,11 @@
         "src/styles/subfolder-view.css",
         "src/styles/sidebar.css",
         "src/styles/folder-dialogs.css",
-        "src/styles/theme.css"
+        "src/styles/theme.css",
+        "src/styles/folder-icons.css"
       ],
       "js": [
+        "src/shared/FolderIcons.js",
         "src/shared/BackupFormat.js",
         "src/accounts/AccountSetupStore.js",
         "src/accounts/AccountSetupMigration.js",
@@ -45,6 +47,7 @@
         "src/components/FolderDialogs/DialogLifecycle.js",
         "src/components/PlanDialogs/FolderLimitDialog.js",
         "src/services/BackupService.js",
+        "src/components/FolderDialogs/FolderIconPicker.js",
         "src/components/FolderDialogs/DialogControls.js",
         "src/components/FolderDialogs/ParentFolderDialog.js",
         "src/components/FolderDialogs/SubfolderDialog.js",

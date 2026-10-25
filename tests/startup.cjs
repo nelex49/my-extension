@@ -95,6 +95,7 @@ for (const plan of ['free','expired']) {
   assert.ok(trigger.textContent.includes('Pro'));
   manage.events.click({target:trigger});
   let prompt=body.children.at(-1);assert.ok(prompt.classList.contains('ytsm-multi-move-pro-dialog'));
+  assert.ok(prompt.textContent.includes('Also included with Pro'));assert.ok(prompt.textContent.includes('Unlimited subfolders'));assert.ok(prompt.querySelector('.ytsm-free-note').textContent.includes('Included with Free:'));assert.ok(prompt.querySelector('.ytsm-free-note').textContent.includes('individual channel moves, unlimited parent folders, 3 subfolders per parent, and folder colours.'));assert.ok(!prompt.textContent.includes('Your existing icons remain visible.'));assert.ok(!prompt.textContent.includes('Unlimited folders'));
   const cancel=prompt.querySelector('[data-dialog-close]');assert.equal(document.activeElement,cancel);
   const upgrade=prompt.querySelector('[data-action="multi-move-upgrade"]');
   assert.equal(upgrade.textContent,plan==='expired'?'Renew Pro':'Upgrade to Pro');
@@ -257,6 +258,26 @@ assert.equal(document.getElementById('subfolder-view-modal'),null);
 context.ViewPreferences.update({manageOpen:true,parent:'Deleted',child:'Missing'});
 context.showSubfolderView();verificationView=document.getElementById('subfolder-view-modal');
 assert.equal(context.ViewPreferences.read().parent,null);assert.equal(context.ViewPreferences.read().child,null);
+// Manifest-loaded icon catalogue renders parent, subfolder, sidebar and destinations after expiry.
+const iconFolders=structuredClone(context.folderData);
+iconFolders['Sports renamed'].iconId='fitness';
+iconFolders['Sports renamed'].subfolders['Renamed ball'].iconId='gaming';
+iconFolders['Sports renamed'].subfolders['Renamed ball'].subscriptions=[a,b];
+emitChanges({folderData:iconFolders,developmentFolderPlan:'expired'});
+context.showSubfolderView();verificationView=document.getElementById('subfolder-view-modal');
+verificationView.events.click({target:verificationView.querySelectorAll('button').find(button=>button.dataset.parent==='Sports renamed')});
+assert.equal(verificationView.querySelector('.ysm-parent-custom-icon').dataset.folderIcon,'fitness');
+const iconChild=verificationView.querySelectorAll('button').find(button=>button.dataset.child==='Renamed ball');
+assert.equal(iconChild.querySelector('svg').dataset.folderIcon,'gaming');
+verificationView.events.click({target:iconChild});
+assert.equal(document.getElementById('yt-folder-dropdown').querySelector('.ytsm-custom-folder-icon').querySelector('svg').dataset.folderIcon,'fitness');
+const moveIconTrigger=verificationView.querySelector('[data-action="move"]');
+verificationView.events.click({target:moveIconTrigger});
+assert.equal(verificationView.querySelectorAll('[data-action="move-parent"]').find(button=>button.dataset.moveParent==='Sports renamed').querySelector('svg').dataset.folderIcon,'fitness');
+verificationView.events.click({target:verificationView.querySelectorAll('[data-action="move-parent"]').find(button=>button.dataset.moveParent==='Sports renamed')});
+assert.equal(verificationView.querySelectorAll('[data-action="destination"]').find(button=>button.dataset.destinationChild==='Renamed ball').querySelector('svg').dataset.folderIcon,'gaming');
+verificationView.events.click({target:verificationView.querySelector('[data-action="move-close"]')});
+console.log('PASS: manifest-loaded icons in parent tabs, subfolders, sidebar and move destinations under Expired.');
 // A mismatched authorised account closes Manage and prevents folder writes.
 const beforeBlocked=JSON.stringify(context.folderData), writesBeforeBlocked=writes;
 for(const listener of [...listeners])listener({accountStatus:{newValue:{state:'blocked',session:'token',account:{id:'UC_OTHER',title:'Other'},owner:store.folderOwner}}},'local');

@@ -40,8 +40,8 @@ function createMovePicker({ modal, state }) {
             .toString(16).padStart(2, '0')).join('');
         }
         return state.moveParent === null ?
-          `<button type="button" data-action="move-parent" data-move-parent="${manageEscape(name)}" title="${manageEscape(name)}" style="--destination-colour: ${iconColour}">${manageFolderIcon('ysm-destination-icon')}<span>${manageEscape(name)}</span><small>›</small></button>` :
-          `<button type="button" data-action="destination" data-destination-parent="${manageEscape(state.moveParent)}" data-destination-child="${manageEscape(name)}" title="${manageEscape(name)}" style="--destination-colour: ${iconColour}" ${current ? 'disabled' : ''}>${manageFolderIcon('ysm-destination-icon')}<span>${manageEscape(name)}</span>${current ? '<small>Current</small>' : ''}</button>`;
+          `<button type="button" data-action="move-parent" data-move-parent="${manageEscape(name)}" title="${manageEscape(name)}" style="--destination-colour: ${iconColour}">${manageFolderIcon('ysm-destination-icon', false, folder.iconId)}<span>${manageEscape(name)}</span><small>›</small></button>` :
+          `<button type="button" data-action="destination" data-destination-parent="${manageEscape(state.moveParent)}" data-destination-child="${manageEscape(name)}" title="${manageEscape(name)}" style="--destination-colour: ${iconColour}" ${current ? 'disabled' : ''}>${manageFolderIcon('ysm-destination-icon', false, folder.iconId)}<span>${manageEscape(name)}</span>${current ? '<small>Current</small>' : ''}</button>`;
       }).join('') || `<p class="ysm-empty">${names.length ? 'No matching folders.' : state.moveParent === null ? 'No parent folders yet.' : `No subfolders in ${manageEscape(state.moveParent)} yet. Close this picker and use + Subfolder to create one.`}</p>`}</div>`;
     const search = picker.querySelector('.ysm-move-search');
     if (search) {

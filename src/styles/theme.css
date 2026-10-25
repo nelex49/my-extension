@@ -117,22 +117,22 @@
 #subfolder-view-modal .ysm-pro-badge span { margin: 0; color: inherit; }
 .ytsm-pro-crown { flex: 0 0 16px; vertical-align: middle; }
 .ytsm-folder-dialog .ytsm-primary .ytsm-pro-crown { margin-right: 7px; }
-.ytsm-multi-move-pro-dialog .ytsm-dialog-panel { width: min(420px,calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow-y: auto; }
-.ytsm-multi-move-pro-dialog .ytsm-dialog-header { padding: 20px; gap: 12px; }
-.ytsm-multi-move-pro-dialog .ytsm-pro-emblem { display: flex; align-items: center; justify-content: center; flex: 0 0 40px; height: 40px; border: 1px solid var(--ytsm-form-accent-border); border-radius: 10px; background: var(--ytsm-theme-accent-soft, #33485b); color: var(--ytsm-form-text); }
-.ytsm-multi-move-pro-dialog .ytsm-pro-emblem svg { width: 22px; height: 22px; flex-basis: 22px; }
-.ytsm-multi-move-pro-dialog .ytsm-pro-eyebrow { display: block; margin-bottom: 4px; color: var(--ytsm-form-muted); font-size: 10px; letter-spacing: .8px; font-weight: 600; }
-.ytsm-multi-move-pro-dialog h2 { font-size: 18px; line-height: 1.3; }
-.ytsm-multi-move-pro-dialog .ytsm-folder-form { padding: 18px 20px 20px; }
-.ytsm-multi-move-pro-dialog .ytsm-pro-intro { line-height: 1.6; }
-.ytsm-multi-move-pro-dialog .ytsm-pro-benefits { display: grid; gap: 14px; padding: 14px; margin: 16px 0; border: 1px solid var(--ytsm-form-border); border-radius: 8px; background: var(--ytsm-form-surface); }
-.ytsm-multi-move-pro-dialog .ytsm-pro-benefits strong { display: block; margin-bottom: 3px; font-size: 13px; }
-.ytsm-multi-move-pro-dialog .ytsm-pro-benefits span, .ytsm-multi-move-pro-dialog .ytsm-plan-copy { color: var(--ytsm-form-muted); font-size: 12px; line-height: 1.6; }
-.ytsm-multi-move-pro-dialog .ytsm-multi-move-pro-details { margin-top: 14px; padding: 12px; border: 1px solid var(--ytsm-form-border); border-radius: 8px; background: var(--ytsm-form-surface); }
-.ytsm-multi-move-pro-dialog .ytsm-multi-move-pro-details .ytsm-plan-copy { margin-top: 8px; }
-.ytsm-multi-move-pro-dialog .ytsm-dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 16px; }
-.ytsm-multi-move-pro-dialog .ytsm-dialog-actions button { min-height: 36px; padding: 8px 12px; }
-.ytsm-multi-move-pro-dialog [data-dialog-close]:focus { outline: 2px solid var(--ytsm-theme-focus, #9ec9f3); outline-offset: 2px; }
+:is(.ytsm-multi-move-pro-dialog, .ytsm-folder-icons-pro-dialog) .ytsm-dialog-panel { width: min(420px,calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow-y: auto; }
+:is(.ytsm-multi-move-pro-dialog, .ytsm-folder-icons-pro-dialog) .ytsm-dialog-header { padding: 20px; gap: 12px; }
+:is(.ytsm-multi-move-pro-dialog, .ytsm-folder-icons-pro-dialog) .ytsm-pro-emblem { display: flex; align-items: center; justify-content: center; flex: 0 0 40px; height: 40px; border: 1px solid var(--ytsm-form-accent-border); border-radius: 10px; background: var(--ytsm-theme-accent-soft, #33485b); color: var(--ytsm-form-text); }
+:is(.ytsm-multi-move-pro-dialog, .ytsm-folder-icons-pro-dialog) .ytsm-pro-emblem svg { width: 22px; height: 22px; flex-basis: 22px; }
+:is(.ytsm-multi-move-pro-dialog, .ytsm-folder-icons-pro-dialog) .ytsm-pro-eyebrow { display: block; margin-bottom: 4px; color: var(--ytsm-form-muted); font-size: 10px; letter-spacing: .8px; font-weight: 600; }
+:is(.ytsm-multi-move-pro-dialog, .ytsm-folder-icons-pro-dialog) h2 { font-size: 18px; line-height: 1.3; }
+:is(.ytsm-multi-move-pro-dialog, .ytsm-folder-icons-pro-dialog) .ytsm-folder-form { padding: 18px 20px 20px; }
+:is(.ytsm-multi-move-pro-dialog, .ytsm-folder-icons-pro-dialog) .ytsm-pro-intro { line-height: 1.6; }
+:is(.ytsm-multi-move-pro-dialog, .ytsm-folder-icons-pro-dialog) .ytsm-pro-benefits { display: grid; gap: 14px; padding: 14px; margin: 16px 0; border: 1px solid var(--ytsm-form-border); border-radius: 8px; background: var(--ytsm-form-surface); }
+:is(.ytsm-multi-move-pro-dialog, .ytsm-folder-icons-pro-dialog) .ytsm-pro-benefits strong { display: block; margin-bottom: 3px; font-size: 13px; }
+:is(.ytsm-multi-move-pro-dialog, .ytsm-folder-icons-pro-dialog) .ytsm-pro-benefits span, :is(.ytsm-multi-move-pro-dialog, .ytsm-folder-icons-pro-dialog) .ytsm-plan-copy { color: var(--ytsm-form-muted); font-size: 12px; line-height: 1.6; }
+:is(.ytsm-multi-move-pro-dialog, .ytsm-folder-icons-pro-dialog) .ytsm-multi-move-pro-details { margin-top: 14px; padding: 12px; border: 1px solid var(--ytsm-form-border); border-radius: 8px; background: var(--ytsm-form-surface); }
+:is(.ytsm-multi-move-pro-dialog, .ytsm-folder-icons-pro-dialog) .ytsm-multi-move-pro-details .ytsm-plan-copy { margin-top: 8px; }
+:is(.ytsm-multi-move-pro-dialog, .ytsm-folder-icons-pro-dialog) .ytsm-dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 16px; }
+:is(.ytsm-multi-move-pro-dialog, .ytsm-folder-icons-pro-dialog) .ytsm-dialog-actions button { min-height: 36px; padding: 8px 12px; }
+:is(.ytsm-multi-move-pro-dialog, .ytsm-folder-icons-pro-dialog) [data-dialog-close]:focus { outline: 2px solid var(--ytsm-theme-focus, #9ec9f3); outline-offset: 2px; }
 
 /* Selection entry is discoverable; a ready bulk move is the primary action. */
 #subfolder-view-modal .ysm-selection-bar [data-action="start-selection"] {

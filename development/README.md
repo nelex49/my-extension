@@ -13,21 +13,21 @@ These are development simulations, not subscription verification or payment cont
 
 ## Manual checks
 
-Back up your real setup first. Use a temporary folder setup if you want to delete folders during testing. A pre-existing setup above the Free limits will be preserved and will already trigger the creation restriction.
+Back up your real setup first. Use a temporary setup for deletion tests. Existing subfolders above the Free allowance are always preserved.
 
-- **Free:** create four parent folders; the fifth should show the Pro prompt. Within a parent create three subfolders; the fourth should show the prompt. Other parents can still use their three subfolders when the whole setup is within the limits. Channels have no plan count limit.
-- **Prompt:** Not now, Escape and outside-click should close it without changes. Upgrade/Renew shows Pro information and states that purchases are not available yet; no payment is attempted.
-- **Pro:** create more than four parents and more than three children in one parent. Export a backup of this larger setup.
-- **Expired:** switch from Pro to expired. Everything remains accessible. Rename, change colours, delete folders, and move/remove channels. Creation should be blocked while any parent or child count exceeds the Free limits.
-- **Reduce:** delete down to at most four parents and at most three subfolders per parent. Creation becomes available where there is room: at four parents a fifth is still blocked; a parent with two children can receive a third.
-- **Restore:** while Free or expired, restore the larger backup. Confirm its complete structure returns after the safety-copy download. New creation stays restricted; editing, moving and deletion work. Restore does not change the current test plan.
-- **Live change:** open a create form under Pro, then change to expired in the test page before saving. Saving must recheck the limit and must not add an excess folder.
+- **Free:** create more than four parent folders with no upgrade prompt. Within any parent create three subfolders; the fourth should show the Pro prompt. Parent folders and subscriptions have no plan count limit.
+- **Prompt:** Cancel, Escape and outside-click close it without changes. The clicked feature is explained first, followed by Also included with Pro. Upgrade/Renew states purchases are unavailable; no payment is attempted.
+- **Pro:** create more than three subfolders in one parent. Try multi-channel moves and built-in folder icons. Export a backup.
+- **Expired:** everything remains intact, including icons. Rename/recolour/delete folders and move/remove channels. Parent creation remains unlimited. A parent with three or more subfolders cannot receive another, but other parents can still use their own allowance.
+- **Reduce:** delete subfolders in one parent until it has two. A third becomes available; a fourth stays blocked. Other parents' counts do not affect this.
+- **Restore:** on Free/Expired, restore the larger backup and verify safety-copy download. All content/icons return. Parent creation remains available; each parent independently follows the three-subfolder allowance. Restore does not change the plan.
+- **Live change:** open a subfolder create form under Pro in a parent already holding three children; switch to Expired before Save. Saving must block a fourth. A parent-folder create form must still save after the same plan change.
 - **Regression:** verify sidebar creation/editing, Manage navigation, centred move feedback, Refresh, backup, restore, About, sign-out and return sign-in.
 - Reload YouTube/restart Chrome and confirm both folder persistence and the selected test state.
 
 ## Layout and modules
 
-- `src/plans/FolderPlan.js`: the only definition of the provisional 4/3 limits and creation policy. Also resolves the explicitly development-only test state.
+- `src/plans/FolderPlan.js`: the only definition of the unlimited-parent / three-subfolder-per-parent allowance and creation policy. Also resolves the explicitly development-only test state.
 - `src/plans/FolderCreationGate.js`: bridges the policy to the limit dialog. Forms and creation services both use it.
 - `src/components/PlanDialogs/FolderLimitDialog.js`: themed limit/renewal prompt and Pro details; no checkout integration.
 - `development/plan-testing.*`: test state controls, exposed through development Extension options.

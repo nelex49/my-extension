@@ -56,7 +56,7 @@ function refreshFolderDropdown() {
     const subfolders = Object.entries(info.subfolders || {});
     const directSubscriptions = info.subscriptions || [];
     const expanded = sidebarExpandedParents.has(name);
-    const row = sidebarFolderRow(name, expanded, false, colour, folderTextColour(colour));
+    const row = sidebarFolderRow(name, expanded, false, colour, folderTextColour(colour), info.iconId);
     row.dataset.focusKey = JSON.stringify([name]);
     row.addEventListener("click", () => toggleSidebarSet(sidebarExpandedParents, name));
     group.append(sidebarFolderActions(row, name));
@@ -73,7 +73,7 @@ function refreshFolderDropdown() {
         const open = sidebarExpandedSubfolders.has(key);
         const subGroup = sidebarElement("div", "ytsm-subfolder-group");
         const subColour = sidebarFolderColour(subInfo.color, index);
-        const subRow = sidebarFolderRow(subName, open, true, subColour, folderTextColour(subColour));
+        const subRow = sidebarFolderRow(subName, open, true, subColour, folderTextColour(subColour), subInfo.iconId);
         subRow.dataset.focusKey = key;
         subRow.addEventListener("click", () => toggleSidebarSet(sidebarExpandedSubfolders, key));
         subGroup.append(sidebarFolderActions(subRow, name, subName));

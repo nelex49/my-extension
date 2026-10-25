@@ -1,7 +1,7 @@
 // Deliberately separate from the product UI. Disable the CONFIG flag for release.
 (() => {
   const status = document.querySelector('#status');
-  document.querySelector('#allowance').textContent = `Free allows ${FolderPlan.limits.parents} parent folders and ${FolderPlan.limits.subfolders} subfolders per parent.`;
+  document.querySelector('#allowance').textContent = `Free allows unlimited parent folders and ${FolderPlan.limits.subfolders} subfolders per parent.`;
   const buttons = Array.from(document.querySelectorAll('[data-plan]'));
   const enabled = window.CONFIG?.DEVELOPMENT_PLAN_TESTING === true;
   function disable(value) { buttons.forEach(button => { button.disabled = value; }); }

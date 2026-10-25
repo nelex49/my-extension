@@ -15,17 +15,19 @@ function showFolderForm(options) {
   const noun = kind === 'parent' ? 'Folder' : 'Subfolder';
   const title = editing ? `Edit ${noun}` : `Create ${noun}`;
   const parentLine = kind === 'subfolder' ? `<p class="ytsm-parent-context">Parent: <strong>${folderDialogEscape(parentName)}</strong></p>` : '';
-  const { modal, close } = openFolderDialog(kind, `<div class="ytsm-dialog-panel">
-    <header class="ytsm-dialog-header"><svg class="ytsm-dialog-folder-icon" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M3 7V5a2 2 0 0 1 2-2h5l2 3h7a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7Z"/></svg><div><h2 id="ytsm-folder-dialog-title">${title}</h2>${parentLine}</div></header>
+  const { modal, close, position } = openFolderDialog(kind, `<div class="ytsm-dialog-panel">
+    <header class="ytsm-dialog-header">${FolderIcons.svg(record?.iconId, 'ytsm-dialog-folder-icon')}<div><h2 id="ytsm-folder-dialog-title">${title}</h2>${parentLine}</div></header>
     <div class="ytsm-folder-form"><label for="ytsm-folder-name">${noun} name</label><div class="ytsm-name-line"><input type="text" id="ytsm-folder-name" maxlength="20" value="${folderDialogEscape(editing ? originalName : '')}" autocomplete="off"><span class="ytsm-character-count"><span>${editing ? originalName.length : 0}</span>/20</span></div>
     <label>Colour</label><div class="ytsm-colour-controls"><div class="ytsm-colour-row">${folderColourButtons()}</div><button type="button" class="ytsm-custom-colour"><span class="ytsm-palette-icon" aria-hidden="true">◉</span> Custom colour</button><div class="ytsm-custom-panel" hidden><input class="ytsm-colour-input" type="color" value="${sidebarFolderColour(selectedColor)}" aria-label="Choose custom colour"><input class="ytsm-colour-hex" type="text" value="${sidebarFolderColour(selectedColor)}" maxlength="7" aria-label="Custom colour hex value" spellcheck="false"><button type="button" class="ytsm-colour-done">Done</button></div></div>
+    <section class="ytsm-icon-controls" aria-label="Folder icon"><label>Icon</label><div class="ytsm-icon-summary"><span class="ytsm-icon-preview" aria-hidden="true"></span><span class="ytsm-icon-name"></span><button type="button" class="ytsm-change-icon" aria-expanded="false" aria-controls="ytsm-icon-grid">Change icon</button></div><button type="button" class="ytsm-reset-icon" hidden>Use default folder</button><div id="ytsm-icon-grid" class="ytsm-icon-grid" role="group" aria-label="Choose a folder icon" hidden></div><p class="ytsm-icon-hint" hidden>Choose an icon. Create or Save changes applies your choice.</p></section>
     <p class="ytsm-form-error" role="alert" hidden></p>
     <div class="ytsm-delete-confirm" hidden><span>Delete this ${noun.toLowerCase()}${kind === 'parent' ? ' and its subfolders' : ''}?</span><button type="button" data-action="confirm-delete" class="is-danger">Delete</button><button type="button" data-action="cancel-delete">Keep</button></div>
     <footer class="ytsm-dialog-actions">${editing ? '<button type="button" data-action="delete" class="ytsm-delete">Delete</button>' : ''}<span></span><button type="button" data-dialog-close>Cancel</button><button type="button" data-action="save" class="ytsm-primary">${editing ? 'Save changes' : 'Create'}</button></footer></div></div>`, anchor, placement);
   const input = modal.querySelector('#ytsm-folder-name'), count = modal.querySelector('.ytsm-character-count span'), error = modal.querySelector('.ytsm-form-error');
   const save = modal.querySelector('[data-action="save"]'), picker = modal.querySelector('.ytsm-colour-input');
   function showError(message) { error.textContent = message; error.hidden = !message; }
-  function syncSwatches() { modal.querySelector('.ytsm-palette-icon').style.color = sidebarFolderColour(selectedColor); modal.querySelector('.ytsm-custom-colour').title = `Selected colour: ${sidebarFolderColour(selectedColor)}`; modal.querySelectorAll('.ytsm-swatch').forEach(button => { const active = button.dataset.color === selectedColor?.toLowerCase(); button.classList.toggle('is-selected', active); button.setAttribute('aria-pressed', String(active)); }); }
+  const iconPicker = createFolderIconPicker({ modal, initialIcon: record?.iconId, getColour: () => selectedColor, onLayout: position });
+  function syncSwatches() { iconPicker.sync(); modal.querySelector('.ytsm-palette-icon').style.color = sidebarFolderColour(selectedColor); modal.querySelector('.ytsm-custom-colour').title = `Selected colour: ${sidebarFolderColour(selectedColor)}`; modal.querySelectorAll('.ytsm-swatch').forEach(button => { const active = button.dataset.color === selectedColor?.toLowerCase(); button.classList.toggle('is-selected', active); button.setAttribute('aria-pressed', String(active)); }); }
   input.addEventListener('input', () => { count.textContent = input.value.length; showError(''); });
   modal.querySelectorAll('.ytsm-swatch').forEach(button => button.addEventListener('click', () => { selectedColor = button.dataset.color; selectedTextColor = '#ffffff'; colourChanged = true; picker.value = selectedColor; hexInput.value = selectedColor; hexInput.setAttribute('aria-invalid', 'false'); syncSwatches(); }));
   const customButton = modal.querySelector('.ytsm-custom-colour');
@@ -62,11 +64,12 @@ function showFolderForm(options) {
   save.addEventListener('click', () => {
     const name = input.value.trim(), problem = validate(name); if (problem) { showError(problem); return; }
     if (!editing && !requireFolderCreation(kind, parentName)) return;
+    if (iconPicker.changed && iconPicker.value !== 'folder' && window.FolderPlan?.state !== 'pro' && iconPicker.value !== FolderIcons.normalise(record?.iconId)) { showFolderIconsProDialog(); return; }
     save.disabled = true; showError('');
     const textColor = editing && !colourChanged ? (record.textColor || selectedTextColor) : selectedTextColor;
     const done = success => { if (!success) { save.disabled = false; showError('Could not save changes. Existing data was kept.'); return; } close(); onSaved?.(name); };
-    if (kind === 'parent') editing ? updateParentFolderRecord(originalName, name, selectedColor, textColor, done) : createParentFolderRecord(name, selectedColor, textColor, done);
-    else editing ? updateSubfolderRecord(parentName, originalName, name, selectedColor, textColor, done) : createSubfolderRecord(parentName, name, selectedColor, textColor, done);
+    if (kind === 'parent') editing ? updateParentFolderRecord(originalName, name, selectedColor, textColor, done, iconPicker.changed ? iconPicker.value : undefined) : createParentFolderRecord(name, selectedColor, textColor, done, iconPicker.changed ? iconPicker.value : undefined);
+    else editing ? updateSubfolderRecord(parentName, originalName, name, selectedColor, textColor, done, iconPicker.changed ? iconPicker.value : undefined) : createSubfolderRecord(parentName, name, selectedColor, textColor, done, iconPicker.changed ? iconPicker.value : undefined);
   });
   const deleteTrigger = modal.querySelector('[data-action="delete"]');
   deleteTrigger?.addEventListener('click', () => { confirmingDelete = true; modal.querySelector('.ytsm-delete-confirm').hidden = false; deleteTrigger.hidden = true; });

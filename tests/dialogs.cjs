@@ -34,7 +34,7 @@ context.userSubscriptions=[a,b,c];
 let failure=false,pendingSave=null,holdSave=false;
 context.chrome.storage.local={set(data,callback){writes++;if(holdSave){pendingSave=callback;return}context.chrome.runtime.lastError=failure?{message:'test error'}:null;callback?.();context.chrome.runtime.lastError=null}};
 vm.createContext(context);
-for(const file of ['src/utils/FolderColours.js','src/accounts/AccountSetupStore.js','src/accounts/AccountSetupMigration.js','src/plans/FolderPlan.js','src/plans/FolderCreationGate.js','src/components/PlanDialogs/FolderLimitDialog.js','src/services/FolderService.js','src/components/FolderDialogs/DialogLifecycle.js','src/components/FolderDialogs/DialogControls.js','src/components/FolderDialogs/ParentFolderDialog.js','src/components/FolderDialogs/SubfolderDialog.js'])vm.runInContext(fs.readFileSync(root+file,'utf8'),context,{filename:file});
+for(const file of ['src/shared/FolderIcons.js','src/utils/FolderColours.js','src/accounts/AccountSetupStore.js','src/accounts/AccountSetupMigration.js','src/plans/FolderPlan.js','src/plans/FolderCreationGate.js','src/components/PlanDialogs/FolderLimitDialog.js','src/services/FolderService.js','src/components/FolderDialogs/DialogLifecycle.js','src/components/FolderDialogs/FolderIconPicker.js','src/components/FolderDialogs/DialogControls.js','src/components/FolderDialogs/ParentFolderDialog.js','src/components/FolderDialogs/SubfolderDialog.js'])vm.runInContext(fs.readFileSync(root+file,'utf8'),context,{filename:file});
 context.CONFIG={DEVELOPMENT_PLAN_TESTING:true};context.FolderPlan.applyStorage({developmentFolderPlan:'pro'});
 function click(modal,button){button?.events.click?.({target:button,currentTarget:button});if(modal.isConnected)modal.events.click?.({target:button})}
 function listenerCount(){return Object.values(document.events).reduce((n,set)=>n+set.size,0)}
@@ -121,26 +121,65 @@ assert.equal(context.folderData.Target.subfolders.New.subscriptions.length,1);
 context.removeFromSubfolder('UC_A','Target','New',ok=>assert.equal(ok,true));
 assert.equal(context.folderData.Target.subfolders.New.subscriptions.length,0);
 assert.equal(JSON.stringify(context.userSubscriptions),youtubeBefore);
-// Free gates both creation forms; editing/deletion stay available above the limits.
+// Free gates excess subfolders; editing/deletion stay available above the limits.
 context.FolderPlan.applyStorage({developmentFolderPlan:'free'});
 context.folderData=Object.fromEntries(['One','Two','Three','Four'].map(name=>[name,{subscriptions:[],color:'#44345d',subfolders:{A:{subscriptions:[]},B:{subscriptions:[]},C:{subscriptions:[]}}}]));
 const unchanged=JSON.stringify(context.folderData),beforeLimitWrites=writes;
-context.showUnifiedFolderManager();modal=body.children.at(-1);assert.ok(modal.classList.contains('ytsm-plan-dialog'));
-assert.ok(modal.textContent.includes('4 parent folders'));assert.equal(modal.querySelector('#ytsm-folder-name'),null);
+context.showCreateSubfolderModal('One');modal=body.children.at(-1);assert.ok(modal.classList.contains('ytsm-plan-dialog'));
+assert.ok(modal.textContent.includes('3 subfolders per parent folder'));assert.equal(modal.querySelector('#ytsm-folder-name'),null);
 const proButton=modal.querySelector('[data-action="pro-details"]');
 let trapped=false;modal.firstElementChild.events.keydown({key:'Tab',shiftKey:true,preventDefault(){trapped=true}});assert.ok(trapped);assert.equal(document.activeElement,proButton);
 click(modal,proButton);assert.ok(!modal.querySelector('.ytsm-pro-details').hidden);
 assert.ok(modal.textContent.includes('not available yet'));assert.equal(JSON.stringify(context.folderData),unchanged);assert.equal(writes,beforeLimitWrites);
 click(modal,modal.querySelector('[data-dialog-close]'));assert.equal(listenerCount(),0);
-context.showCreateSubfolderModal('One');modal=body.children.at(-1);assert.ok(modal.textContent.includes('3 subfolders per parent'));
+context.showCreateSubfolderModal('One');modal=body.children.at(-1);assert.ok(modal.textContent.includes('3 subfolders per parent folder'));
 for(const fn of [...document.events.keydown])fn({key:'Escape',preventDefault(){},stopImmediatePropagation(){}});assert.equal(listenerCount(),0);
 // A create form opened under Pro is checked again if the plan changes before Save.
-context.FolderPlan.applyStorage({developmentFolderPlan:'pro'});context.showUnifiedFolderManager();const staleForm=body.children.at(-1);
+context.FolderPlan.applyStorage({developmentFolderPlan:'pro'});context.showCreateSubfolderModal('One');const staleForm=body.children.at(-1);
 staleForm.querySelector('#ytsm-folder-name').value='Cannot sneak in';context.FolderPlan.applyStorage({developmentFolderPlan:'expired'});
 click(staleForm,staleForm.querySelector('[data-action="save"]'));modal=body.children.at(-1);assert.ok(modal.classList.contains('ytsm-plan-dialog'));assert.ok(modal.textContent.includes('subscription has expired'));
-assert.equal(context.folderData['Cannot sneak in'],undefined);click(modal,modal.querySelector('[data-dialog-close]'));click(staleForm,staleForm.querySelector('[data-dialog-close]'));assert.equal(listenerCount(),0);
+assert.equal(context.folderData.One.subfolders['Cannot sneak in'],undefined);click(modal,modal.querySelector('[data-dialog-close]'));click(staleForm,staleForm.querySelector('[data-dialog-close]'));assert.equal(listenerCount(),0);
 context.folderData.Extra={color:'#44345d',subfolders:{},subscriptions:[]};
 context.showUnifiedFolderManager('Extra','edit');modal=body.children.at(-1);assert.ok(modal.querySelector('#ytsm-folder-name'));
 modal.querySelector('#ytsm-folder-name').value='Renamed extra';click(modal,modal.querySelector('[data-action="save"]'));assert.ok(context.folderData['Renamed extra']);assert.equal(listenerCount(),0);
 context.showUnifiedFolderManager('Renamed extra','edit');modal=body.children.at(-1);click(modal,modal.querySelector('[data-action="delete"]'));click(modal,modal.querySelector('[data-action="confirm-delete"]'));assert.equal(context.folderData['Renamed extra'],undefined);assert.equal(listenerCount(),0);
 console.log('PASS: Free/expired limit dialogs, Pro details, unchanged data on decline, shared lifecycle cleanup, live plan recheck before Save, editing/deletion above limits; atomic assignment saves, failed move/removal rollback, thrown writes, overlapping change guard, preserved YouTube cache; dialog save once, cancel, duplicate names, storage failure rollback, escaped names, unlimited Pro parents and subfolders, preserved assignments, outside click, Escape and anchored-editor listener cleanup across repeated openings.');
+// Optional icons: ten bundled choices, local preview, atomic saving and plan protection.
+context.FolderPlan.applyStorage({developmentFolderPlan:'pro'});
+context.folderData={Library:{color:'#244563',subscriptions:[a],subfolders:{Child:{color:'#315641',subscriptions:[b]}}}};
+const chooseIcon=(form,id)=>click(form,Array.from(form.querySelectorAll('.ytsm-icon-choice')).find(button=>button.dataset.iconId===id));
+context.showUnifiedFolderManager('Library','edit');modal=body.children.at(-1);
+assert.equal(modal.querySelectorAll('.ytsm-icon-choice').length,10);assert.equal(modal.querySelector('.ytsm-icon-grid').hidden,true);
+const iconsBefore=JSON.stringify(context.folderData),iconsWrites=writes;
+click(modal,modal.querySelector('.ytsm-change-icon'));assert.equal(modal.querySelector('.ytsm-icon-grid').hidden,false);
+chooseIcon(modal,'coding');assert.equal(modal.querySelector('.ytsm-icon-name').textContent,'Coding');
+assert.equal(JSON.stringify(context.folderData),iconsBefore);assert.equal(writes,iconsWrites);
+click(modal,modal.querySelector('[data-dialog-close]'));assert.equal(JSON.stringify(context.folderData),iconsBefore);
+context.showUnifiedFolderManager('Library','edit');modal=body.children.at(-1);click(modal,modal.querySelector('.ytsm-change-icon'));chooseIcon(modal,'coding');
+failure=true;click(modal,modal.querySelector('[data-action="save"]'));assert.equal(JSON.stringify(context.folderData),iconsBefore);assert.ok(modal.isConnected);failure=false;
+click(modal,modal.querySelector('[data-action="save"]'));assert.equal(context.folderData.Library.iconId,'coding');assert.equal(context.folderData.Library.subscriptions[0].snippet.resourceId.channelId,'UC_A');
+context.showCreateSubfolderModal('Library','Child');modal=body.children.at(-1);click(modal,modal.querySelector('.ytsm-change-icon'));chooseIcon(modal,'music');click(modal,modal.querySelector('[data-action="save"]'));
+assert.equal(context.folderData.Library.subfolders.Child.iconId,'music');
+context.showUnifiedFolderManager();modal=body.children.at(-1);modal.querySelector('#ytsm-folder-name').value='New icons';click(modal,modal.querySelector('.ytsm-change-icon'));chooseIcon(modal,'travel');click(modal,modal.querySelector('[data-action="save"]'));assert.equal(context.folderData['New icons'].iconId,'travel');
+// Expiry preserves existing icons on ordinary edits; Free cannot choose a new custom icon.
+context.FolderPlan.applyStorage({developmentFolderPlan:'expired'});
+context.showUnifiedFolderManager('Library','edit');const expiredIconForm=body.children.at(-1);
+assert.equal(expiredIconForm.querySelector('.ytsm-icon-name').textContent,'Coding');
+click(expiredIconForm,expiredIconForm.querySelector('.ytsm-change-icon'));let iconPrompt=body.children.at(-1);assert.ok(iconPrompt.classList.contains('ytsm-folder-icons-pro-dialog'));
+// Escape dismisses the overlay without dismissing the underlying edit form.
+for(const fn of [...document.events.keydown])fn({key:'Escape',preventDefault(){},stopImmediatePropagation(){}});
+assert.ok(expiredIconForm.isConnected);assert.ok(!iconPrompt.isConnected);assert.equal(document.activeElement,expiredIconForm.querySelector('.ytsm-change-icon'));
+expiredIconForm.querySelector('#ytsm-folder-name').value='Library renamed';click(expiredIconForm,expiredIconForm.querySelector('[data-action="save"]'));assert.equal(context.folderData['Library renamed'].iconId,'coding');
+context.showUnifiedFolderManager('Library renamed','edit');modal=body.children.at(-1);click(modal,modal.querySelector('.ytsm-reset-icon'));click(modal,modal.querySelector('[data-action="save"]'));assert.equal(context.folderData['Library renamed'].iconId,'folder');
+const protectedIcons=JSON.stringify(context.folderData),protectedWrites=writes;
+context.updateParentFolderRecord('Library renamed','Library renamed','#244563','#fff',ok=>assert.equal(ok,false),'film');assert.equal(writes,protectedWrites);assert.equal(JSON.stringify(context.folderData),protectedIcons);
+context.FolderPlan.applyStorage({developmentFolderPlan:'pro'});context.showCreateSubfolderModal('Library renamed','Child');const staleIconForm=body.children.at(-1);click(staleIconForm,staleIconForm.querySelector('.ytsm-change-icon'));chooseIcon(staleIconForm,'news');
+context.FolderPlan.applyStorage({developmentFolderPlan:'free'});click(staleIconForm,staleIconForm.querySelector('[data-action="save"]'));iconPrompt=body.children.at(-1);assert.ok(iconPrompt.classList.contains('ytsm-folder-icons-pro-dialog'));assert.equal(context.folderData['Library renamed'].subfolders.Child.iconId,'music');
+click(iconPrompt,iconPrompt.querySelector('[data-dialog-close]'));click(staleIconForm,staleIconForm.querySelector('[data-dialog-close]'));assert.equal(listenerCount(),0);
+console.log('PASS: ten icon choices, cancel/preview isolation, parent/subfolder/create persistence, failed-save retry, expiry retention/reset, overlay Escape/focus, service and stale-form plan gates.');
+
+// Unlimited parent creation also survives a plan change while the form is open.
+context.FolderPlan.applyStorage({developmentFolderPlan:'pro'});context.showUnifiedFolderManager();modal=body.children.at(-1);
+modal.querySelector('#ytsm-folder-name').value='Free parent';context.FolderPlan.applyStorage({developmentFolderPlan:'expired'});
+click(modal,modal.querySelector('[data-action="save"]'));assert.ok(context.folderData['Free parent']);assert.equal(listenerCount(),0);
+console.log('PASS: parent creation remains available after a live downgrade.');

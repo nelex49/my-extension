@@ -26,7 +26,7 @@ function openFolderDialog(kind, html, anchor = null, placement = 'beside', canCl
     document.removeEventListener('keydown', keydown); window.removeEventListener?.('resize', position);
     modal.remove(); onClosed(); if (previousFocus?.isConnected) previousFocus.focus({ preventScroll: true });
   }
-  function keydown(event) { if (event.key === 'Escape') { event.preventDefault(); event.stopImmediatePropagation(); close(); } }
+  function keydown(event) { if (Array.from(document.body.children).filter(node => node.classList.contains('ytsm-folder-dialog')).at(-1) !== modal) return; if (event.key === 'Escape') { event.preventDefault(); event.stopImmediatePropagation(); close(); } }
   document.addEventListener('keydown', keydown); window.addEventListener?.('resize', position);
   modal.addEventListener('pointerdown', event => { if (event.target === modal) close(); });
   modal.addEventListener('click', event => { if (event.target.closest('[data-dialog-close]')) close(); });
