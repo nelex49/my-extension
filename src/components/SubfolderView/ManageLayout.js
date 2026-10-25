@@ -15,7 +15,7 @@ function manageLayoutHTML() {
     <section class="ysm-content"><header class="ysm-content-heading"><div><h3 class="ysm-selected"></h3><p class="ysm-selected-count"></p></div>
       <input class="ysm-channel-search" type="search" aria-label="Search channels" placeholder="Search channels...">
       <select class="ysm-sort" aria-label="Sort channels"><option value="az">Sort: A - Z</option><option value="za">Sort: Z - A</option></select></header>
-      <div class="ysm-channel-list"></div></section></div>
+      <div class="ysm-selection-bar" hidden></div><div class="ysm-channel-list"></div></section></div>
     <section class="ysm-move-picker" aria-label="Move channel to a folder" hidden></section>
     <section class="ysm-channel-menu" aria-label="Channel options" hidden></section>
   </section>`;

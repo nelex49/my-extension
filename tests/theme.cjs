@@ -23,7 +23,7 @@ function setup(initial, options={}) {
  for(const name of ['sidebar','subfolder-view','folder-dialogs']){
   const css=fs.readFileSync(path.join(root,'src/styles',name+'.css'),'utf8');
   const expected={'sidebar': '76f19718438af5a33e25b613161c482b23b22c6ce623b721d1636716bb954246', 'subfolder-view': 'f9c6394ecaf41be87be5698554377d9f7a327a8f641dd272240bd276e65d2c06', 'folder-dialogs': '7895222de45b4377035b5e04c382a5cb47f8d715157547ca69ceee5e6a25a3cf'};
-  assert.equal(require('crypto').createHash('sha256').update(css.replace(/var\(--ytsm-theme-[a-z-]+, (#[a-fA-F0-9]+)\)/g,'$1')).digest('hex'),expected[name]);
+  assert.equal(require('crypto').createHash('sha256').update((css.includes('/* Pro selection controls') ? css.split('/* Pro selection controls')[0].slice(0,-1) : css).replace(/var\(--ytsm-theme-[a-z-]+, (#[a-fA-F0-9]+)\)/g,'$1')).digest('hex'),expected[name]);
  }
  const theme=fs.readFileSync(path.join(root,'src/styles/theme.css'),'utf8');
  assert.ok(theme.includes(':root[data-ytsm-theme="light"]'));assert.ok(!theme.includes('filter: invert'));

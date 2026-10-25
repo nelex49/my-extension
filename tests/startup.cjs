@@ -87,6 +87,33 @@ manage.events.click({target:manage.querySelector('[data-action="uncategorised"]'
 emitChanges({developmentFolderPlan:'pro'});assert.equal(context.FolderPlan.state,'pro');
 emitChanges({developmentFolderPlan:'expired'});assert.equal(context.FolderPlan.state,'expired');assert.ok(manage.isConnected);
 emitChanges({developmentFolderPlan:'free'});assert.equal(context.FolderPlan.state,'free');assert.ok(manage.isConnected);
+// Free/Expired discovery, shared dialog lifecycle and Pro direct selection.
+const beforeProPrompt=JSON.stringify([store.folderData,store.accountSetupData]), promptWrites=writes;
+for (const plan of ['free','expired']) {
+  emitChanges({developmentFolderPlan:plan});
+  const trigger=manage.querySelector('[data-action="start-selection"]');trigger.focus();
+  assert.ok(trigger.textContent.includes('Pro'));
+  manage.events.click({target:trigger});
+  let prompt=body.children.at(-1);assert.ok(prompt.classList.contains('ytsm-multi-move-pro-dialog'));
+  const cancel=prompt.querySelector('[data-dialog-close]');assert.equal(document.activeElement,cancel);
+  const upgrade=prompt.querySelector('[data-action="multi-move-upgrade"]');
+  assert.equal(upgrade.textContent,plan==='expired'?'Renew Pro':'Upgrade to Pro');
+  let tabTrapped=false;prompt.events.keydown({key:'Tab',shiftKey:true,preventDefault(){tabTrapped=true}});assert.ok(tabTrapped);assert.equal(document.activeElement,upgrade);
+  upgrade.events.click();assert.equal(prompt.querySelector('.ytsm-multi-move-pro-details').hidden,false);
+  assert.ok(prompt.textContent.includes('not available yet'));assert.equal(document.activeElement,cancel);
+  prompt.events.click({target:cancel});assert.ok(!prompt.isConnected);assert.equal(document.activeElement,trigger);
+  manage.events.click({target:trigger});prompt=body.children.at(-1);
+  prompt.events.pointerdown({target:prompt});assert.ok(!prompt.isConnected);
+  manage.events.click({target:trigger});prompt=body.children.at(-1);
+  context.showMultiMoveProDialog();assert.equal(body.children.filter(e=>e.classList.contains('ytsm-multi-move-pro-dialog')).length,1);
+  const escapeHandler=[...document.events.keydown].at(-1);escapeHandler({key:'Escape',preventDefault(){},stopImmediatePropagation(){}});assert.ok(!prompt.isConnected);
+}
+assert.equal(writes,promptWrites);assert.equal(JSON.stringify([store.folderData,store.accountSetupData]),beforeProPrompt);
+emitChanges({developmentFolderPlan:'pro'});
+assert.ok(!manage.querySelector('[data-action="start-selection"]').textContent.includes('Pro'));
+manage.events.click({target:manage.querySelector('[data-action="start-selection"]')});assert.ok(manage.querySelector('[data-action="move-selected"]'));
+assert.ok(!body.children.some(e=>e.classList.contains('ytsm-multi-move-pro-dialog')));
+emitChanges({developmentFolderPlan:'free'});assert.ok(manage.querySelector('[data-action="start-selection"]').textContent.includes('Pro'));
 // Backup menu routing and themed confirmation use real manifest-loaded modules.
 context.TextEncoder=TextEncoder;context.clearTimeout=()=>{};
 context.setTimeout=()=>1;

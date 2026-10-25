@@ -397,3 +397,13 @@
   #subfolder-view-modal .ysm-parent-heading-actions { grid-column: 2; grid-row: 1; }
   #subfolder-view-modal .ysm-notice-slot { grid-column: 1 / -1; grid-row: 2; }
 }
+
+/* Pro selection controls share the current theme and remain separate from row actions. */
+#subfolder-view-modal .ysm-selection-bar { display:flex; flex-wrap:wrap; align-items:center; gap:8px; padding:10px 16px; border-bottom:1px solid var(--ytsm-theme-border, #344150); background:var(--ytsm-theme-control, #202936); }
+#subfolder-view-modal .ysm-selection-bar[hidden] { display:none; }
+#subfolder-view-modal .ysm-selection-bar button { border:1px solid var(--ytsm-theme-border, #46576a); border-radius:6px; padding:7px 10px; background:var(--ytsm-theme-surface, #263344); color:var(--ytsm-theme-text, #edf2f7); cursor:pointer; }
+#subfolder-view-modal .ysm-selection-bar button:disabled { opacity:.5; cursor:default; }
+#subfolder-view-modal .ysm-selection-bar span { margin-right:auto; color:var(--ytsm-theme-text, #edf2f7); }
+#subfolder-view-modal .ysm-selection-bar small { margin-left:6px; color:var(--ytsm-theme-muted, #a9b8ca); }
+#subfolder-view-modal .ysm-channel-check { display:flex; align-items:center; padding:8px; }
+#subfolder-view-modal .ysm-channel-check input { width:18px; height:18px; accent-color:var(--ytsm-theme-focus, #80b7ee); cursor:pointer; }

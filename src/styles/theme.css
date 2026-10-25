@@ -98,3 +98,53 @@
 #subfolder-view-modal .ysm-subfolder-search-toggle:hover { background: var(--ytsm-theme-hover, #39485b); }
 #subfolder-view-modal .ysm-subfolder-search-toggle[aria-expanded="true"] { border-color: var(--ytsm-theme-focus, #9ec9f3); }
 #subfolder-view-modal .ysm-subfolder-search-toggle[hidden] { display: none; }
+
+/* Parent-folder actions sit over saved colours, including in All Folders. */
+:root[data-ytsm-theme="light"] #subfolder-view-modal .ysm-parent-item > .ysm-folder-more {
+  color: #ffffff; background: transparent; opacity: 1;
+}
+:root[data-ytsm-theme="light"] #subfolder-view-modal .ysm-parent-item > .ysm-folder-more:hover,
+:root[data-ytsm-theme="light"] #subfolder-view-modal .ysm-parent-item > .ysm-folder-more:focus-visible {
+  color: #ffffff; background: rgba(255,255,255,.12);
+}
+
+/* Geometric dots keep the action centred independently of font metrics. */
+#subfolder-view-modal .ysm-parent-item > .ysm-folder-more { display: inline-flex; align-items: center; justify-content: center; padding: 0; letter-spacing: 0; line-height: 1; }
+#subfolder-view-modal .ysm-parent-item > .ysm-folder-more svg { display: block; flex: 0 0 18px; pointer-events: none; filter: drop-shadow(0 1px 1px rgba(0,0,0,.65)); }
+/* A compact Pro badge reads as a separate label in either theme. */
+#subfolder-view-modal [data-action="start-selection"] { display: inline-flex; align-items: center; gap: 10px; }
+#subfolder-view-modal .ysm-selection-bar .ysm-pro-badge { display: inline-flex; align-items: center; gap: 4px; margin: 0; padding: 2px 6px; border: 1px solid var(--ytsm-theme-accent-border, #85aacd); border-radius: 5px; background: var(--ytsm-theme-accent-soft, #33485b); color: var(--ytsm-theme-text, #eff5fb); font-size: 11px; font-weight: 700; line-height: 1.3; }
+#subfolder-view-modal .ysm-pro-badge span { margin: 0; color: inherit; }
+.ytsm-pro-crown { flex: 0 0 16px; vertical-align: middle; }
+.ytsm-folder-dialog .ytsm-primary .ytsm-pro-crown { margin-right: 7px; }
+.ytsm-multi-move-pro-dialog .ytsm-dialog-panel { width: min(420px,calc(100vw - 24px)); max-height: calc(100dvh - 24px); overflow-y: auto; }
+.ytsm-multi-move-pro-dialog .ytsm-dialog-header { padding: 20px; gap: 12px; }
+.ytsm-multi-move-pro-dialog .ytsm-pro-emblem { display: flex; align-items: center; justify-content: center; flex: 0 0 40px; height: 40px; border: 1px solid var(--ytsm-form-accent-border); border-radius: 10px; background: var(--ytsm-theme-accent-soft, #33485b); color: var(--ytsm-form-text); }
+.ytsm-multi-move-pro-dialog .ytsm-pro-emblem svg { width: 22px; height: 22px; flex-basis: 22px; }
+.ytsm-multi-move-pro-dialog .ytsm-pro-eyebrow { display: block; margin-bottom: 4px; color: var(--ytsm-form-muted); font-size: 10px; letter-spacing: .8px; font-weight: 600; }
+.ytsm-multi-move-pro-dialog h2 { font-size: 18px; line-height: 1.3; }
+.ytsm-multi-move-pro-dialog .ytsm-folder-form { padding: 18px 20px 20px; }
+.ytsm-multi-move-pro-dialog .ytsm-pro-intro { line-height: 1.6; }
+.ytsm-multi-move-pro-dialog .ytsm-pro-benefits { display: grid; gap: 14px; padding: 14px; margin: 16px 0; border: 1px solid var(--ytsm-form-border); border-radius: 8px; background: var(--ytsm-form-surface); }
+.ytsm-multi-move-pro-dialog .ytsm-pro-benefits strong { display: block; margin-bottom: 3px; font-size: 13px; }
+.ytsm-multi-move-pro-dialog .ytsm-pro-benefits span, .ytsm-multi-move-pro-dialog .ytsm-plan-copy { color: var(--ytsm-form-muted); font-size: 12px; line-height: 1.6; }
+.ytsm-multi-move-pro-dialog .ytsm-multi-move-pro-details { margin-top: 14px; padding: 12px; border: 1px solid var(--ytsm-form-border); border-radius: 8px; background: var(--ytsm-form-surface); }
+.ytsm-multi-move-pro-dialog .ytsm-multi-move-pro-details .ytsm-plan-copy { margin-top: 8px; }
+.ytsm-multi-move-pro-dialog .ytsm-dialog-actions { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 10px; margin-top: 20px; padding-top: 16px; }
+.ytsm-multi-move-pro-dialog .ytsm-dialog-actions button { min-height: 36px; padding: 8px 12px; }
+.ytsm-multi-move-pro-dialog [data-dialog-close]:focus { outline: 2px solid var(--ytsm-theme-focus, #9ec9f3); outline-offset: 2px; }
+
+/* Selection entry is discoverable; a ready bulk move is the primary action. */
+#subfolder-view-modal .ysm-selection-bar [data-action="start-selection"] {
+  background: var(--ytsm-theme-accent-soft, #2d4052); border-color: var(--ytsm-theme-accent-border, #6c93b5);
+  font-weight: 600; transition: background-color .15s, border-color .15s;
+}
+#subfolder-view-modal .ysm-selection-bar [data-action="start-selection"]:hover {
+  background: var(--ytsm-theme-accent-hover, #3a5269); border-color: var(--ytsm-theme-focus, #9ec9f3);
+}
+#subfolder-view-modal .ysm-selection-bar [data-action="move-selected"]:not(:disabled) {
+  background: var(--ytsm-theme-accent-fill, #315f83); border-color: var(--ytsm-theme-accent-border, #76a6cb); color: #ffffff; font-weight: 600;
+}
+#subfolder-view-modal .ysm-selection-bar [data-action="move-selected"]:not(:disabled):hover { filter: brightness(1.12); }
+#subfolder-view-modal .ysm-selection-bar button:focus-visible { outline: 2px solid var(--ytsm-theme-focus, #9ec9f3); outline-offset: 2px; }
+#subfolder-view-modal .ysm-row-actions button:disabled { opacity: .4; cursor: default; filter: none; }

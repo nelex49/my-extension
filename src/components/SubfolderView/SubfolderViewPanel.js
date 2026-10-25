@@ -34,7 +34,7 @@ function showSubfolderView() {
 
   function dismissMenus(event) {
     if (state.optionsChannel && !event.target.closest('.ysm-channel-menu') && !event.target.closest('[data-action="channel-options"]')) closeChannelMenu();
-    if (state.moveChannel && !event.target.closest('.ysm-move-picker') && !event.target.closest('[data-action="move"]')) closeMovePicker();
+    if ((state.moveChannel || state.bulkPicker) && !event.target.closest('.ysm-move-picker') && !event.target.closest('[data-action="move"]') && !event.target.closest('[data-action="move-selected"]')) closeMovePicker();
     if (!event.target.closest('.ysm-main-menu') && !event.target.closest('[data-action="menu"]')) {
       modal.querySelector('.ysm-main-menu').hidden = true;
       modal.querySelector('[data-action="menu"]').setAttribute('aria-expanded', 'false');
@@ -126,7 +126,7 @@ function showSubfolderView() {
     if (changes.accessToken && !changes.accessToken.newValue) { close(); return; }
     if (changes.folderData) { folderData = changes.folderData.newValue || {}; window.folderData = folderData; }
     if (changes.userSubscriptions) { userSubscriptions = changes.userSubscriptions.newValue || []; window.userSubscriptions = userSubscriptions; }
-    if (changes.folderData || changes.userSubscriptions) render();
+    if (changes.folderData || changes.userSubscriptions || changes.developmentFolderPlan) render();
   }
   function keydown(event) {
     // Existing creation dialogs sit above Manage; allow them to own their keys.
@@ -137,7 +137,8 @@ function showSubfolderView() {
       const menu = modal.querySelector(".ysm-main-menu");
       if (!menu.hidden) { menu.hidden = true; modal.querySelector('[data-action="menu"]').setAttribute("aria-expanded", "false"); }
       else if (modal.querySelector('.ysm-more-parents')?.open) modal.querySelector('.ysm-more-parents').open = false;
-      else if (state.moveChannel) closeMovePicker(true);
+      else if (state.moveChannel || state.bulkPicker) closeMovePicker(true);
+      else if (state.selectionMode && !state.bulkMoving) { state.selectionMode = false; state.selectedChannels.clear(); render(); modal.querySelector('[data-action="start-selection"]')?.focus(); }
       else close();
     }
     if (event.key === "Tab") {

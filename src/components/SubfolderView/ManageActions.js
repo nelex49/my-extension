@@ -4,9 +4,34 @@ function createManageActions({ modal, state, render, close, dismissMenus, select
   return event => {
     dismissMenus(event);
     if (event.target === modal) { close(); return; }
+    if (state.bulkMoving) return;
+    const checkbox = event.target.closest('[data-select-channel]');
+    if (checkbox && state.selectionMode && window.FolderPlan?.state === 'pro') {
+      const id = checkbox.dataset.selectChannel;
+      if (checkbox.checked) state.selectedChannels.add(id); else state.selectedChannels.delete(id);
+      closeMovePicker(); render();
+      Array.from(modal.querySelectorAll('[data-select-channel]')).find(item => item.dataset.selectChannel === id)?.focus({preventScroll:true});
+      return;
+    }
     const button = event.target.closest("button");
     if (!button || button.disabled) return;
     const action = button.dataset.action;
+    if (['start-selection', 'cancel-selection', 'clear-selection', 'select-results', 'move-selected'].includes(action)) {
+      if (window.FolderPlan?.state !== 'pro') {
+        if (action === 'start-selection') showMultiMoveProDialog();
+        return;
+      }
+      closeMovePicker(); closeChannelMenu();
+      if (action === 'start-selection') state.selectionMode = true;
+      else if (action === 'cancel-selection') { state.selectionMode = false; state.selectedChannels.clear(); }
+      else if (action === 'clear-selection') state.selectedChannels.clear();
+      else if (action === 'select-results') manageFilteredSubscriptions(state.parent, state.child, state.query, state.sort).forEach(sub => { const id = manageChannelId(sub); if (id) state.selectedChannels.add(id); });
+      else if (state.selectedChannels.size) state.bulkPicker = true;
+      render();
+      if (state.bulkPicker) modal.querySelector('.ysm-move-list button')?.focus();
+      else modal.querySelector(`[data-action="${state.selectionMode ? 'move-selected' : 'start-selection'}"]`)?.focus({preventScroll:true});
+      return;
+    }
     if (action === "toggle-subfolder-search") {
       state.folderSearchOpen = !state.folderSearchOpen;
       state.folderQuery = ''; modal.querySelector('.ysm-folder-search').value = '';
@@ -97,6 +122,22 @@ function createManageActions({ modal, state, render, close, dismissMenus, select
       const previous = state.moveParent; state.moveQuery = ""; state.moveParent = null; renderMovePicker();
       Array.from(modal.querySelectorAll('[data-action="move-parent"]')).find(item => item.dataset.moveParent === previous)?.focus();
     } else if (action === "destination") {
+      if (state.bulkPicker) {
+        if (window.FolderPlan?.state !== 'pro' || !state.selectedChannels.size) return;
+        const ids = [...state.selectedChannels], parent = button.dataset.destinationParent, child = button.dataset.destinationChild;
+        state.bulkMoving = true;
+        moveChannelsToSubfolder(ids, parent, child, state.parent, state.child, success => {
+          state.bulkMoving = false;
+          if (!modal.isConnected) return;
+          if (success) {
+            closeMovePicker(); state.selectedChannels.clear(); state.selectionMode = false;
+            backupNotice.show(`Moved ${ids.length} channels to ${parent} / ${child}`, 'success', 2000);
+          }
+          render();
+        });
+        if (state.bulkMoving) render();
+        return;
+      }
       const id = state.moveChannel;
       // Existing operation expects the app's lexical state to match window state.
       folderData = window.folderData; userSubscriptions = window.userSubscriptions;

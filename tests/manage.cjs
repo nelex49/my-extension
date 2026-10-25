@@ -29,7 +29,7 @@ const context={console,document,URL,innerWidth:1200,innerHeight:900,ResizeObserv
 context.window=context;context.userSubscriptions=[a,b,c];context.folderData={'Music "test"':{color:'#44345d',subfolders:{Blues:{subscriptions:[a,b]},Empty:{color:'#12ab34',subscriptions:[]}},subscriptions:[]},Sports:{subfolders:{Ball:{subscriptions:[]}}}};
 vm.createContext(context);
 context.chrome.storage.local={set(data,callback){writes++;callback?.();}};
-for(const file of ['src/accounts/AccountSetupStore.js','src/accounts/AccountSetupMigration.js','src/plans/FolderPlan.js','src/plans/FolderCreationGate.js','src/services/FolderService.js'])vm.runInContext(fs.readFileSync(root+file,'utf8'),context);
+for(const file of ['src/accounts/AccountSetupStore.js','src/accounts/AccountSetupMigration.js','src/plans/FolderPlan.js','src/plans/FolderCreationGate.js','src/components/PlanDialogs/FolderLimitDialog.js','src/services/FolderService.js'])vm.runInContext(fs.readFileSync(root+file,'utf8'),context);
 vm.runInContext(fs.readFileSync(root+'src/components/SubscriptionManager.js','utf8'),context);
 vm.runInContext(fs.readFileSync(root+'src/components/SubfolderView/ManageViewHelpers.js','utf8'),context);
 for(const name of ['ManageState', 'ManageTools', 'ManageLayout', 'MovePicker', 'ChannelOptionsMenu', 'ParentFolderNavigation', 'SubfolderNavigation', 'ChannelList', 'ManageActions'])vm.runInContext(fs.readFileSync(root+'src/components/SubfolderView/'+name+'.js','utf8'),context);
@@ -132,3 +132,55 @@ context.syncSubscriptions([a]);context.loadUserData('mock');assert.equal(context
 vm.runInContext('isLoggedIn=true',context);context.showSubfolderView();modal=body.children.at(-1);assert.equal(modal.querySelector('.ysm-total').textContent,'2 saved subscriptions');const strip=modal.querySelector('.ysm-visible-parents');strip.testWidth=140;context.tabsObserver.callback();assert.ok(strip.querySelectorAll('.ysm-parent-item').filter(e=>!e.hidden).length<=1);strip.testWidth=430;context.tabsObserver.callback();assert.ok(strip.querySelectorAll('.ysm-parent-item').filter(e=>!e.hidden).length<=3);
 context.syncSubscriptions([a,b,c]);assert.equal(modal.querySelector('.ysm-total').textContent,'3 saved subscriptions');click(modal.querySelectorAll('button').find(e=>e.dataset.action==='close'));
 console.log('PASS: component state isolation and timer cleanup; Uncategorised explanation and hidden folder search; subfolder clear control; unique parent totals and four-digit count labels; always-visible search filtering in both steps, search focus and reset, clearer headings;  folder SVG icons and heading tooltip; unavailable total instead of false zero; cached subscription load uses shared state and updates open Manage; menu outside-click dismissal; permanent Create Folder; escaped description toggles; searchable 100-folder overflow and selected tab promotion; document listener cleanup; manifest JS parsing; escaping; uncategorised data; search/sort; singleton modal; read-only rendering; parent navigation; move/remove retain YouTube subscriptions; Add shared dialog; empty account; logout and listener cleanup.');
+{
+// Pro multi-move: filtering, scope reset, atomic rollback and plan enforcement.
+context.accountIsReady=()=>true;context.CONFIG={DEVELOPMENT_PLAN_TESTING:true};context.FolderPlan.applyStorage({developmentFolderPlan:'pro'});
+context.folderData={Source:{subscriptions:[],subfolders:{One:{subscriptions:[a,b]}}},Target:{subscriptions:[],subfolders:{Two:{subscriptions:[]}}}};
+context.userSubscriptions=[a,b,c];context.chrome.storage.local={set(data,callback){writes++;callback?.()}};
+context.showSubfolderView();modal=body.children.at(-1);
+const act=name=>modal.querySelector(`[data-action="${name}"]`);
+click(modal.querySelectorAll('button').find(e=>e.dataset.parent==='Source'));
+click(act('start-selection'));assert.equal(modal.querySelectorAll('input').filter(e=>e.attrs.type==='checkbox').length,2);
+assert.equal(act('move-selected').disabled,true);
+for (const action of ['move','remove']) for (const button of modal.querySelectorAll(`[data-action="${action}"]`)) assert.equal(button.disabled,true);
+click(act('cancel-selection'));
+for (const action of ['move','remove']) for (const button of modal.querySelectorAll(`[data-action="${action}"]`)) assert.ok(!button.disabled);
+click(act('start-selection'));
+
+let search=modal.querySelector('.ysm-channel-search');search.value='Alpha';search.events.input({target:search});
+assert.ok(act('select-results').textContent.includes('results'));click(act('select-results'));
+assert.ok(modal.querySelector('.ysm-selection-bar').textContent.includes('1 selected'));assert.ok(!act('move-selected').disabled);
+search.value='';search.events.input({target:search});click(act('select-results'));
+assert.ok(modal.querySelector('.ysm-selection-bar').textContent.includes('2 selected'));
+const beforeBulk=JSON.stringify(context.folderData),beforeWrites=writes;
+click(act('move-selected'));assert.equal(modal.querySelector('.ysm-move-picker').hidden,false);
+click(modal.querySelectorAll('button').find(e=>e.dataset.moveParent==='Target'));
+// Failed writes retain all assignments and selection, allowing retry.
+context.chrome.storage.local.set=(data,callback)=>{writes++;context.chrome.runtime.lastError={message:'failed'};callback();delete context.chrome.runtime.lastError};
+click(act('destination'));assert.equal(JSON.stringify(context.folderData),beforeBulk);assert.equal(writes,beforeWrites+1);
+assert.ok(modal.querySelector('.ysm-selection-bar').textContent.includes('2 selected'));
+context.chrome.storage.local.set=(data,callback)=>{writes++;callback()};
+click(act('destination'));assert.equal(writes,beforeWrites+2);
+assert.equal(context.folderData.Source.subfolders.One.subscriptions.length,0);
+assert.equal(context.folderData.Target.subfolders.Two.subscriptions.length,2);assert.equal(context.userSubscriptions.length,3);
+assert.ok(act('start-selection'));assert.equal(modal.querySelector('.ysm-selected').textContent,'One');
+click(modal.querySelectorAll('button').find(e=>e.dataset.parent==='Target'));click(act('start-selection'));click(act('select-results'));
+click(act('uncategorised'));assert.ok(act('start-selection'));assert.equal(modal.querySelectorAll('input').filter(e=>e.attrs.type==='checkbox').length,0);
+context.FolderPlan.applyStorage({developmentFolderPlan:'expired'});context.refreshManageView();assert.equal(modal.querySelector('.ysm-selection-bar').hidden,false);assert.ok(act('start-selection').textContent.includes('Pro'));
+let rejected=false;context.moveChannelsToSubfolder(['UC_C'],'Target','Two',null,null,ok=>rejected=!ok);assert.ok(rejected);
+click(act('close'));
+context.FolderPlan.applyStorage({developmentFolderPlan:'pro'});
+const stable=JSON.stringify(context.folderData), stableWrites=writes;
+context.moveChannelsToSubfolder(['UC_A','missing'],'Source','One','Target','Two',ok=>assert.equal(ok,false));
+assert.equal(JSON.stringify(context.folderData),stable);assert.equal(writes,stableWrites);
+let releaseBulk;
+context.chrome.storage.local.set=(data,callback)=>{writes++;releaseBulk=callback};
+context.moveChannelsToSubfolder(['UC_A','UC_A','UC_B'],'Source','One','Target','Two',ok=>assert.equal(ok,true));
+assert.equal(JSON.stringify(context.folderData),stable);
+context.moveChannelsToSubfolder(['UC_A'],'Source','One','Target','Two',ok=>assert.equal(ok,false));
+assert.equal(writes,stableWrites+1);releaseBulk();
+assert.equal(context.folderData.Source.subfolders.One.subscriptions.length,2);
+console.log('PASS: stale selection rejection, overlapping-save guard and duplicate selection deduplication.');
+console.log('PASS: Pro selection/search/scope reset, one-write multi-move, failed-save rollback/retry, unchanged subscriptions and expired gate.');
+
+}

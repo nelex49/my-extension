@@ -38,3 +38,22 @@ function addToSubfolder(channelId, parentName, childName, done) {
   return persistFolderMutation(next, previous, done);
 }
 Object.assign(window, { removeSubscriptionFromAllFolders, removeFromSubfolder, addToSubfolder });
+
+// Validate the entire selection before committing one atomic folder save.
+function moveChannelsToSubfolder(ids, parentName, childName, sourceParent, sourceChild, done) {
+  if (window.FolderPlan?.state !== 'pro') { done?.(false); return false; }
+  const previous = cloneFolderData(), next = cloneFolderData(previous);
+  const destination = next[parentName]?.subfolders?.[childName];
+  const selected = new Set(ids);
+  const source = new Set(manageFilteredSubscriptions(sourceParent, sourceChild, '', 'az').map(assignmentChannelId));
+  const subscriptions = new Map((window.userSubscriptions || []).map(sub => [assignmentChannelId(sub), sub]));
+  if (!selected.size || !destination || (parentName === sourceParent && childName === sourceChild) ||
+      [...selected].some(id => !id || !source.has(id) || !subscriptions.has(id))) {
+    showUserNotification('Selection or destination changed. Review the channels and try again.', 'warn');
+    done?.(false); return false;
+  }
+  for (const id of selected) clearChannelAssignments(next, id);
+  destination.subscriptions ||= [];
+  for (const id of selected) destination.subscriptions.push(subscriptions.get(id));
+  return persistFolderMutation(next, previous, done);
+}

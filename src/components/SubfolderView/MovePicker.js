@@ -1,12 +1,13 @@
 // Two-level destination picker, search, icons and stable positioning.
 function createMovePicker({ modal, state }) {
   function moveAnchor() {
+    if (state.bulkPicker) return modal.querySelector('[data-action="move-selected"]');
     return Array.from(modal.querySelectorAll('[data-action="move"]')).find(button =>
       button.closest('[data-channel]')?.dataset.channel === state.moveChannel);
   }
   function closeMovePicker(restoreFocus = false) {
     const anchor = moveAnchor();
-    state.moveChannel = null; state.moveParent = null; state.moveQuery = ""; state.movePosition = null;
+    state.bulkPicker = false; state.moveChannel = null; state.moveParent = null; state.moveQuery = ""; state.movePosition = null;
     modal.querySelector('.ysm-move-picker').hidden = true;
     anchor?.setAttribute('aria-expanded', 'false');
     if (restoreFocus) anchor?.focus({ preventScroll: true });
@@ -14,7 +15,7 @@ function createMovePicker({ modal, state }) {
   function renderMovePicker() {
     const picker = modal.querySelector('.ysm-move-picker');
     const anchor = moveAnchor();
-    if (!state.moveChannel || !anchor) { closeMovePicker(); return; }
+    if ((!state.moveChannel && !state.bulkPicker) || !anchor) { closeMovePicker(); return; }
     const data = window.folderData || {};
     if (state.moveParent !== null && !Object.hasOwn(data, state.moveParent)) state.moveParent = null;
     const names = state.moveParent === null ? Object.keys(data) : Object.keys(data[state.moveParent].subfolders || {});
